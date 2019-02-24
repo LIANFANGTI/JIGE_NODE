@@ -11,6 +11,11 @@ module.exports = appInfo => {
    * @type {Egg.EggAppConfig}
    **/
   const config = {
+    cluster: {
+      listen: {
+        port: 7007
+      }
+    },
     security: {
       csrf: {
         enable: false
