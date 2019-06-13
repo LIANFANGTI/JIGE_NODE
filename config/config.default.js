@@ -18,10 +18,15 @@ module.exports = appInfo => {
     },
     security: {
       csrf: {
-        enable: false
+        enable: false,
+        ignoreJSON:true
       }
     },
-    domainWhiteList: [],
+    domainWhiteList: ["*"],
+    cors:{
+      origin:'*',
+      allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
+    },
     sequelize: {
       dialect: "mysql",
       database: "AD",
