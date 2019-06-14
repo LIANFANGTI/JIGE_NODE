@@ -16,6 +16,19 @@ module.exports = appInfo => {
         port: 7007
       }
     },
+    validatePlus :{
+      resolveError(ctx, errors) {
+        if (errors.length) {
+          ctx.type = 'json';
+          ctx.status = 400;
+          ctx.body = {
+            code: 400,
+            error: errors,
+            message: '参数错误',
+          };
+        }
+      }
+    },
     security: {
       csrf: {
         enable: false,

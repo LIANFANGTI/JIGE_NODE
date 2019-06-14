@@ -9,5 +9,9 @@ module.exports = {
   sequelize: {
     enable: true,
     package: "egg-sequelize"
+  },
+  validatePlus : {
+    enable: true,
+    package: 'egg-validate-plus',
   }
 };
