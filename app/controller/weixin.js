@@ -13,9 +13,7 @@ module.exports = class WeixinController extends Controller {
         console.log(`\n\n==================================[${new Date()}]接收到网络请求==================================`);
         console.log(`调试:接收到的GET参数`, query);
         console.log(`调试:接收到的POST参数`, data);
-        // console.log(`调试:输出一整个request`, ctx.request);
         if (ctx.request.method === "POST") {
-            ctx.set("Content-Type", "text/xml")
             if (data.Event) {
                 switch (data.Event) {
                     case "subscribe":
@@ -29,16 +27,8 @@ module.exports = class WeixinController extends Controller {
                         break;
                 }
             }else if(data.MsgType){
-                ctx.body = `<xml>
-                              <ToUserName><![CDATA[${data.FromUserName}]]></ToUserName>
-                              <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName>
-                              <CreateTime>${new Date().getTime()}</CreateTime>
-                              <MsgType><![CDATA[text]]></MsgType>
-                              <Content><![CDATA[你是说${data.Content}?]]></Content>
-                            </xml>`
+               this.reply({content:'好的我知道了'});
             }
-
-
         } else {
             let array = [token, query.timestamp, query.nonce];
             let key = array.sort().join("");
@@ -73,5 +63,22 @@ module.exports = class WeixinController extends Controller {
     async getAccessToken() {
         const {ctx} = this;
         ctx.body = await ctx.service.weixin.getAccessToken();
+    }
+
+    async reply({type = 'text', content = ''}){
+        const { ctx } = this;
+        const data = ctx.request.body;
+
+        const head = `<xml><ToUserName><![CDATA[${data.FromUserName}]]></ToUserName> <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName>
+                      <CreateTime>${new Date().getTime()}</CreateTime> <MsgType><![CDATA[${type}]]></MsgType>`;
+        let body ;
+        const end =`</xml>`;
+        switch (type) {
+            case 'text':
+                body = `${head} <Content><![CDATA[${content}]]></Content>`;
+            break;
+        }
+        ctx.set("Content-Type", "text/xml");
+        ctx.body = `${head}${body}${end}`
     }
 };
