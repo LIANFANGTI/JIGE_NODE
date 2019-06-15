@@ -17,17 +17,12 @@ module.exports = class WeixinController extends Controller {
             if (data.Event) {
                 switch (data.Event) {
                     case "subscribe":
-                        ctx.body = `<xml>
-                                      <ToUserName><![CDATA[${data.FromUserName}]]></ToUserName>
-                                      <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName>
-                                      <CreateTime>${new Date().getTime()}</CreateTime>
-                                      <MsgType><![CDATA[text]]></MsgType>
-                                      <Content><![CDATA[谢谢关注 你妈死了！ \n 你本次关注的二维码信息是 (${data.Ticket})]]></Content>
-                                    </xml>`;
-                        break;
+                        this.replyMessage({content:'谢谢关注 ！💖'});
+                    break;
                 }
             }else if(data.MsgType){
                this.reply({content:'好的我知道了'});
+
             }
         } else {
             let array = [token, query.timestamp, query.nonce];
@@ -78,5 +73,6 @@ module.exports = class WeixinController extends Controller {
         }
         ctx.set("Content-Type", "text/xml");
         ctx.body = `${head}${body}${end}`
+
     }
 };
