@@ -72,7 +72,7 @@ module.exports = class WeixinController extends Controller {
         const end =`</xml>`;
         switch (type) {
             case 'text':
-                body = `${head} <Content><![CDATA[${content}]]></Content>`;
+                body = `<Content><![CDATA[${content}]]></Content>`;
             break;
         }
         ctx.set("Content-Type", "text/xml");
