@@ -10,7 +10,7 @@ module.exports = class WeixinController extends Controller {
         const token = 'p4d0lfS9LR0aaHh0';
         let query = ctx.request.query;
         let data = ctx.request.body;
-        const head = `<xml><ToUserName><![CDATA[${data.FromUserName}]]></ToUserName> <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName> <CreateTime>${new Date().getTime()}</CreateTime> <MsgType><![CDATA[${type}]]></MsgType>`;
+        const head = `<xml><ToUserName><![CDATA[${data.FromUserName}]]></ToUserName> <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName> <CreateTime>${new Date().getTime()}</CreateTime> <MsgType><![CDATA[text]]></MsgType>`;
         let body ;
         const end =`</xml>`;
         console.log(`\n\n==================================[${new Date()}]接收到网络请求==================================`);
@@ -25,7 +25,9 @@ module.exports = class WeixinController extends Controller {
                 }
             }else if(data.MsgType){
                // this.reply({content:'好的我知道了'});
+                ctx.set("Content-Type", "text/xml");
                 body = '<Content><![CDATA[${content}]]></Content>'
+                console.log(`\n\n 调试:返回XML`,  `${head}${body}${end}`)
                 ctx.body = `${head}${body}${end}`
 
             }
