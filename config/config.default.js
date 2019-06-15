@@ -13,7 +13,7 @@ module.exports = appInfo => {
   const config = {
     cluster: {
       listen: {
-        port: 7007
+        port: 7003
       }
     },
     validatePlus :{
