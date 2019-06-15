@@ -24,7 +24,7 @@ module.exports = class WeixinController extends Controller {
                                       <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName>
                                       <CreateTime>${new Date().getTime()}</CreateTime>
                                       <MsgType><![CDATA[text]]></MsgType>
-                                      <Content><![CDATA[你好]]></Content>
+                                      <Content><![CDATA[谢谢关注 你妈死了！ \n 你本次关注的二维码信息是 (${data.Ticket})]]></Content>
                                     </xml>`;
                         break;
                 }

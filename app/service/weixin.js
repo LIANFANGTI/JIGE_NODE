@@ -21,7 +21,7 @@ module.exports = class WeixinService extends Service {
         let data = {
             expire_seconds,       // 二维码有效时间 单位秒 最大值为2592000（30天） 默认有效期 30s
             action_name: "QR_SCENE",  // 二维码类型  QR_SCENE 临时型 | QR_STR_SCENE  临时字符串| QR_LIMIT_SCENE  永久| QR_LIMIT_STR_SCENE 永久字符串
-            action_info:info, // 二维码详细信息
+            action_info: info, // 二维码详细信息
             // scene_id: 10000,          // 整型场景值ID 临时型二维码为 32位非0整形 永久型二维码 取值范围 [1,100000]
             //scene_str: 'a0001'         // 字符串型场景值ID  长度范围为[1,64]
         }
