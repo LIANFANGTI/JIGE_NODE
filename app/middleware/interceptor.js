@@ -14,17 +14,23 @@ module.exports = options => {
             //把xml转成json
             if(this.request.header["content-type"] === 'text/xml'){
                 let buff = yield getRawBody(this.request.req);
+                console.log(`\n调试:获取到的Raw值`, buff)
                 let resultjson = JSON.parse(xmlparser.toJson(buff)).xml;
                 this.request.body = resultjson;
             } else {
-                //入参处理
-                let reqJson = this.request.body.json;
-                //入参重新赋值
-                this.request.body = JSON.parse(reqJson);
+                // //入参处理
+                // let reqJson = this.request.body.json;
+                // //入参重新赋值
+                // console.log(`调试:获取到的JSON数据`, reqJson)
+                // this.request.body = JSON.parse(reqJson);
             }
 
         } catch (e) {
-            this.response.body = errorModule.JSON_PARSE_ERR;
+            console.log(`调试:错误`, e)
+            this.response.body = {
+                code:500,
+                msg:"JSON PARSE 出错"
+            };
             this.logger.info(`----出参----${JSON.stringify(this.response.body)}`);
             return;
         }
