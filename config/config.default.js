@@ -54,7 +54,7 @@ module.exports = appInfo => {
   config.keys = appInfo.name + "_1551017688905_3516";
 
   // add your middleware config here
-  config.middleware = [];
+  config.middleware = ['interceptor'];
 
   // add your user config here
   const userConfig = {};
