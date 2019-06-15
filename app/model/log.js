@@ -7,6 +7,7 @@ module.exports = app => {
     balance: FLOAT,
     type: STRING, //红包类型
     amount: FLOAT, //红包金额
+    token:STRING,// 当前调用的TOKEN
     sum_condition: FLOAT, //红包使用条件 满多少才减
     sn:STRING,//红包码
   },{

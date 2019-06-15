@@ -13,8 +13,10 @@
     "egg-sequelize": "^4.3.1",
     "egg-validate-plus": "^1.1.6",
     "mysql2": "^1.6.5",
+    "qr-image": "^3.2.0",
     "request": "^2.88.0",
-    "request-promise": "^4.2.4"
+    "request-promise": "^4.2.4",
+    "wechat-node-sdk": "^0.2.2"
   },
   "devDependencies": {
     "autod": "^3.0.1",
