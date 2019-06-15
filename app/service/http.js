@@ -16,7 +16,7 @@ module.exports = class HttpService extends Service {
     async post(options) {
         return await requset({
             ...options,
-            formData: options.data || options.formData,
+            body: options.data || options.body,
             method: 'POST',
             json: true
         })
