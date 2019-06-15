@@ -68,9 +68,7 @@ module.exports = class WeixinController extends Controller {
     async reply({type = 'text', content = ''}){
         const { ctx } = this;
         const data = ctx.request.body;
-
-        const head = `<xml><ToUserName><![CDATA[${data.FromUserName}]]></ToUserName> <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName>
-                      <CreateTime>${new Date().getTime()}</CreateTime> <MsgType><![CDATA[${type}]]></MsgType>`;
+        const head = `<xml><ToUserName><![CDATA[${data.FromUserName}]]></ToUserName> <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName> <CreateTime>${new Date().getTime()}</CreateTime> <MsgType><![CDATA[${type}]]></MsgType>`;
         let body ;
         const end =`</xml>`;
         switch (type) {
