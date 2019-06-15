@@ -10,6 +10,9 @@ module.exports = class WeixinController extends Controller {
         const token = 'p4d0lfS9LR0aaHh0';
         let query = ctx.request.query;
         let data = ctx.request.body;
+        const head = `<xml><ToUserName><![CDATA[${data.FromUserName}]]></ToUserName> <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName> <CreateTime>${new Date().getTime()}</CreateTime> <MsgType><![CDATA[${type}]]></MsgType>`;
+        let body ;
+        const end =`</xml>`;
         console.log(`\n\n==================================[${new Date()}]接收到网络请求==================================`);
         console.log(`调试:接收到的GET参数`, query);
         console.log(`调试:接收到的POST参数`, data);
@@ -21,7 +24,9 @@ module.exports = class WeixinController extends Controller {
                     break;
                 }
             }else if(data.MsgType){
-               this.reply({content:'好的我知道了'});
+               // this.reply({content:'好的我知道了'});
+                body = '<Content><![CDATA[${content}]]></Content>'
+                ctx.body = `${head}${body}${end}`
 
             }
         } else {
@@ -60,7 +65,7 @@ module.exports = class WeixinController extends Controller {
         ctx.body = await ctx.service.weixin.getAccessToken();
     }
 
-    async reply({type = 'text', content = ''}){
+    reply({type = 'text', content = ''}){
         const { ctx } = this;
         const data = ctx.request.body;
         const head = `<xml><ToUserName><![CDATA[${data.FromUserName}]]></ToUserName> <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName> <CreateTime>${new Date().getTime()}</CreateTime> <MsgType><![CDATA[${type}]]></MsgType>`;
