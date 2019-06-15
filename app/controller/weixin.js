@@ -25,10 +25,7 @@ module.exports = class WeixinController extends Controller {
                 }
             }else if(data.MsgType){
                // this.reply({content:'好的我知道了'});
-                ctx.set("Content-Type", "text/xml");
-                body = '<Content><![CDATA[${content}]]></Content>'
-                console.log(`\n\n 调试:返回XML`,  `${head}${body}${end}`)
-                ctx.body = `${head}${body}${end}`
+                this.reply({content:'恩恩好的呢'});
 
             }
         } else {
