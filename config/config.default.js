@@ -42,11 +42,11 @@ module.exports = appInfo => {
     },
     sequelize: {
       dialect: "mysql",
-      database: "AD",
-      host: "www.deepand.com",
+      database: "eleme",
+      host: "ele.lianfangti.cn",
       port: 3306,
-      username: "root",
-      password: "1005.Deepand"
+      username: "eleme",
+      password: "lianfangti*"
     }
   };
 

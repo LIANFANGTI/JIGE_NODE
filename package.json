@@ -24,14 +24,15 @@
     "egg-mock": "^3.21.0",
     "eslint": "^5.13.0",
     "eslint-config-egg": "^7.1.0",
+    "sequelize-cli": "^5.5.0",
     "webstorm-disable-index": "^1.2.0"
   },
   "engines": {
     "node": ">=8.9.0"
   },
   "scripts": {
-    "start": "egg-scripts start --daemon --title=egg-server-ad-project",
-    "stop": "egg-scripts stop --title=egg-server-ad-project",
+    "start": "egg-scripts start --port=7002 --daemon --title=ele-project",
+    "stop": "egg-scripts stop --title=ele-project",
     "dev": "egg-bin dev",
     "debug": "egg-bin debug",
     "test": "npm run lint -- --fix && npm run test-local",
