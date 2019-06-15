@@ -19,23 +19,11 @@ module.exports = class WeixinController extends Controller {
             if (data.Event) {
                 switch (data.Event) {
                     case "subscribe":
-                        ctx.body = `<xml>
-                                      <ToUserName><![CDATA[${data.FromUserName}]]></ToUserName>
-                                      <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName>
-                                      <CreateTime>${new Date().getTime()}</CreateTime>
-                                      <MsgType><![CDATA[text]]></MsgType>
-                                      <Content><![CDATA[谢谢关注 你妈死了！ \n 你本次关注的二维码信息是 (${data.Ticket})]]></Content>
-                                    </xml>`;
-                        break;
+                        this.replyMessage({content:'谢谢关注 ！💖'});
+                    break;
                 }
             }else if(data.MsgType){
-                ctx.body = `<xml>
-                              <ToUserName><![CDATA[${data.FromUserName}]]></ToUserName>
-                              <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName>
-                              <CreateTime>${new Date().getTime()}</CreateTime>
-                              <MsgType><![CDATA[text]]></MsgType>
-                              <Content><![CDATA[你是说${data.Content}?]]></Content>
-                            </xml>`
+                this.replyMessage({content:`你是说${data.Content}`});
             }
 
 
@@ -73,5 +61,39 @@ module.exports = class WeixinController extends Controller {
     async getAccessToken() {
         const {ctx} = this;
         ctx.body = await ctx.service.weixin.getAccessToken();
+    }
+
+    async replyMessage({type = 'text',content =''} = {}){
+        const { ctx } = this
+        let data = ctx.request.body;
+        ctx.set("Content-Type", "text/xml");
+        const messageTemplate = {
+            text(context){
+                return `<xml>
+                          <ToUserName><![CDATA[${context.ToUserName}]]></ToUserName>
+                          <FromUserName><![CDATA[${context.FromUserName}]]></FromUserName>
+                          <CreateTime>${new Date().getTime()}</CreateTime>
+                          <MsgType><![CDATA[text]]></MsgType>
+                          <Content><![CDATA[${context.content}]]></Content>
+                        </xml>`
+            },
+            image(context){
+                return `<xml>
+                          <ToUserName><![CDATA[${context.ToUserName}]]></ToUserName>
+                          <FromUserName><![CDATA[${context.FromUserName}]]></FromUserName>
+                          <CreateTime>${new Date().getTime()}</CreateTime>
+                          <MsgType><![CDATA[image]]></MsgType>
+                          <Image>
+                            <MediaId><![CDATA[media_id]]></MediaId>
+                          </Image>
+                        </xml>`
+            },
+            voice(context){},
+            video(context){},
+            music(context){},
+            news(context){}
+        }
+        let context = {content,...data}
+        ctx.body = messageTemplate[type](context)
     }
 };
