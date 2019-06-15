@@ -31,8 +31,8 @@
     "node": ">=8.9.0"
   },
   "scripts": {
-    "start": "egg-scripts start --port=7002 --daemon --title=ele-project",
-    "stop": "egg-scripts stop --title=ele-project",
+    "start": "egg-scripts start --port=7003 --daemon --title=eleme-api",
+    "stop": "egg-scripts stop --title=eleme-api",
     "dev": "egg-bin dev",
     "debug": "egg-bin debug",
     "test": "npm run lint -- --fix && npm run test-local",
