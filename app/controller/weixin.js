@@ -13,31 +13,61 @@ module.exports = class WeixinController extends Controller {
         console.log(`\n\n==================================[${new Date()}]接收到网络请求==================================`);
         console.log(`调试:接收到的GET参数`, query);
         console.log(`调试:接收到的POST参数`, data);
-        console.log(`调试:输出一整个request`, ctx.request);
+        // console.log(`调试:输出一整个request`, ctx.request);
+        if (ctx.request.method === "POST") {
+            ctx.set("Content-Type", "text/xml")
+            if (data.Event) {
+                switch (data.Event) {
+                    case "subscribe":
+                        ctx.body = `<xml>
+                                      <ToUserName><![CDATA[${data.FromUserName}]]></ToUserName>
+                                      <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName>
+                                      <CreateTime>${new Date().getTime()}</CreateTime>
+                                      <MsgType><![CDATA[text]]></MsgType>
+                                      <Content><![CDATA[你好]]></Content>
+                                    </xml>`;
+                        break;
+                }
+            }else if(data.MsgType){
+                ctx.body = `<xml>
+                              <ToUserName><![CDATA[${data.FromUserName}]]></ToUserName>
+                              <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName>
+                              <CreateTime>${new Date().getTime()}</CreateTime>
+                              <MsgType><![CDATA[text]]></MsgType>
+                              <Content><![CDATA[你是说${data.Content}?]]></Content>
+                            </xml>`
+            }
 
-        let array = [token, query.timestamp, query.nonce];
-        let key = array.sort().join("");
-        // console.log(`调试:key=[${key}]`, array)
-        let sha1 = crypto.createHash("sha1").update(key).digest("hex");
-        if (sha1 == query.signature) {
-            ctx.body = query.echostr
+
         } else {
-            ctx.body = "Token 验证出错"
+            let array = [token, query.timestamp, query.nonce];
+            let key = array.sort().join("");
+            // console.log(`调试:key=[${key}]`, array)
+            let sha1 = crypto.createHash("sha1").update(key).digest("hex");
+
+            if (sha1 == query.signature) {
+                ctx.body = query.echostr
+            } else {
+                ctx.body = "Token 验证出错"
+            }
         }
+
+
     }
+
     //生成二维码
-    async qr(){
-       const { ctx } = this
-       let res = await  ctx.service.weixin.qrcode({info:{name:'练方梯的二维码'}});
-       let query = ctx.request.query;
-       let type = query.type || 'json';
-       if(type=='image'){
-           ctx.set("Content-Type", "image/png")
-           let img = qr.image(res.url, {type: 'png'});
-           ctx.body = img
-       }else{
-           ctx.body = res
-       }
+    async qr() {
+        const {ctx} = this
+        let res = await ctx.service.weixin.qrcode({info: {name: '练方梯的二维码'}});
+        let query = ctx.request.query;
+        let type = query.type || 'json';
+        if (type == 'image') {
+            ctx.set("Content-Type", "image/png")
+            let img = qr.image(res.url, {type: 'png'});
+            ctx.body = img
+        } else {
+            ctx.body = res
+        }
     }
 
     async getAccessToken() {
