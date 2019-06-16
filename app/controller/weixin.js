@@ -2,6 +2,8 @@ const Controller = require("egg").Controller;
 const crypto = require("crypto");
 const requset = require('request-promise');
 const qr = require('qr-image');
+const utils  =require("../public/utils");
+
 
 
 module.exports = class WeixinController extends Controller {
@@ -51,7 +53,22 @@ module.exports = class WeixinController extends Controller {
                 }
 
             } else if (data.MsgType) {
-                this.reply({content: '恩恩好的呢'});
+                const   content = data.Content
+                 if(utils.checkPhone(content)){
+                     let phone = content;
+                     console.log(`调试:收到的是手机号`, content);
+                     let exist = await ctx.service.user.exist({where:{phone}});
+                     if(exist){
+                         this.reply({content: `号码[${phone}]已被绑定,请检查`});
+                     }else{
+                            await   this.getEleme({phone});
+                     }
+
+                 }else{
+                     console.log(`调试:收到的不是手机号`, content);
+                     this.reply({content: '恩恩好的呢'});
+                 }
+
             }
         } else {
             let array = [token, query.timestamp, query.nonce];
@@ -138,7 +155,7 @@ module.exports = class WeixinController extends Controller {
     }
 
     //领红包
-    async getEleme({type=20}){
+    async getEleme({type=20,phone}){
         const {ctx} = this;
         const data = ctx.request.body;
         const openid = data.FromUserName;
@@ -149,11 +166,13 @@ module.exports = class WeixinController extends Controller {
         if(user){ // 判断用户是否存在
             console.log(`调试:用户是否存在判断完毕`, user);
             console.log(`调试:判断用户是否存在手机号`, user.phone);
-            if(user.phone){
+            if(user.phone || phone){
                 console.log(`调试:用户已绑定手机号`);
                 ctx.body = "ok"
-                this.reply({content:"领取成功"})
-              }else{
+                let res =await  ctx.service.eleme.getEleme({phone});
+                console.log(`调试:`, res)
+                this.reply({content:res.msg})
+            }else{
                 this.reply({content:"您未绑定手机号 请回复11位手机号进行绑定"})
 
             }

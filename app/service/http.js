@@ -18,7 +18,7 @@ module.exports = class HttpService extends Service {
             ...options,
             body: options.data || options.body,
             method: 'POST',
-            json: true
+            json: options.json !==  undefined ? options.json : true
         })
     }
 
