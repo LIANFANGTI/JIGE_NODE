@@ -13,7 +13,7 @@ module.exports = class UserService extends Service {
   async exist({where={},col = ["id"],showCol = false}){
       // console.log(`调试:是否存在查询`, where);
       let result = await  this.select({col,where});
-      return  showCol ? ( Boolean(result.length) ? result : true) : Boolean(result.length)
+      return  showCol ? ( Boolean(result.length) ? result[0].dataValues : true) : Boolean(result.length)
   }
   async update(map,condition){
       console.log(`调试:要更新的字段`, map);

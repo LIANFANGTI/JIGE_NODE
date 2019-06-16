@@ -140,9 +140,13 @@ module.exports = class WeixinController extends Controller {
         const {ctx} = this;
         const data = ctx.request.body;
         const openid = data.FromUserName;
-        let exist =  this.ctx.service.user.exist({where:{openid}});
-        if(exist){
-
+        let user = await this.ctx.service.user.exist({where:{openid},col:['phone','id'],showCol:true});
+        if(user){ // 判断用户是否存在
+              if(user.phone){
+                   this.reply({content:"领取成功"})
+              }else{
+                  this.reply({content:'您未绑定手机号 请回复手机号进行绑定'})
+              }
         }
 
     }
