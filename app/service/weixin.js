@@ -120,7 +120,7 @@ module.exports = class WeixinService extends Service {
         const { access_token } = await  this.getAccessToken();
         const url =`https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=${access_token}`;
         let data = {
-            "touser":"o-GhE5lF3AND63TVdilZMNlNbbNk",
+            "touser":this.ctx.request.body.FromUserName || '',
             "msgtype":`${type}`,
             "text":
                 {
