@@ -23,7 +23,8 @@ module.exports = class WeixinController extends Controller {
                         case "subscribe":
                             let userinfo = await ctx.service.weixin.getUserInfo({openid});
                             console.log(`调试:用户信息userinfo返回值`, userinfo)
-                            let father = data.EventKey.split('_')[1]
+                            let father = userinfo.qr_scene;
+
                             exist = await ctx.service.user.exist({where: {openid}});
                             let user = {...userinfo};
                             if (!exist) {
@@ -38,7 +39,17 @@ module.exports = class WeixinController extends Controller {
                                 console.log(`调试:用户已存在 信息更新成功`, updateResult)
                             }
 
-                            this.reply({content: '谢谢关注 ！NM$L! 💖'});
+                            this.reply({content: '谢谢关注 ！NM$L! 💖\n 点击下方一键红包菜单即可领取红包 \n'});
+                            if(father!==0){
+                                console.log(`调试:邀请者不为空`, father);
+                                let fer = await  ctx.service.user.exist({where:{id:father},col:["id","times","nickname"],showCol:true});
+                                console.log(`调试:邀请者 详细信息`, fer)
+                                let updatefer  = await  ctx.service.user.update({times:fer.times + 1},{id:father});
+                                console.log(`调试:更新邀请者积分`, updatefer)
+                                let sendRes = await  ctx.service.weixin.sendServiceMessage({content:`受邀成功! \n 您的积分: + 2\n 邀请者[${fer.nickname}]积分: + 1`})
+                                console.log(`调试:完成后客服消息推送返回值`, sendRes)
+
+                            }
                             break;
                         case "unsubscribe":
                             let result = await ctx.service.user.update({subscribe: 0}, {openid})
