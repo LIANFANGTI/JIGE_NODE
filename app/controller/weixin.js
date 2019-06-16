@@ -47,6 +47,28 @@ module.exports = class WeixinController extends Controller {
                         case "CLICK":
                             await this.handleMenuClick(data);
                         break;
+                        case "SCAN": //关注后扫码
+                            let fid = data.EventKey;
+                            // let fUser = await  ctx.service.user.exist({col:["nickname","id","times"],showCol:true,where:{id:fid}});
+                            let iUser = await  ctx.service.user.exist({col:["id","times","father"],where:{openid},showCol:true});
+                            let fUser = await  ctx.service.user.exist({col:["id","times","father","nickname"],where:{id:fid},showCol:true});
+                            console.log(`调试:两个User的值`, fUser,"\n-----------",iUser)
+                            if(iUser.father){
+                                console.log(`调试:已经填写过邀请码`, iUser)
+                                this.reply();
+                            }else{
+                                let res1 = await ctx.service.user.update({father:fid,times:fUser.times + 1 }, {openid});
+                                let res2 = await ctx.service.user.update({father:fid,times:iUser.times + 1}, {id:fid});
+                                if(res1 && res2) {
+                                    this.reply({content:`邀请码填写成功 \n您的积分:+1,\n邀请者[${fUser.nickname}]积分:+1`});
+                                }else{
+                                    this.reply();
+                                }
+                            }
+
+
+
+                        break;
                     }
                 } catch (e) {
                     console.error(`调试:错误`, e)
@@ -153,9 +175,10 @@ module.exports = class WeixinController extends Controller {
     //生成二维码
     async qr() {
         const {ctx} = this;
-        let res = await ctx.service.weixin.qrcode({info: {name: '练方梯的二维码'}});
         let query = ctx.request.query;
+        let res = await ctx.service.weixin.qrcode({scene_id:query.fid || 1});
         let type = query.type || 'json';
+
         if (type == 'image') {
             ctx.set("Content-Type", "image/png")
             let img = qr.image(res.url, {type: 'png'});
@@ -181,7 +204,7 @@ module.exports = class WeixinController extends Controller {
             if(user.phone ){
                 console.log(`调试:用户已绑定手机号`);
                 // this.reply({content});
-                   console.log(`调试:开始调用ele接口`)
+                   console.log(`调试:开始调用ele接口`);
                 let res = await  ctx.service.eleme.getEleme({phone});
                 if(res.code == 1){
                     res.msg = `领取成功！！,请在饿了么中查看\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
