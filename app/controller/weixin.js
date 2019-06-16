@@ -43,7 +43,7 @@ module.exports = class WeixinController extends Controller {
                             console.log(`调试:取关后更新用户状态返回值 `, result)
                         break;
                         case "CLICK":
-                             this.handleMenuClick(data);
+                            await this.handleMenuClick(data);
                         break;
                     }
                 } catch (e) {
@@ -82,11 +82,13 @@ module.exports = class WeixinController extends Controller {
                 this.reply({content:'你点击了拼手气红包'});
                 break;
             case "PZLM": // 品质联盟
-                this.getEleme({type:20});
-                // this.reply({content:'你点击了品质联盟红包'});
+
+              let res =  await this.getEleme({type:20});
+
+              // this.reply({content:res});
 
 
-                break;
+           break;
             case "TGM":  // 推广码
                 this.reply({content:'你点击了推广码按钮'});
 
@@ -140,13 +142,24 @@ module.exports = class WeixinController extends Controller {
         const {ctx} = this;
         const data = ctx.request.body;
         const openid = data.FromUserName;
-        let user = await this.ctx.service.user.exist({where:{openid},col:['phone','id'],showCol:true});
+        console.log(`调试:开始检测用户是否存在 `)
+        let user = await this.ctx.service.user.exist({where:{openid},col:['phone','id'],showCol:true}).catch(res=>{
+            console.log(`调试:检测用户是否存在出错`, res)
+        });
         if(user){ // 判断用户是否存在
-              if(user.phone){
-                   this.reply({content:"领取成功"})
+            console.log(`调试:用户是否存在判断完毕`, user);
+            console.log(`调试:判断用户是否存在手机号`, user.phone);
+            if(user.phone){
+                console.log(`调试:用户已绑定手机号`);
+                ctx.body = "ok"
+                this.reply({content:"领取成功"})
               }else{
-                  this.reply({content:'您未绑定手机号 请回复手机号进行绑定'})
-              }
+                this.reply({content:"您未绑定手机号 请回复11位手机号进行绑定"})
+
+            }
+        }else{
+           return  ("用户不存在")
+
         }
 
     }
@@ -167,10 +180,11 @@ module.exports = class WeixinController extends Controller {
 
     async getCustomService(){
         const { ctx } = this
-        ctx.body  =await  ctx.service.weixin.getCustomService();
+        ctx.body  = await  ctx.service.weixin.getCustomService();
     }
 
     reply({type = 'text', content = ''}) {
+        console.log(`调试:调用了回复`, content)
         const {ctx} = this;
         const data = ctx.request.body;
         const head = `<xml><ToUserName><![CDATA[${data.FromUserName}]]></ToUserName> <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName> <CreateTime>${new Date().getTime()}</CreateTime> <MsgType><![CDATA[${type}]]></MsgType>`;
@@ -182,6 +196,7 @@ module.exports = class WeixinController extends Controller {
                 break;
         }
         ctx.set("Content-Type", "text/xml");
+        console.log(`调试:即将响应的内容`, `${head}${body}${end}`)
         ctx.body = `${head}${body}${end}`
 
     }
