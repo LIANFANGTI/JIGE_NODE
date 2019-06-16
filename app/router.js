@@ -10,6 +10,8 @@ module.exports = app => {
   router.get('/menu', controller.weixin.menu);
   router.post('/menu', controller.weixin.createMenu);
   router.post('/weixin', controller.weixin.index);
+  router.post('/service', controller.weixin.addSerivce);
+  router.get('/service', controller.weixin.getCustomService);
   router.get('/qr', controller.weixin.qr);
   router.get('/access_token', controller.weixin.getAccessToken);
   router.post('/ele', controller.eleme.index);

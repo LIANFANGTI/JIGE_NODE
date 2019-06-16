@@ -78,11 +78,12 @@ module.exports = class WeixinController extends Controller {
                 this.reply({content})
             break;
             case "PSQ":  // 拼手气红包
+
                 this.reply({content:'你点击了拼手气红包'});
                 break;
             case "PZLM": // 品质联盟
-                // this.getEleme()
-                this.reply({content:'你点击了品质联盟红包'});
+                this.getEleme({type:20});
+                // this.reply({content:'你点击了品质联盟红包'});
 
 
                 break;
@@ -121,7 +122,7 @@ module.exports = class WeixinController extends Controller {
 
     //生成二维码
     async qr() {
-        const {ctx} = this
+        const {ctx} = this;
         let res = await ctx.service.weixin.qrcode({info: {name: '练方梯的二维码'}});
         let query = ctx.request.query;
         let type = query.type || 'json';
@@ -134,11 +135,35 @@ module.exports = class WeixinController extends Controller {
         }
     }
 
+    //领红包
+    async getEleme({type=20}){
+        const {ctx} = this;
+        const data = ctx.request.body;
+        const openid = data.FromUserName;
+        let exist =  this.ctx.service.user.exist({where:{openid}});
+        if(exist){
+
+        }
+
+    }
+
 
     //获取access_token
     async getAccessToken() {
         const {ctx} = this;
         ctx.body = await ctx.service.weixin.getAccessToken();
+    }
+
+    //添加客服
+    async addSerivce(){
+        const {ctx} = this;
+        ctx.body = await  ctx.service.weixin.addServive()
+
+    }
+
+    async getCustomService(){
+        const { ctx } = this
+        ctx.body  =await  ctx.service.weixin.getCustomService();
     }
 
     reply({type = 'text', content = ''}) {
@@ -153,7 +178,7 @@ module.exports = class WeixinController extends Controller {
                 break;
         }
         ctx.set("Content-Type", "text/xml");
-        ctx.body = `${head}${body}${end}${head}${body}${end}`
+        ctx.body = `${head}${body}${end}`
 
     }
 };

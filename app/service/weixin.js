@@ -98,4 +98,21 @@ module.exports = class WeixinService extends Service {
         return  await this.ctx.service.http.post({url,data})
     }
 
+    // 添加客服
+    async addServive(data){
+        const {access_token} = await this.getAccessToken();
+        const  url =`https://api.weixin.qq.com/customservice/kfaccount/add?access_token=${access_token}`
+        data = {
+            "kf_account" : "admin@lianfangti",
+            "nickname" : "1号技师",
+            "password" : "123456"
+        }
+        return   await  this.ctx.service.http.post({url,data})
+    }
+    async getCustomService(){
+        const {access_token} = await this.getAccessToken();
+        const url = `https://api.weixin.qq.com/cgi-bin/customservice/getkflist?access_token=${access_token}`
+        return   await  this.ctx.service.http.get({url})
+    }
+
 }

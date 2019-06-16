@@ -9,9 +9,11 @@ module.exports = class UserService extends Service {
         where
       })
   }
-  async exist({condition}){
-      let result = await  this.select({col:["id"],where:condition});
-      return Boolean(result.length)
+  // showCol字段  如果查询结果存在  是否返回数据  默认false 返回 布尔值
+  async exist({where={},col = ["id"],showCol = false}){
+      // console.log(`调试:是否存在查询`, where);
+      let result = await  this.select({col,where});
+      return  showCol ? ( Boolean(result.length) ? result : true) : Boolean(result.length)
   }
   async update(map,condition){
       console.log(`调试:要更新的字段`, map);
