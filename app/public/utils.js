@@ -6,3 +6,13 @@ exports.checkPhone =   function (phone){
         return  true
     }
 }
+
+exports.checkVerificationCode = function (value) {
+    reg=/^[0-9]{6}$/;
+    if(reg.test(str)){
+        return  true
+    }else{
+        return false
+    }
+
+}

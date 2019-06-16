@@ -14,5 +14,7 @@ module.exports = app => {
   router.get('/service', controller.weixin.getCustomService);
   router.get('/qr', controller.weixin.qr);
   router.get('/access_token', controller.weixin.getAccessToken);
+  router.get('/template_message', controller.weixin.sendTemplateMessage);
+  router.get('/service_message', controller.weixin.sendServiceMessage);
 };
 

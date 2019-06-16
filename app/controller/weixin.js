@@ -42,7 +42,7 @@ module.exports = class WeixinController extends Controller {
                             break;
                         case "unsubscribe":
                             let result = await ctx.service.user.update({subscribe: 0}, {openid})
-                            console.log(`调试:取关后更新用户状态返回值 `, result)
+                            console.log(`调试:取关后更新用户状态返回值 `, result);
                         break;
                         case "CLICK":
                             await this.handleMenuClick(data);
@@ -53,18 +53,29 @@ module.exports = class WeixinController extends Controller {
                 }
 
             } else if (data.MsgType) {
-                const   content = data.Content
-                 if(utils.checkPhone(content)){
+                const   content = data.Content,openid = data.FromUserName;
+                 if(utils.checkPhone(content)){ // 判断是否为手机号
                      let phone = content;
                      console.log(`调试:收到的是手机号`, content);
                      let exist = await ctx.service.user.exist({where:{phone}});
                      if(exist){
                          this.reply({content: `号码[${phone}]已被绑定,请检查`});
                      }else{
-                            await   this.getEleme({phone});
+                            // await   this.getEleme({phone});
+                         let res =  await  ctx.service.user.update({phone},{openid});
+                         if(res){
+                             this.reply({content:'手机号绑定成功'});
+                         }else{
+                             this.reply({content:'手机号绑定失败'});
+
+                         }
                      }
 
-                 }else{
+                 }else if(utils.checkVerificationCode(content)){  //判断是否为验证码
+                     console.log(`调试:输入的为验证码`, content)
+                     let res =  await this.getEleme({type:20,validate_code:content});
+
+                 } else{
                      console.log(`调试:收到的不是手机号`, content);
                      this.reply({content: '恩恩好的呢'});
                  }
@@ -99,10 +110,10 @@ module.exports = class WeixinController extends Controller {
                 this.reply({content:'你点击了拼手气红包'});
                 break;
             case "PZLM": // 品质联盟
-
+              this.reply();
               let res =  await this.getEleme({type:20});
 
-              // this.reply({content:res});
+
 
 
            break;
@@ -155,23 +166,29 @@ module.exports = class WeixinController extends Controller {
     }
 
     //领红包
-    async getEleme({type=20,phone}){
+    async getEleme({type=20}){
         const {ctx} = this;
         const data = ctx.request.body;
         const openid = data.FromUserName;
         console.log(`调试:开始检测用户是否存在 `)
-        let user = await this.ctx.service.user.exist({where:{openid},col:['phone','id'],showCol:true}).catch(res=>{
+        let user = await this.ctx.service.user.exist({where:{openid},col:['phone','id',"times"],showCol:true}).catch(res=>{
             console.log(`调试:检测用户是否存在出错`, res)
         });
         if(user){ // 判断用户是否存在
             console.log(`调试:用户是否存在判断完毕`, user);
             console.log(`调试:判断用户是否存在手机号`, user.phone);
-            if(user.phone || phone){
+            let phone = user.phone
+            if(user.phone ){
                 console.log(`调试:用户已绑定手机号`);
-                ctx.body = "ok"
-                let res =await  ctx.service.eleme.getEleme({phone});
-                console.log(`调试:`, res)
-                this.reply({content:res.msg})
+                // this.reply({content});
+                   console.log(`调试:开始调用ele接口`)
+                let res = await  ctx.service.eleme.getEleme({phone});
+                if(res.code == 1){
+                    res.msg = `领取成功！！,请在饿了么中查看\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
+                }
+                console.log(`调试:Controller.weixin#182行`, res);
+                await ctx.service.weixin.sendServiceMessage({content:res.msg});
+
             }else{
                 this.reply({content:"您未绑定手机号 请回复11位手机号进行绑定"})
 
@@ -181,6 +198,14 @@ module.exports = class WeixinController extends Controller {
 
         }
 
+    }
+
+    async sendTemplateMessage(){
+        this.ctx.body = await this.ctx.service.weixin.sendTemplateMessage();
+    }
+
+    async sendServiceMessage(){
+        this.ctx.body = await  this.ctx.service.weixin.sendServiceMessage();
     }
 
 
@@ -202,7 +227,7 @@ module.exports = class WeixinController extends Controller {
         ctx.body  = await  ctx.service.weixin.getCustomService();
     }
 
-    reply({type = 'text', content = ''}) {
+    reply({type = 'text', content} = {}) {
         console.log(`调试:调用了回复`, content)
         const {ctx} = this;
         const data = ctx.request.body;
@@ -216,7 +241,7 @@ module.exports = class WeixinController extends Controller {
         }
         ctx.set("Content-Type", "text/xml");
         console.log(`调试:即将响应的内容`, `${head}${body}${end}`)
-        ctx.body = `${head}${body}${end}`
+        ctx.body = content ?  `${head}${body}${end}` : 'success'
 
     }
 };

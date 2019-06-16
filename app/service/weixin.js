@@ -115,4 +115,54 @@ module.exports = class WeixinService extends Service {
         return   await  this.ctx.service.http.get({url})
     }
 
+    // 发送客服消息
+    async sendServiceMessage({type = 'text',content =''}) {
+        const { access_token } = await  this.getAccessToken();
+        const url =`https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=${access_token}`;
+        let data = {
+            "touser":"o-GhE5lF3AND63TVdilZMNlNbbNk",
+            "msgtype":`${type}`,
+            "text":
+                {
+                    "content":`${content}`
+                }
+        };
+        return  await  this.ctx.service.http.post({url,data})
+    }
+    // 发送模板消息
+    async sendTemplateMessage(openid){
+        const {access_token} = await this.getAccessToken();
+        const url = `https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=${access_token}`;
+        let data  = {
+            "touser":`o-GhE5lF3AND63TVdilZMNlNbbNk`,
+            "template_id":"Uo5zXHQk8kPhs-BjOSwaNU3I0R9YyV4lDFgZ6kHMU4w",
+            "url":"http://weixin.qq.com/download",
+            // "miniprogram":{ //点击打开小程序
+            //     "appid":"xiaochengxuappid12345",
+            //     "pagepath":"index?foo=bar"
+            // },
+            "data":{
+                "first": {
+                    "value":"发送成功",
+                    "color":"#173177"
+                },
+                "keyword1":{
+                    "value":'18757739042',
+                    "color":"#173177"
+                },
+                "keyword2":{
+                    "value":new Date(),
+                    "color":"#173177"
+                },
+                "remark":{
+                    "value":"请在30分钟内回复6位短信验证码 如果这不是您的手机号 您可重新发送手机号绑定",
+                    "color":"#173177"
+                }
+            }
+        }
+
+        return  await  this.ctx.service.http.post({url,data})
+
+    }
+
 }
