@@ -15,13 +15,43 @@ module.exports = class WeixinController extends Controller {
         console.log(`调试:接收到的POST参数`, data);
         if (ctx.request.method === "POST") {
             if (data.Event) {
-                switch (data.Event) {
-                    case "subscribe":
-                        this.reply({content:'谢谢关注 ！💖'});
-                    break;
+                try {
+                    let openid = data.FromUserName, exist;
+                    switch (data.Event) {
+                        case "subscribe":
+                            let userinfo = await ctx.service.weixin.getUserInfo({openid});
+                            console.log(`调试:用户信息userinfo返回值`, userinfo)
+                            let father = data.EventKey.split('_')[1]
+                            exist = await ctx.service.user.exist({where: {openid}});
+                            let user = {...userinfo};
+                            if (!exist) {
+                                user['times'] = 2; // 新用户送两个次数
+                                user['father'] = father; // 新用户送两个次数
+                                user['subscribe'] = 1; // 是否关注
+                                let addResult = await ctx.service.user.add(user);
+                                // console.log(`调试:添加用户返回值`, addResult);
+                            } else {
+                                user['subscribe'] = 1; // 是否关注
+                                let updateResult = await ctx.service.user.update(user, {openid})
+                                console.log(`调试:用户已存在 信息更新成功`, updateResult)
+                            }
+
+                            this.reply({content: '谢谢关注 ！NM$L! 💖'});
+                            break;
+                        case "unsubscribe":
+                            let result = await ctx.service.user.update({subscribe: 0}, {openid})
+                            console.log(`调试:取关后更新用户状态返回值 `, result)
+                        break;
+                        case "CLICK":
+                             this.handleMenuClick(data);
+                        break;
+                    }
+                } catch (e) {
+                    console.error(`调试:错误`, e)
                 }
-            }else if(data.MsgType){
-                this.reply({content:'恩恩好的呢'});
+
+            } else if (data.MsgType) {
+                this.reply({content: '恩恩好的呢'});
             }
         } else {
             let array = [token, query.timestamp, query.nonce];
@@ -39,6 +69,54 @@ module.exports = class WeixinController extends Controller {
 
     }
 
+    //菜单点击事件
+    async handleMenuClick({EventKey}){
+        console.log(`调试:响应点击事件[${EventKey}]`);
+        switch (EventKey) {
+            case "SYJC": // 使用教程
+                let content = `如何使用XX红包助手？\n 1.回复手机号 \n 2.点击菜单栏一键红包 \n 3.回复验证码即可领取`;
+                this.reply({content})
+            break;
+            case "PSQ":  // 拼手气红包
+                this.reply({content:'你点击了拼手气红包'});
+                break;
+            case "PZLM": // 品质联盟
+                this.reply({content:'你点击了品质联盟红包'});
+
+                break;
+            case "TGM":  // 推广码
+                this.reply({content:'你点击了推广码按钮'});
+
+            break;
+            case "MRQD": // 每日签到
+                this.reply({content:'你点击了每日签到按钮'});
+                break;
+            case "ZHCZ": // 账户充值
+                this.reply({content:'你点击了账户充值按钮'});
+
+
+                break;
+            case "YECX": // 余额查询
+                this.reply({content:'你点击了余额查询按钮'});
+
+                break;
+            case "LXKF": //联系客服
+                this.reply({content:'你点击了联系客服按钮'});
+
+            break;
+        }
+    }
+
+
+
+    async menu(){
+        this.ctx.body = await this.ctx.service.weixin.getMenu();
+    }
+    async createMenu(){
+        this.ctx.body =  await this.ctx.service.weixin.createMenu()
+    }
+
+
     //生成二维码
     async qr() {
         const {ctx} = this
@@ -54,21 +132,23 @@ module.exports = class WeixinController extends Controller {
         }
     }
 
+
+    //获取access_token
     async getAccessToken() {
         const {ctx} = this;
         ctx.body = await ctx.service.weixin.getAccessToken();
     }
 
-    reply({type = 'text', content = ''}){
-        const { ctx } = this;
+    reply({type = 'text', content = ''}) {
+        const {ctx} = this;
         const data = ctx.request.body;
         const head = `<xml><ToUserName><![CDATA[${data.FromUserName}]]></ToUserName> <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName> <CreateTime>${new Date().getTime()}</CreateTime> <MsgType><![CDATA[${type}]]></MsgType>`;
-        let body ;
-        const end =`</xml>`;
+        let body;
+        const end = `</xml>`;
         switch (type) {
             case 'text':
                 body = `<Content><![CDATA[${content}]]></Content>`;
-            break;
+                break;
         }
         ctx.set("Content-Type", "text/xml");
         ctx.body = `${head}${body}${end}`
