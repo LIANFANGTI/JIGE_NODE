@@ -81,7 +81,9 @@ module.exports = class WeixinController extends Controller {
                 this.reply({content:'你点击了拼手气红包'});
                 break;
             case "PZLM": // 品质联盟
+                // this.getEleme()
                 this.reply({content:'你点击了品质联盟红包'});
+
 
                 break;
             case "TGM":  // 推广码
@@ -151,7 +153,7 @@ module.exports = class WeixinController extends Controller {
                 break;
         }
         ctx.set("Content-Type", "text/xml");
-        ctx.body = `${head}${body}${end}`
+        ctx.body = `${head}${body}${end}${head}${body}${end}`
 
     }
 };
