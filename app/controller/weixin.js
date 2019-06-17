@@ -56,7 +56,7 @@ module.exports = class WeixinController extends Controller {
                             console.log(`调试:取关后更新用户状态返回值 `, result);
                         break;
                         case "CLICK":
-                            await this.handleMenuClick(data);
+                            await this.handleMenuClick({...data,openid});
                         break;
                         case "SCAN": //关注后扫码
                             let fid = data.EventKey;
@@ -133,8 +133,10 @@ module.exports = class WeixinController extends Controller {
     }
 
     //菜单点击事件
-    async handleMenuClick({EventKey}){
+    async handleMenuClick({EventKey,openid}){
         console.log(`调试:响应点击事件[${EventKey}]`);
+        // let data = this.ctx.request.body;
+        // let openid = data.FromUserName;
         switch (EventKey) {
             case "SYJC": // 使用教程
                 let content = `如何使用XX红包助手？\n 1.回复手机号 \n 2.点击菜单栏一键红包 \n 3.回复验证码即可领取`;
@@ -143,13 +145,10 @@ module.exports = class WeixinController extends Controller {
             case "PSQ":  // 拼手气红包
 
                 this.reply({content:'你点击了拼手气红包'});
+                 await this.getEleme({type:20});
                 break;
                 case "PZLM": // 品质联盟
-                let res =  await this.getEleme({type:20});
-
-
-
-
+                 await this.getEleme({type:21});
            break;
             case "TGM":  // 推广码
                 this.reply({content:'你点击了推广码按钮'});
@@ -164,7 +163,10 @@ module.exports = class WeixinController extends Controller {
 
                 break;
             case "YECX": // 余额查询
-                this.reply({content:'你点击了余额查询按钮'});
+
+                let user =  await this.ctx.service.user.findOne({col:["id","times"],where:{openid}});
+                console.log(`调试:余额查询返回用户对象`,user );
+                this.reply({content:`查询成功 \n 剩余积分:${user.times}\n 您可通过邀请 充值 或 每日签到来获取积分！`});
 
                 break;
             case "LXKF": //联系客服

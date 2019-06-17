@@ -9,6 +9,13 @@ module.exports = class UserService extends Service {
         where
       })
   }
+  async findOne({col=["id"],where = {}} = {}){
+      return  await  this.ctx.model.User.findOne({
+          attributes:col,
+          where
+      })
+
+  };
   // showCol字段  如果查询结果存在  是否返回数据  默认false 返回 布尔值
   async exist({where={},col = ["id"],showCol = false}){
       // console.log(`调试:是否存在查询`, where);
@@ -19,4 +26,5 @@ module.exports = class UserService extends Service {
       console.log(`调试:要更新的字段`, map);
       return  await this.ctx.model.User.update(map,{where:condition})
   }
+
 };
