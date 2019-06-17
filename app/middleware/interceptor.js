@@ -7,7 +7,7 @@ const xmlparser = require('xml2json');
 module.exports = options => {
     return function* interceptor(next) {
         //拦截request请求
-        this.logger.info(`----入参----${JSON.stringify(this.request.body)}`);
+        // this.logger.info(`----入参----${JSON.stringify(this.request.body)}`);
 
         //入参参数校验
         try{
@@ -22,12 +22,12 @@ module.exports = options => {
             }
 
         } catch (e) {
-            console.log(`调试:错误`, e)
+            console.log(`调试:错误`, e);
             this.response.body = {
                 code:500,
                 msg:"JSON PARSE 出错"
             };
-            this.logger.info(`----出参----${JSON.stringify(this.response.body)}`);
+            // this.logger.info(`----出参----${JSON.stringify(this.response.body)}`);
             return;
         }
 
@@ -35,7 +35,7 @@ module.exports = options => {
         yield next;
         //拦截response请求
         if(this.response.body){
-            this.logger.info(`----出参----${JSON.stringify(this.response.body)}`);
+            // this.logger.info(`----出参----${JSON.stringify(this.response.body)}`);
         }
     };
 };

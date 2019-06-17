@@ -7,8 +7,8 @@ module.exports = class ElemeService extends Service {
         const { ctx } = this;
         data['token'] = token;
         const url = 'http://ele.lianfangti.cn/ele';
-        console.log(`\n\n #############################[${new Date()}]Ele接口调用日志#############################\n\\n`,"请求数据:\n", {url,data});
-        return await this.ctx.service.http.post({url, data}).then( res => {
+        console.log(`\n\n #############################[${new Date()}]Ele接口调用日志#############################\n\n`,"请求数据:\n", {url,data});
+        return await this.ctx.service.http.post({url, data}).then( async res => {
             console.log(`返回值[正常]:\n`, res,"\n\n");
             let errors = {
                 0: "库存不足",
@@ -23,13 +23,8 @@ module.exports = class ElemeService extends Service {
             };
             if(res.code === 50){
                 let content =
-                    `正在为手机号[${data.phone}]下发验证码，请稍等... \n
-                     温馨提示: 如果这不是您的手机号,您可以重新发送手机号绑定
-                     `;
-                 ctx.service.weixin.sendServiceMessage({content}).then(r=>{
-                     console.log(`调试:发送客服消息回调`, r)
-
-                 });
+                    `正在为手机号[${data.phone}]下发验证码，请稍等... \n温馨提示: 如果这不是您的手机号,您可以重新发送手机号绑定`;
+                await ctx.service.weixin.sendServiceMessage({content});
                 if(res.result.message.indexOf("成功") !== -1){
                     errors[50] = `发送短信验证码成功,请您回复6位数验证码领取红包`
                 }else{

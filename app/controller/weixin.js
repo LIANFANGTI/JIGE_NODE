@@ -217,15 +217,17 @@ module.exports = class WeixinController extends Controller {
                 console.log(`调试:用户已绑定手机号`);
                 // this.reply({content});
                 console.log(`调试:开始调用ele接口`);
-                this.reply();
+                this.reply({});
                 try{
-                    let res = await  ctx.service.eleme.getEleme(validate_code ? {phone,validate_code,type} : {phone,type});
-                    console.log(`调试:调用Eleme接口返回值`, res)
-                    if(res.code == 1){
-                        res.msg = `领取成功！！,请在饿了么中查看\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
-                    }
-                    // console.log(`调试:Controller.weixin#182行`, res);
-                    await ctx.service.weixin.sendServiceMessage({content:res.msg});
+                   ctx.service.eleme.getEleme(validate_code ? {phone,validate_code,type} : {phone,type}).then(res=>{
+                       console.log(`调试:调用Eleme接口返回值`, res);
+                       if(res.code == 1){
+                           res.msg = `领取成功！！,请在饿了么中查看\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
+                       }
+                       // console.log(`调试:Controller.weixin#182行`, res);
+                       ctx.service.weixin.sendServiceMessage({content:res.msg});
+                   });
+
                 }catch (e) {
                        console.log(`调试:Eleme接口调用出错`, e)
                 }
@@ -282,7 +284,7 @@ module.exports = class WeixinController extends Controller {
                 break;
         }
         ctx.set("Content-Type", "text/xml");
-        console.log(`调试:回复响应内容`, `${head}${body}${end}`,"\n\n");
+        console.log(`调试:回复响应内容`, content ? `${head}${body}${end}` : 'success',"\n\n");
         ctx.body = content ?  `${head}${body}${end}` : 'success'
 
     }
