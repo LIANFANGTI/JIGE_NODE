@@ -127,6 +127,7 @@ module.exports = class WeixinService extends Service {
                     "content":`${content}`
                 }
         };
+        console.log(`调试:客服消息发送日志`,data,new Date());
         return  await  this.ctx.service.http.post({url,data})
     }
     // 发送模板消息
