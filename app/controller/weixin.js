@@ -218,7 +218,7 @@ module.exports = class WeixinController extends Controller {
                 console.log(`调试:用户已绑定手机号`);
                 // this.reply({content});
                 console.log(`调试:开始调用ele接口`);
-
+                this.reply();
                 let res = await  ctx.service.eleme.getEleme(validate_code ? {phone,validate_code,type} : {phone,type});
                 console.log(`调试:调用Eleme接口返回值`, res)
                 if(res.code == 1){

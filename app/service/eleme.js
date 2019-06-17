@@ -4,10 +4,10 @@ const requset = require('request-promise');
 const token = 'aHR0cHM6Ly93d3cubGlhbmZhbmd0aS5jbg==';
 module.exports = class ElemeService extends Service {
     async getEleme(data) {
-        const { ctx } = this
-        data['token'] = token
+        const { ctx } = this;
+        data['token'] = token;
         const url = 'http://ele.lianfangti.cn/ele';
-
+        console.log(`调试:正在调用ele接口\n\n`, {url,data});
         return await this.ctx.service.http.post({url, data}).then( res => {
             let errors = {
                 0: "库存不足",
@@ -15,7 +15,7 @@ module.exports = class ElemeService extends Service {
                 2: "余额不足",
                 50: "发送验证码状态 ",
                 500: "手机号有误",
-                501: "验证码过期",
+                501: "验证码已过期  请点击下方领红包按钮 重新获取验证码",
                 502: "请重新获取验证码 ",
                 503: "领取失败，可能是您今天次数已达上限，或请稍后再试",
                 504: "领取失败，系统繁忙",
@@ -32,7 +32,7 @@ module.exports = class ElemeService extends Service {
                 if(res.result.message.indexOf("成功") !== -1){
                     errors[50] = `发送短信验证码成功,请您回复6位数验证码领取红包`
                 }else{
-                    res.code = 51
+                    res.code = 51;
                     errors[51] = res.result.message
                 }
 
