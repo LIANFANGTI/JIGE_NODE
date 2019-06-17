@@ -45,7 +45,8 @@ module.exports = class ElemeService extends Service {
         }).catch(err =>{
             console.log(`返回值[出错]:\n`, err,"\n\n");
 
-            console.log(`错误:ele接口调用出错`, err)
+            console.log(`错误:ele接口调用出错`, err);
+            return Promise.reject(err);
         });
     }
 }

@@ -144,9 +144,8 @@ module.exports = class WeixinController extends Controller {
 
                 this.reply({content:'你点击了拼手气红包'});
                 break;
-            case "PZLM": // 品质联盟
-              this.reply();
-              let res =  await this.getEleme({type:20});
+                case "PZLM": // 品质联盟
+                let res =  await this.getEleme({type:20});
 
 
 
@@ -219,13 +218,18 @@ module.exports = class WeixinController extends Controller {
                 // this.reply({content});
                 console.log(`调试:开始调用ele接口`);
                 this.reply();
-                let res = await  ctx.service.eleme.getEleme(validate_code ? {phone,validate_code,type} : {phone,type});
-                console.log(`调试:调用Eleme接口返回值`, res)
-                if(res.code == 1){
-                    res.msg = `领取成功！！,请在饿了么中查看\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
+                try{
+                    let res = await  ctx.service.eleme.getEleme(validate_code ? {phone,validate_code,type} : {phone,type});
+                    console.log(`调试:调用Eleme接口返回值`, res)
+                    if(res.code == 1){
+                        res.msg = `领取成功！！,请在饿了么中查看\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
+                    }
+                    // console.log(`调试:Controller.weixin#182行`, res);
+                    await ctx.service.weixin.sendServiceMessage({content:res.msg});
+                }catch (e) {
+                       console.log(`调试:Eleme接口调用出错`, e)
                 }
-                console.log(`调试:Controller.weixin#182行`, res);
-                await ctx.service.weixin.sendServirceMessage({content:res.msg});
+
 
             }else{
                 this.reply({content:"您未绑定手机号 请回复11位手机号进行绑定"})
