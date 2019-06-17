@@ -108,6 +108,7 @@ module.exports = class WeixinController extends Controller {
                      console.log(`调试:输入的为验证码`, content)
                      this.reply();
                      let res =  await this.getEleme({type:20,validate_code:content});
+                     console.log(`调试:提交验证码返回值`, res)
 
                  } else{
                      console.log(`调试:收到的不是手机号`, content);
@@ -201,7 +202,7 @@ module.exports = class WeixinController extends Controller {
     }
 
     //领红包
-    async getEleme({type=20}){
+    async getEleme({type=20,validate_code}){
         const {ctx} = this;
         const data = ctx.request.body;
         const openid = data.FromUserName;
@@ -216,8 +217,10 @@ module.exports = class WeixinController extends Controller {
             if(user.phone ){
                 console.log(`调试:用户已绑定手机号`);
                 // this.reply({content});
-                   console.log(`调试:开始调用ele接口`);
-                let res = await  ctx.service.eleme.getEleme({phone});
+                console.log(`调试:开始调用ele接口`);
+
+                let res = await  ctx.service.eleme.getEleme(validate_code ? {phone,validate_code,type} : {phone,type});
+                console.log(`调试:调用Eleme接口返回值`, res)
                 if(res.code == 1){
                     res.msg = `领取成功！！,请在饿了么中查看\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
                 }
