@@ -106,6 +106,7 @@ module.exports = class WeixinController extends Controller {
 
                  }else if(utils.checkVerificationCode(content)){  //判断是否为验证码
                      console.log(`调试:输入的为验证码`, content)
+                     this.reply();
                      let res =  await this.getEleme({type:20,validate_code:content});
 
                  } else{

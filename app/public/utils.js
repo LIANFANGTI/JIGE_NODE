@@ -9,7 +9,7 @@ exports.checkPhone =   function (phone){
 
 exports.checkVerificationCode = function (value) {
     reg=/^[0-9]{6}$/;
-    if(reg.test(str)){
+    if(reg.test(value)){
         return  true
     }else{
         return false
