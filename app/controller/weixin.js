@@ -1,6 +1,7 @@
 const Controller = require("egg").Controller;
 const crypto = require("crypto");
 const requset = require('request-promise');
+let request2 = require('request');
 const qr = require('qr-image');
 const utils  =require("../public/utils");
 
@@ -68,8 +69,8 @@ module.exports = class WeixinController extends Controller {
                                 console.log(`调试:已经填写过邀请码`, iUser)
                                 this.reply();
                             }else{
-                                let res1 = await ctx.service.user.update({father:fid,times:fUser.times + 1 }, {openid});
-                                let res2 = await ctx.service.user.update({father:fid,times:iUser.times + 1}, {id:fid});
+                                let res1 = await ctx.service.user.update({father:fid,times:iUser.times + 1 }, {openid});
+                                let res2 = await ctx.service.user.update({father:fid,times:fUser.times + 1}, {id:fid});
                                 if(res1 && res2) {
                                     this.reply({content:`邀请码填写成功 \n您的积分:+1,\n邀请者[${fUser.nickname}]积分:+1`});
                                 }else{
@@ -151,7 +152,16 @@ module.exports = class WeixinController extends Controller {
                  await this.getEleme({type:21});
            break;
             case "TGM":  // 推广码
-                this.reply({content:'你点击了推广码按钮'});
+                this.reply({content:'获取中 请稍后...'});
+                const url = 'http://127.0.0.1:7003/qr?type=image&fid=1';
+                let buffer =await this.ctx.service.http.download({url});
+                console.log(`调试:数据下载成功`, buffer);
+               this.ctx.service.weixin.uploadMedia({type:'image',media:buffer}).then(async  res=>{
+                    console.log(`调试:上传到微信服务器返回值`, res);
+                     let { media_id  } = res;
+                     console.log(`调试:返回的媒体ID`, media_id,typeof (res));
+                     await this.ctx.service.weixin.sendServiceMessage({media_id,type:'image'});
+                })
 
             break;
             case "MRQD": // 每日签到

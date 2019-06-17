@@ -1,19 +1,32 @@
 'use strict';
 const Service = require('egg').Service;
-const requset = require('request-promise');
+const requset = require('request');
 const options = {
     'token': 'p4d0lfS9LR0aaHh0',           //填写你设定的Token
     'encodingaeskey': 'NfJU7O3k83Mr7KTP3gdHKIAyHKvRSBoAkWEO3cCvGjc',  //填写加密用的EncodingAESKey
     // 'appid': 'wx2e707ecbc65368f3',                  //填写高级调用功能的appid
     // 'appsecret': '092a7a30fb235d10edca16e91405f2f0'   //填写高级调用功能的密钥
-    'appid': 'wxe6209b6d5f2872a6',                  //测试号
-    'appsecret': 'af758ed398ffe6395bfff0ff9b41ff56'   //测试号
+    //'appid': 'wxe6209b6d5f2872a6',                  //测试号1
+    //'appsecret': 'af758ed398ffe6395bfff0ff9b41ff56'   //测试号1
+    'appid': 'wxf5ccc5ae787a2646',                  //测试号1
+    'appsecret': 'e4668913444f591a062995c8b2c12d94'   //测试号1
 };
 module.exports = class WeixinService extends Service {
     // 获取access_token
     async getAccessToken() {
         let url = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${options.appid}&secret=${options.appsecret}`;
-        return await this.ctx.service.http.get({url});
+        return await this.ctx.service.http.get({url}).then(res=>{
+            console.log(`调试:获取Token成功`, res)
+            if(res.errcode){
+                return  Promise.reject({msg:'获取TOKEN失败',result:res})
+            }else{
+                return  Promise.resolve(res)
+            }
+        }).catch(err=>{
+            console.log(`调试:获取Token失败`, err)
+            return  Promise.reject({msg:'获取TOKEN失败',result:err})
+
+        });
     }
 
     //创建二维码
@@ -116,17 +129,22 @@ module.exports = class WeixinService extends Service {
     }
 
     // 发送客服消息
-    async sendServiceMessage({type = 'text',content =''}) {
+    async sendServiceMessage({type = 'text',content ='',media_id = ''}) {
         const { access_token } = await  this.getAccessToken();
         const url =`https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=${access_token}`;
         let data = {
             "touser":this.ctx.request.body.FromUserName || '',
             "msgtype":`${type}`,
-            "text":
-                {
-                    "content":`${content}`
-                }
         };
+        switch (type) {
+            case "text":
+                data[type] =  {  "content":`${content}` }
+                break;
+            case "image":
+                data[type] =  {  media_id };
+                break;
+        }
+
         console.log(`\n\n *************[${new Date()}]客服消息发送日志 *************[ `);
         console.log(`\n发送数据:\n`, data , "\n\n");
 
@@ -163,10 +181,25 @@ module.exports = class WeixinService extends Service {
                     "color":"#173177"
                 }
             }
-        }
-
+        };
         return  await  this.ctx.service.http.post({url,data})
+    }
 
+    // 新增素材
+    async uploadMedia({type = 'image',media}){
+        const {access_token} = await this.getAccessToken();
+        console.log(`调试:获取到access_token`,access_token)
+        const url = `https://api.weixin.qq.com/cgi-bin/media/upload?access_token=${access_token}&type=${type}`;
+        let data = {
+            media:{
+                value: media,
+                options: {
+                    filename: `pic_${new Date().getTime()}.png`
+                }
+            }
+        };
+
+       return  await this.ctx.service.http.upload({url,data,json:true})
     }
 
 }

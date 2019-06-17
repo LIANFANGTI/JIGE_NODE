@@ -33,7 +33,7 @@ module.exports = options => {
 
         //返回控制权给控制器
         yield next;
-        //拦截response请求
+        //拦截response请求2610
         if(this.response.body){
             // this.logger.info(`----出参----${JSON.stringify(this.response.body)}`);
         }
