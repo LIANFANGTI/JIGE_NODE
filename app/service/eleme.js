@@ -7,8 +7,9 @@ module.exports = class ElemeService extends Service {
         const { ctx } = this;
         data['token'] = token;
         const url = 'http://ele.lianfangti.cn/ele';
-        console.log(`调试:正在调用ele接口\n\n`, {url,data});
+        console.log(`\n\n #############################[${new Date()}]Ele接口调用日志#############################\n\\n`,"请求数据:\n", {url,data});
         return await this.ctx.service.http.post({url, data}).then( res => {
+            console.log(`返回值[正常]:\n`, res,"\n\n");
             let errors = {
                 0: "库存不足",
                 1: "成功",
@@ -42,6 +43,8 @@ module.exports = class ElemeService extends Service {
                 msg: errors[res.code] || '未知错误',
             })
         }).catch(err =>{
+            console.log(`返回值[出错]:\n`, err,"\n\n");
+
             console.log(`错误:ele接口调用出错`, err)
         });
     }

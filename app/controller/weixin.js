@@ -225,7 +225,7 @@ module.exports = class WeixinController extends Controller {
                     res.msg = `领取成功！！,请在饿了么中查看\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
                 }
                 console.log(`调试:Controller.weixin#182行`, res);
-                await ctx.service.weixin.sendServiceMessage({content:res.msg});
+                await ctx.service.weixin.sendServirceMessage({content:res.msg});
 
             }else{
                 this.reply({content:"您未绑定手机号 请回复11位手机号进行绑定"})
@@ -266,7 +266,7 @@ module.exports = class WeixinController extends Controller {
     }
 
     reply({type = 'text', content} = {}) {
-        console.log(`调试:调用了回复`, content)
+        console.log(`\n\n 00000000000000000000000000000000[${new Date()}回复调用日志00000000000000000000000000000000\n]`);
         const {ctx} = this;
         const data = ctx.request.body;
         const head = `<xml><ToUserName><![CDATA[${data.FromUserName}]]></ToUserName> <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName> <CreateTime>${new Date().getTime()}</CreateTime> <MsgType><![CDATA[${type}]]></MsgType>`;
@@ -278,7 +278,7 @@ module.exports = class WeixinController extends Controller {
                 break;
         }
         ctx.set("Content-Type", "text/xml");
-        console.log(`调试:即将响应的内容`, `${head}${body}${end}`)
+        console.log(`调试:回复响应内容`, `${head}${body}${end}`,"\n\n");
         ctx.body = content ?  `${head}${body}${end}` : 'success'
 
     }
