@@ -154,6 +154,7 @@ module.exports = class WeixinController extends BaseController {
             console.log(`调试:响应点击事件[${EventKey}]`);
             // let data = this.ctx.request.body;
             // let openid = data.FromUserName;
+            let openid = this.ctx.request.body.FromUserName;
             switch (EventKey) {
                 case "SYJC": // 使用教程
                     let content = `如何使用XX红包助手？\n 1.回复手机号 \n 2.点击菜单栏一键红包 \n 3.回复验证码即可领取`;
@@ -169,7 +170,6 @@ module.exports = class WeixinController extends BaseController {
                     break;
                 case "TGM":  // 推广码
                     this.reply({content: '获取中 请稍后...'});
-                    let openid = this.ctx.request.body.FromUserName;
                     let u = await this.ctx.service.user.findOne({col: ["id", "openid"], where: {openid}});
                     console.log(`调试:用户信息`, u.id);
                     const url = `http://127.0.0.1:7003/draw?type=image&id=${u.id}`;
