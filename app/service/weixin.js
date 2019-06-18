@@ -2,6 +2,7 @@
 const Service = require('egg').Service;
 const requset = require('request');
 const qr = require('qr-image');
+const cache = require('memory-cache');
 const options = {
     'token': 'p4d0lfS9LR0aaHh0',           //填写你设定的Token
     'encodingaeskey': 'NfJU7O3k83Mr7KTP3gdHKIAyHKvRSBoAkWEO3cCvGjc',  //填写加密用的EncodingAESKey
@@ -16,20 +17,39 @@ module.exports = class WeixinService extends Service {
     // 获取access_token
     async getAccessToken() {
         let url = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${options.appid}&secret=${options.appsecret}`;
-        // return '22_qlDsLpAGNF3C-C-QLqylPtUiv4hti-JSX-0i4-RPMnjVjUbn1E-hDdU1jGYOkIsYF7XOkPIPWvTRSDceJxUzWSwuXVDdBdF3fbkWZxVqusht3bt0H7tr3_MeYK1JSbLaj42iVnJq3_qlvmCYQGDeABAAQN';
+        let access_token = '';
+        // cache.del("access_token")
+        if(!cache.get("access_token")){
+            console.log(`调试:缓存中不存在 重新获取`)
+            access_token = await   this.ctx.service.http.get({url}).then(res=>{
+                if(res.errcode){
+                    return  Promise.reject({from:'获取TOKEN',result:res})
+                }else{
+                    let { access_token, expires_in } = res;
+                    // console.log(`调试:开始写入缓存啊啊啊存储时间[${expires_in}]，[${typeof (expires_in)}]`, access_token);
+                    cache.put("access_token",{access_token,time:new Date(),expires_in:expires_in * 1000},7200000);
+                    return  Promise.resolve(res)
+                }
+            }).catch(err=>{
+                console.log(`调试:获取Token失败`, err)
+                return  Promise.reject({from:'获取TOKEN',result:err})
 
-        return await this.ctx.service.http.get({url}).then(res=>{
-            console.log(`调试:获取Token成功`, res)
-            if(res.errcode){
-                return  Promise.reject({msg:'获取TOKEN失败',result:res})
-            }else{
-                return  Promise.resolve(res)
-            }
-        }).catch(err=>{
-            console.log(`调试:获取Token失败`, err)
-            return  Promise.reject({msg:'获取TOKEN失败',result:err})
+            });
+            console.log(`调试:获取到access_token`, access_token);
+        } else{
+            console.log(`调试:缓存中存在直接拿`)
+            let res = cache.get("access_token");
+            let {access_token,time}  = res
+            // console.log(`调试:缓存中存在`, access_token);
+            // console.log(`调试:存入时间`, time);
+            // console.log(`调试:剩余时间`,7200 - (new Date().getTime() -  time.getTime())/ 1000);
+            res['residue'] = (7200 - (new Date().getTime() -  time.getTime())/ 1000)
+            return  Promise.resolve(res)
+        }
 
-        });
+        return access_token
+
+
     }
 
     //创建二维码
