@@ -179,6 +179,7 @@ module.exports = class WeixinController extends BaseController {
                         console.log(`调试:上传到微信服务器返回值`, res);
                         let {media_id} = res;
                         console.log(`调试:返回的媒体ID`, media_id, typeof (res));
+                        await this.ctx.service.weixin.sendServiceMessage({content:'推广码获取成功  请点击查看原图 长按发送给朋友\n成功邀请一位朋友您将获得1积分'});
                         await this.ctx.service.weixin.sendServiceMessage({media_id, type: 'image'});
                     })
 
@@ -315,7 +316,7 @@ module.exports = class WeixinController extends BaseController {
                 console.log(`调试:用户已绑定手机号`);
                 // this.reply({content});
                 console.log(`调试:开始调用ele接口`);
-                this.reply({});
+                this.reply({content:'数据获取中...请稍后\n ⚠️切勿重复点击！'});
                 try {
                     ctx.service.eleme.getEleme(validate_code ? {phone, validate_code, type} : {
                         phone,

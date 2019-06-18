@@ -8,6 +8,7 @@
 
 see [egg docs][egg] for more detail.
 
+
 ### Development
 
 ```bash
@@ -15,7 +16,18 @@ $ npm i
 $ npm run dev
 $ open http://localhost:7001/
 ```
+新增了 node-canvas 模块 
 
+可能需要安装依赖
+
+#### linux: 
+```$xslt
+sudo yum install cairo cairo-devel cairomm-devel libjpeg-turbo-devel pango pango-devel pangomm pangomm-devel giflib-devel
+```
+#### mac:
+```$xslt
+brew install pkg-config cairo pango libpng jpeg giflib
+```
 ### Deploy
 
 ```bash
