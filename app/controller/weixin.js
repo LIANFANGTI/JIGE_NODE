@@ -325,7 +325,7 @@ module.exports = class WeixinController extends BaseController {
                         console.log(`调试:调用Eleme接口返回值`, res);
                         if (res.code == 1) {
                             await ctx.service.user.update({times:user.times - 1},{openid})
-                            res.msg = `领取成功！！,请在饿了么中查看\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n积分使用: -1,\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
+                            res.msg = `领取成功！！,请在饿了么中查看\n红包类型:${type === 20 ? '拼手气': '品质联盟'}\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n积分使用: -1,\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
                         }
                         // console.log(`调试:Controller.weixin#182行`, res);
                         ctx.service.weixin.sendServiceMessage({content: res.msg});
