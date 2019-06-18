@@ -23,7 +23,7 @@ module.exports = class HttpService extends Service {
             method: 'POST',
             json: options.json !==  undefined ? options.json : true
         }).then(res=>{
-            console.log(`调试:POST请求返回值`, res);
+            // console.log(`调试:POST请求返回值`, res);
             return  Promise.resolve(res)
         })
     }

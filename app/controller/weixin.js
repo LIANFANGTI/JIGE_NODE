@@ -1,13 +1,9 @@
-const Controller = require("egg").Controller;
+const BaseController = require("./BaseController")
 const crypto = require("crypto");
-const requset = require('request-promise');
-let request2 = require('request');
-const qr = require('qr-image');
-const utils  =require("../public/utils");
+const utils = require("../public/utils");
+const {createCanvas, loadImage} = require('canvas');
 
-
-
-module.exports = class WeixinController extends Controller {
+module.exports = class WeixinController extends BaseController {
     async index() {
         const {ctx} = this;
         const token = 'p4d0lfS9LR0aaHh0';
@@ -29,25 +25,30 @@ module.exports = class WeixinController extends Controller {
                             exist = await ctx.service.user.exist({where: {openid}});
                             let user = {...userinfo};
                             if (!exist) {
+                                this.reply({content: '谢谢关注 ！NM$L! 💖\n 点击下方一键红包菜单即可领取红包 \n'});
                                 user['times'] = 2; // 新用户送两个次数
                                 user['father'] = father; // 新用户送两个次数
                                 user['subscribe'] = 1; // 是否关注
                                 let addResult = await ctx.service.user.add(user);
                                 // console.log(`调试:添加用户返回值`, addResult);
                             } else {
+                                this.reply({content: '欢迎回来 ！NM$L! 💖\n 点击下方一键红包菜单即可领取红包 \n'});
                                 user['subscribe'] = 1; // 是否关注
                                 let updateResult = await ctx.service.user.update(user, {openid})
                                 console.log(`调试:用户已存在 信息更新成功`, updateResult)
                             }
 
-                            this.reply({content: '谢谢关注 ！NM$L! 💖\n 点击下方一键红包菜单即可领取红包 \n'});
-                            if(father!==0){
+                            if (father !== 0) {
                                 console.log(`调试:邀请者不为空`, father);
-                                let fer = await  ctx.service.user.exist({where:{id:father},col:["id","times","nickname"],showCol:true});
+                                let fer = await ctx.service.user.exist({
+                                    where: {id: father},
+                                    col: ["id", "times", "nickname"],
+                                    showCol: true
+                                });
                                 console.log(`调试:邀请者 详细信息`, fer)
-                                let updatefer  = await  ctx.service.user.update({times:fer.times + 1},{id:father});
+                                let updatefer = await ctx.service.user.update({times: fer.times + 1}, {id: father});
                                 console.log(`调试:更新邀请者积分`, updatefer)
-                                let sendRes = await  ctx.service.weixin.sendServiceMessage({content:`受邀成功! \n 您的积分: + 2\n 邀请者[${fer.nickname}]积分: + 1`})
+                                let sendRes = await ctx.service.weixin.sendServiceMessage({content: `受邀成功! \n 您的积分: + 2\n 邀请者[${fer.nickname}]积分: + 1`})
                                 console.log(`调试:完成后客服消息推送返回值`, sendRes)
 
                             }
@@ -55,66 +56,80 @@ module.exports = class WeixinController extends Controller {
                         case "unsubscribe":
                             let result = await ctx.service.user.update({subscribe: 0}, {openid})
                             console.log(`调试:取关后更新用户状态返回值 `, result);
-                        break;
+                            break;
                         case "CLICK":
-                            await this.handleMenuClick({...data,openid});
-                        break;
+                            await this.handleMenuClick({...data, openid});
+                            break;
                         case "SCAN": //关注后扫码
                             let fid = data.EventKey;
                             // let fUser = await  ctx.service.user.exist({col:["nickname","id","times"],showCol:true,where:{id:fid}});
-                            let iUser = await  ctx.service.user.exist({col:["id","times","father"],where:{openid},showCol:true});
-                            let fUser = await  ctx.service.user.exist({col:["id","times","father","nickname"],where:{id:fid},showCol:true});
-                            console.log(`调试:两个User的值`, fUser,"\n-----------",iUser)
-                            if(iUser.father){
+                            let iUser = await ctx.service.user.exist({
+                                col: ["id", "times", "father"],
+                                where: {openid},
+                                showCol: true
+                            });
+                            if (iUser.father) {
                                 console.log(`调试:已经填写过邀请码`, iUser)
+                                this.reply({content: '您已填写过邀请码'});
+                                return
+                            }
+                            let fUser = await ctx.service.user.exist({
+                                col: ["id", "times", "father", "nickname"],
+                                where: {id: fid},
+                                showCol: true
+                            });
+                            console.log(`调试:两个User的值`, fUser, "\n-----------", iUser)
+
+                            let res1 = await ctx.service.user.update({
+                                father: fid,
+                                times: iUser.times + 1
+                            }, {openid});
+                            let res2 = await ctx.service.user.update({
+                                father: fid,
+                                times: fUser.times + 1
+                            }, {id: fid});
+                            if (res1 && res2) {
+                                this.reply({content: `邀请码填写成功 \n您的积分:+1,\n邀请者[${fUser.nickname}]积分:+1`});
+                            } else {
                                 this.reply();
-                            }else{
-                                let res1 = await ctx.service.user.update({father:fid,times:iUser.times + 1 }, {openid});
-                                let res2 = await ctx.service.user.update({father:fid,times:fUser.times + 1}, {id:fid});
-                                if(res1 && res2) {
-                                    this.reply({content:`邀请码填写成功 \n您的积分:+1,\n邀请者[${fUser.nickname}]积分:+1`});
-                                }else{
-                                    this.reply();
-                                }
                             }
 
 
-
-                        break;
+                            break;
                     }
                 } catch (e) {
                     console.error(`调试:错误`, e)
                 }
 
             } else if (data.MsgType) {
-                const   content = data.Content,openid = data.FromUserName;
-                 if(utils.checkPhone(content)){ // 判断是否为手机号
-                     let phone = content;
-                     console.log(`调试:收到的是手机号`, content);
-                     let exist = await ctx.service.user.exist({where:{phone}});
-                     if(exist){
-                         this.reply({content: `号码[${phone}]已被绑定,请检查`});
-                     }else{
-                            // await   this.getEleme({phone});
-                         let res =  await  ctx.service.user.update({phone},{openid});
-                         if(res){
-                             this.reply({content:'手机号绑定成功'});
-                         }else{
-                             this.reply({content:'手机号绑定失败'});
+                const content = data.Content, openid = data.FromUserName;
+                if (utils.checkPhone(content)) { // 判断是否为手机号
+                    let phone = content;
+                    console.log(`调试:收到的是手机号`, content);
+                    let exist = await ctx.service.user.exist({where: {phone}});
+                    if (exist) {
+                        this.reply({content: `号码[${phone}]已被绑定,请检查`});
+                    } else {
+                        // await   this.getEleme({phone});
+                        let res = await ctx.service.user.update({phone}, {openid});
+                        if (res) {
+                            this.reply({content: '手机号绑定成功'});
+                        } else {
+                            this.reply({content: '手机号绑定失败'});
 
-                         }
-                     }
+                        }
+                    }
 
-                 }else if(utils.checkVerificationCode(content)){  //判断是否为验证码
-                     console.log(`调试:输入的为验证码`, content)
-                     this.reply();
-                     let res =  await this.getEleme({type:20,validate_code:content});
-                     console.log(`调试:提交验证码返回值`, res)
+                } else if (utils.checkVerificationCode(content)) {  //判断是否为验证码
+                    console.log(`调试:输入的为验证码`, content)
+                    this.reply();
+                    let res = await this.getEleme({type: 20, validate_code: content});
+                    console.log(`调试:提交验证码返回值`, res)
 
-                 } else{
-                     console.log(`调试:收到的不是手机号`, content);
-                     this.reply({content: '恩恩好的呢'});
-                 }
+                } else {
+                    console.log(`调试:收到的不是手机号`, content);
+                    this.reply({content: '恩恩好的呢'});
+                }
 
             }
         } else {
@@ -134,65 +149,73 @@ module.exports = class WeixinController extends Controller {
     }
 
     //菜单点击事件
-    async handleMenuClick({EventKey,openid}){
-        console.log(`调试:响应点击事件[${EventKey}]`);
-        // let data = this.ctx.request.body;
-        // let openid = data.FromUserName;
-        switch (EventKey) {
-            case "SYJC": // 使用教程
-                let content = `如何使用XX红包助手？\n 1.回复手机号 \n 2.点击菜单栏一键红包 \n 3.回复验证码即可领取`;
-                this.reply({content})
-            break;
-            case "PSQ":  // 拼手气红包
+    async handleMenuClick({EventKey, openid}) {
+        try {
+            console.log(`调试:响应点击事件[${EventKey}]`);
+            // let data = this.ctx.request.body;
+            // let openid = data.FromUserName;
+            switch (EventKey) {
+                case "SYJC": // 使用教程
+                    let content = `如何使用XX红包助手？\n 1.回复手机号 \n 2.点击菜单栏一键红包 \n 3.回复验证码即可领取`;
+                    this.reply({content})
+                    break;
+                case "PSQ":  // 拼手气红包
 
-                this.reply({content:'你点击了拼手气红包'});
-                 await this.getEleme({type:20});
-                break;
+                    this.reply({content: '你点击了拼手气红包'});
+                    await this.getEleme({type: 20});
+                    break;
                 case "PZLM": // 品质联盟
-                 await this.getEleme({type:21});
-           break;
-            case "TGM":  // 推广码
-                this.reply({content:'获取中 请稍后...'});
-                const url = 'http://127.0.0.1:7003/qr?type=image&fid=1';
-                let buffer =await this.ctx.service.http.download({url});
-                console.log(`调试:数据下载成功`, buffer);
-               this.ctx.service.weixin.uploadMedia({type:'image',media:buffer}).then(async  res=>{
-                    console.log(`调试:上传到微信服务器返回值`, res);
-                     let { media_id  } = res;
-                     console.log(`调试:返回的媒体ID`, media_id,typeof (res));
-                     await this.ctx.service.weixin.sendServiceMessage({media_id,type:'image'});
-                })
+                    await this.getEleme({type: 21});
+                    break;
+                case "TGM":  // 推广码
+                    this.reply({content: '获取中 请稍后...'});
+                    let openid = this.ctx.request.body.FromUserName;
+                    let u = await this.ctx.service.user.findOne({col: ["id", "openid"], where: {openid}});
+                    console.log(`调试:用户信息`, u.id);
+                    const url = `http://127.0.0.1:7003/draw?type=image&id=${u.id}`;
+                    let buffer = await this.ctx.service.http.download({url});
+                    console.log(`调试:数据下载成功`, buffer);
+                    this.ctx.service.weixin.uploadMedia({type: 'image', media: buffer}).then(async res => {
+                        console.log(`调试:上传到微信服务器返回值`, res);
+                        let {media_id} = res;
+                        console.log(`调试:返回的媒体ID`, media_id, typeof (res));
+                        await this.ctx.service.weixin.sendServiceMessage({media_id, type: 'image'});
+                    })
 
-            break;
-            case "MRQD": // 每日签到
-                this.reply({content:'你点击了每日签到按钮'});
-                break;
-            case "ZHCZ": // 账户充值
-                this.reply({content:'你点击了账户充值按钮'});
+                    break;
+                case "MRQD": // 每日签到
+                    this.reply({content: '你点击了每日签到按钮'});
+                    break;
+                case "ZHCZ": // 账户充值
+                    this.reply({content: '你点击了账户充值按钮'});
 
 
-                break;
-            case "YECX": // 余额查询
+                    break;
+                case "YECX": // 余额查询
 
-                let user =  await this.ctx.service.user.findOne({col:["id","times"],where:{openid}});
-                console.log(`调试:余额查询返回用户对象`,user );
-                this.reply({content:`查询成功 \n 剩余积分:${user.times}\n 您可通过邀请 充值 或 每日签到来获取积分！`});
+                    let user = await this.ctx.service.user.findOne({col: ["id", "times"], where: {openid}});
+                    console.log(`调试:余额查询返回用户对象`, user);
+                    this.reply({content: `查询成功 \n剩余积分:${user.times}\n您可通过邀请 充值 或 每日签到来获取积分！`});
 
-                break;
-            case "LXKF": //联系客服
-                this.reply({content:'你点击了联系客服按钮'});
+                    break;
+                case "LXKF": //联系客服
+                    this.reply({content: '你点击了联系客服按钮'});
 
-            break;
+                    break;
+            }
+        } catch (e) {
+            console.error(`错误:`, e)
         }
+
     }
 
 
-
-    async menu(){
+    async menu() {
         this.ctx.body = await this.ctx.service.weixin.getMenu();
     }
-    async createMenu(){
-        this.ctx.body =  await this.ctx.service.weixin.createMenu()
+
+    async createMenu() {
+        this.ctx.body = await this.ctx.service.weixin.createMenu()
     }
 
 
@@ -200,68 +223,134 @@ module.exports = class WeixinController extends Controller {
     async qr() {
         const {ctx} = this;
         let query = ctx.request.query;
-        let res = await ctx.service.weixin.qrcode({scene_id:query.fid || 1});
         let type = query.type || 'json';
+        let res = await ctx.service.weixin.qrcode({scene_id: query.fid || 1, type});
+        console.log(`调试:获取二维码内容`, res)
 
         if (type == 'image') {
-            ctx.set("Content-Type", "image/png")
-            let img = qr.image(res.url, {type: 'png'});
-            ctx.body = img
+            ctx.set("Content-Type", "image/png");
+            ctx.body = res
         } else {
             ctx.body = res
         }
     }
 
+    //推广码测试
+    async draw() {
+        let rules = {
+            id: [
+                {required: true}
+            ]
+        }
+        try {
+            let query = await this.validate({rules, type: "GET"});
+            let exist = await this.ctx.service.user.exist({where: {id: query.id}});
+            if (!exist) {
+                this.ctx.status = 404;
+                this.ctx.body = {
+                    code: 404,
+                    msg: '数据不存在'
+                }
+            } else {
+                await this.drawExtensionCode(query);
+            }
+            console.log(`调试:参数验证结果`, query)
+        } catch (e) {
+            console.log(`调试:出错`, e)
+        }
+
+    }
+
+    // 绘制推广码
+    async drawExtensionCode({id}) {
+        const {ctx} = this;
+        let query = ctx.request.query;
+        let {headimgurl} = await ctx.service.user.findOne({col: ['nickname', 'headimgurl', 'id'], where: {id}});
+        console.log(`调试:获取到用户信息`, {headimgurl, id});
+        let qrCodeBuffer = await ctx.service.weixin.qrcode({scene_id: id || 1, type: 'image'});
+        let hdBuffer = await loadImage(headimgurl); //网络图片
+        let bgBuffer = await loadImage(`${this.config.baseDir}/app/public/images/hongbao.png`); //本地图片
+        let qrBuffer = await loadImage(qrCodeBuffer); // Buffer 数据
+
+        this.ctx.set("Content-Type", "image/png");
+        this.ctx.body = await this.drawImage({bgBuffer, hdBuffer, qrBuffer})
+    }
+
+    // 绘制图形
+    async drawImage({bgBuffer, hdBuffer, qrBuffer}) {
+        console.log(`调试:绘制`, {bgBuffer, hdBuffer, qrBuffer})
+        const w = 414,   //画布宽度
+            h = 553,   //画布高度
+            x = 0,     //初始x偏移量
+            y = 0,     //初始y偏移量
+            hdw = 63,  //头像边长
+            qrw = 174; //二维码边长
+        const canvas = createCanvas(w, h);
+        const context = canvas.getContext('2d');
+        context.drawImage(hdBuffer, w / 2 - (hdw / 2), 185, hdw, hdw);  //绘制头像
+        context.drawImage(bgBuffer, x, y, w, h);                                 //绘制背景
+        context.drawImage(qrBuffer, w / 2 - (qrw / 2), 298, qrw, qrw);   //绘制二维码
+        return canvas.toBuffer();
+    }
+
+
     //领红包
-    async getEleme({type=20,validate_code}){
+    async getEleme({type = 20, validate_code}) {
         const {ctx} = this;
         const data = ctx.request.body;
         const openid = data.FromUserName;
         console.log(`调试:开始检测用户是否存在 `)
-        let user = await this.ctx.service.user.exist({where:{openid},col:['phone','id',"times"],showCol:true}).catch(res=>{
+        let user = await this.ctx.service.user.exist({
+            where: {openid},
+            col: ['phone', 'id', "times"],
+            showCol: true
+        }).catch(res => {
             console.log(`调试:检测用户是否存在出错`, res)
         });
-        if(user){ // 判断用户是否存在
+        if (user) { // 判断用户是否存在
             console.log(`调试:用户是否存在判断完毕`, user);
             console.log(`调试:判断用户是否存在手机号`, user.phone);
             let phone = user.phone
-            if(user.phone ){
+            if (user.phone) {
                 console.log(`调试:用户已绑定手机号`);
                 // this.reply({content});
                 console.log(`调试:开始调用ele接口`);
                 this.reply({});
-                try{
-                   ctx.service.eleme.getEleme(validate_code ? {phone,validate_code,type} : {phone,type}).then(res=>{
-                       console.log(`调试:调用Eleme接口返回值`, res);
-                       if(res.code == 1){
-                           res.msg = `领取成功！！,请在饿了么中查看\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
-                       }
-                       // console.log(`调试:Controller.weixin#182行`, res);
-                       ctx.service.weixin.sendServiceMessage({content:res.msg});
-                   });
+                try {
+                    ctx.service.eleme.getEleme(validate_code ? {phone, validate_code, type} : {
+                        phone,
+                        type
+                    }).then(res => {
+                        console.log(`调试:调用Eleme接口返回值`, res);
+                        if (res.code == 1) {
+                            res.msg = `领取成功！！,请在饿了么中查看\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
+                        }
+                        // console.log(`调试:Controller.weixin#182行`, res);
+                        ctx.service.weixin.sendServiceMessage({content: res.msg});
+                    });
 
-                }catch (e) {
-                       console.log(`调试:Eleme接口调用出错`, e)
+                } catch (e) {
+                    console.log(`调试:Eleme接口调用出错`, e)
                 }
 
 
-            }else{
-                this.reply({content:"您未绑定手机号 请回复11位手机号进行绑定"})
+            } else {
+                this.reply({content: "您未绑定手机号 请回复11位手机号进行绑定"})
 
             }
-        }else{
-           return  ("用户不存在")
+        } else {
+            return ("用户不存在")
 
         }
 
     }
 
-    async sendTemplateMessage(){
+    async sendTemplateMessage() {
         this.ctx.body = await this.ctx.service.weixin.sendTemplateMessage();
     }
 
-    async sendServiceMessage(){
-        this.ctx.body = await  this.ctx.service.weixin.sendServiceMessage();
+    async sendServiceMessage() {
+        this.ctx.body = await this.ctx.service.weixin.sendServiceMessage();
     }
 
 
@@ -272,15 +361,15 @@ module.exports = class WeixinController extends Controller {
     }
 
     //添加客服
-    async addSerivce(){
+    async addSerivce() {
         const {ctx} = this;
-        ctx.body = await  ctx.service.weixin.addServive()
+        ctx.body = await ctx.service.weixin.addServive()
 
     }
 
-    async getCustomService(){
-        const { ctx } = this
-        ctx.body  = await  ctx.service.weixin.getCustomService();
+    async getCustomService() {
+        const {ctx} = this
+        ctx.body = await ctx.service.weixin.getCustomService();
     }
 
     reply({type = 'text', content} = {}) {
@@ -296,8 +385,10 @@ module.exports = class WeixinController extends Controller {
                 break;
         }
         ctx.set("Content-Type", "text/xml");
-        console.log(`调试:回复响应内容`, content ? `${head}${body}${end}` : 'success',"\n\n");
-        ctx.body = content ?  `${head}${body}${end}` : 'success'
+        console.log(`调试:回复响应内容`, content ? `${head}${body}${end}` : 'success', "\n\n");
+        ctx.body = content ? `${head}${body}${end}` : 'success'
 
     }
+
+
 };

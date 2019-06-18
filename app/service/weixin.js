@@ -1,6 +1,7 @@
 'use strict';
 const Service = require('egg').Service;
 const requset = require('request');
+const qr = require('qr-image');
 const options = {
     'token': 'p4d0lfS9LR0aaHh0',           //填写你设定的Token
     'encodingaeskey': 'NfJU7O3k83Mr7KTP3gdHKIAyHKvRSBoAkWEO3cCvGjc',  //填写加密用的EncodingAESKey
@@ -15,6 +16,8 @@ module.exports = class WeixinService extends Service {
     // 获取access_token
     async getAccessToken() {
         let url = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${options.appid}&secret=${options.appsecret}`;
+        // return '22_qlDsLpAGNF3C-C-QLqylPtUiv4hti-JSX-0i4-RPMnjVjUbn1E-hDdU1jGYOkIsYF7XOkPIPWvTRSDceJxUzWSwuXVDdBdF3fbkWZxVqusht3bt0H7tr3_MeYK1JSbLaj42iVnJq3_qlvmCYQGDeABAAQN';
+
         return await this.ctx.service.http.get({url}).then(res=>{
             console.log(`调试:获取Token成功`, res)
             if(res.errcode){
@@ -30,7 +33,7 @@ module.exports = class WeixinService extends Service {
     }
 
     //创建二维码
-    async qrcode({expire_seconds = 604800, scene_id = 1} = {}) {
+    async qrcode({expire_seconds = 604800, scene_id = 1, type = 'json'} = {}) {
         let {access_token} = await this.getAccessToken();
         let url = `https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=${access_token}`;
         let data = {
@@ -45,8 +48,14 @@ module.exports = class WeixinService extends Service {
             }, // 二维码详细信息
             scene_id: 101,          // 整型场景值ID 临时型二维码为 32位非0整形 永久型二维码 取值范围 [1,100000]
             scene_str: 'lft0000000001'         // 字符串型场景值ID  长度范围为[1,64]
+        };
+        let result = await this.ctx.service.http.post({url, data});
+        if(type ===  'json'){
+            return  result
+        }else{
+            console.log(`调试:生成二维码成功 当前 是Buffer模式输出 `,)
+            return  qr.imageSync(result.url, {type: 'png'});
         }
-        return this.ctx.service.http.post({url, data})
     }
 
     //获取用户信息
@@ -149,7 +158,17 @@ module.exports = class WeixinService extends Service {
         console.log(`\n发送数据:\n`, data , "\n\n");
 
 
-        return  await  this.ctx.service.http.post({url,data})
+        return  await  this.ctx.service.http.post({url,data}).then(res=>{
+            console.log(`调试:客服消息发送返回值`, res)
+             if(res.errcode){
+                 return Promise.reject(res);
+             }else{
+                 return Promise.resolve(res);
+             }
+        }).catch(err=>{
+            console.log('错误:发送客服消息失败',err);
+             return Promise.reject(err)
+        })
     }
     // 发送模板消息
     async sendTemplateMessage(openid){
