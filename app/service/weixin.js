@@ -130,7 +130,7 @@ module.exports = class WeixinService extends Service {
                     "sub_button": [
                         { "type": "click", "name": "推广码", "key": "TGM"},
                         { "type": "click", "name": "每日签到", "key": "MRQD"},
-                        { "type": "view", "name": "账户充值", "url": "http://eleme.lianfangti.cn/recharge"},
+                        { "type": "click", "name": "账户充值", "key": "ZHCZ"},
                         { "type": "click", "name": "余额查询", "key": "YECX"},
                         { "type": "click", "name": "联系客服", "key": "LXKF"},
                     ]
@@ -158,7 +158,7 @@ module.exports = class WeixinService extends Service {
     }
 
     // 发送客服消息
-    async sendServiceMessage({type = 'text',content ='',media_id = ''}) {
+    async sendServiceMessage({type = 'text',content ='',head_content = "您对本次服务是否满意呢? ",articles = {},tail_content = "欢迎再次光临",media_id = ''}) {
         const { access_token } = await  this.getAccessToken();
         const url =`https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=${access_token}`;
         let data = {
@@ -172,10 +172,35 @@ module.exports = class WeixinService extends Service {
             case "image":
                 data[type] =  {  media_id };
                 break;
+            case "msgmenu":
+                    let list =  [
+                            { "id": "101", "content": "满意"},
+                            { "id": "102", "content": "不满意" }
+                        ]
+                    data[type] = {
+                        head_content,
+                        tail_content,
+                        list
+                    };
+                break;
+            case "news":
+                /* articles 格式
+                *   {
+                            "title":"充值中心",
+                            "description":"0.5元帮您领到最大红包实时充值实时到账",
+                            "url":"http://eleme.lianfangti.cn/recharge",
+                            "picurl":"https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/200x200-lk.png"
+                        }
+                * */
+                data[type] = {
+                    "articles":[ articles ]
+                }
+                break;
+
         }
 
         console.log(`\n\n *************[${new Date()}]客服消息发送日志 *************[ `);
-        console.log(`\n发送数据:\n`, data , "\n\n");
+        console.log(`\n发送数据:\n`, JSON.stringify(data) , "\n\n");
 
 
         return  await  this.ctx.service.http.post({url,data}).then(res=>{
@@ -190,6 +215,18 @@ module.exports = class WeixinService extends Service {
              return Promise.reject(err)
         })
     }
+    //发送充值链接
+    async sendRechargeLink(openid){
+        openid =  openid || this.ctx.request.body.FromUserName;
+        const articles = {
+            "title":"充值中心",
+            "description":"0.5元帮您领到最大红包实时充值实时到账",
+            "url":`http://eleme.lianfangti.cn/recharge?openid=${openid}`,
+            "picurl":"https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/200x200-lk.png"
+        }
+        return  await  this.sendServiceMessage({type:'news',articles});
+    }
+
     // 发送模板消息
     async sendTemplateMessage(openid){
         const {access_token} = await this.getAccessToken();
@@ -239,6 +276,13 @@ module.exports = class WeixinService extends Service {
         };
 
        return  await this.ctx.service.http.upload({url,data,json:true})
+    }
+    async typing(){
+        const {access_token} = await this.getAccessToken();
+        const url = `https://api.weixin.qq.com/cgi-bin/message/custom/typing?access_token=${access_token}`;
+        const openid = this.ctx.request.body.FromUserName ;
+        const data = { "touser":openid, "command":"Typing"};
+        return  await this.ctx.service.http.post({url,data})
     }
 
 }

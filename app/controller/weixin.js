@@ -188,7 +188,9 @@ module.exports = class WeixinController extends BaseController {
                     this.reply({content: '你点击了每日签到按钮'});
                     break;
                 case "ZHCZ": // 账户充值
-                    this.reply({content: '你点击了账户充值按钮'});
+                    // this.reply({content: '你点击了账户充值按钮'});
+                    this.ctx.service.weixin.typing();
+                    this.ctx.service.weixin.sendRechargeLink();
 
 
                     break;
@@ -203,9 +205,14 @@ module.exports = class WeixinController extends BaseController {
                     this.reply({content: '你点击了联系客服按钮'});
 
                     break;
+                case "NEWS":
+                   await this.ctx.service.weixin.sendServiceMessage({type:'news'})
+                case "TYPING":
+                   this.ctx.body = await  this.ctx.service.weixin.typing()
             }
         } catch (e) {
             console.error(`错误:`, e)
+             this.ctx.body =e
         }
 
     }
@@ -387,7 +394,7 @@ module.exports = class WeixinController extends BaseController {
                 order_id: `order${new Date().getTime()}`,
                 order_uid: 8,
                 notify_url: "http://eleme.lianfangti.cn/pay_callback",
-                cancel_url: "http://eleme.lianfangti.cn/view",
+                cancel_url: "http://eleme.lianfangti.cn/recharge",
                 more: 'TEST',
                 expire: 1300,
             }
@@ -421,7 +428,7 @@ module.exports = class WeixinController extends BaseController {
         const data = {
             name: "练方梯",
             items: [
-                {name: '50积分', price: 5.00},
+                {name: '50积分', price: 0.01},
                 {name: '61积分', price: 5.99},
                 {name: '70积分', price: 6.99},
                 {name: '80积分', price: 7.99},
