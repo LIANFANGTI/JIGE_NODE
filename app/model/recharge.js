@@ -7,6 +7,7 @@ module.exports = app => {
         order_id: STRING, // 订单id
         price:FLOAT,//订单金额
         pay_price: FLOAT, // 充值 实际支付金额
+        coin:INTEGER,// 积分
         pay_time: DATE, // 支付时间
         more: STRING,  // 订单信息
         transaction_id: STRING, //流水号

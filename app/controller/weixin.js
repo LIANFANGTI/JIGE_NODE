@@ -2,6 +2,7 @@ const BaseController = require("./BaseController")
 const crypto = require("crypto");
 const utils = require("../public/utils");
 const {createCanvas, loadImage} = require('canvas');
+const Sequelize = require('sequelize');
 
 module.exports = class WeixinController extends BaseController {
     async index() {
@@ -388,7 +389,9 @@ module.exports = class WeixinController extends BaseController {
             const apps = 'fccd1864af5b43c99784d36855aa9f3d';
             const  rules = {
                 price:[ {required:true} ],
-                uid:[ {required:true} ]
+                uid:[ {required:true} ],
+                name:[ {required:true} ],
+
             }
             let body = await this.validate({rules, type: "POST"});
             let data = {
@@ -399,7 +402,7 @@ module.exports = class WeixinController extends BaseController {
                 order_uid: body.uid,
                 notify_url: "http://eleme.lianfangti.cn/pay_callback",
                 cancel_url: "http://eleme.lianfangti.cn/recharge",
-                more: 'TEST',
+                more: body.name,
                 expire: 1300,
             };
             let  {order_id,price,more,name} =  data;
@@ -407,6 +410,7 @@ module.exports = class WeixinController extends BaseController {
             // console.log(`调试:摘取的订单 信息`, order);
             let orders =  await  this.ctx.service.orders.add({
                 ...{order_id,price,more,name},
+                coin:body.name,
                 status:0,
                 buyer:data.order_uid
 
@@ -434,11 +438,14 @@ module.exports = class WeixinController extends BaseController {
         console.log(`\n\n==================================[${new Date()}]支付接口回调==================================`);
         console.log(`调试:接收到的GET参数`, query);
         console.log(`调试:接收到的POST参数`, data);
-        let  {  order_id  } = data
+        let  {  order_id  } = data;
         let { detail } = data;
         detail = detail.replace(/'/g,"");
+        console.log(`调试:detail`, detail);
+
+        // more = JSON.parse(more);
+        // console.log(`调试:more`, more);
         detail = JSON.parse(detail);
-        // console.log(`调试:detail`, detail);
         data["status"] = 1;
         data =  Object.assign(data,detail);
         delete data["detail"];
@@ -447,8 +454,14 @@ module.exports = class WeixinController extends BaseController {
 
         console.log(`调试:处理后的data`, data)
         let  result =  await  this.ctx.service.orders.update(data,{order_id});
+        let order = await  this.ctx.service.orders.findOne({col:['buyer',"order_id",'coin'],where:{order_id}});
+        await this.ctx.service.user.update({times:Sequelize.literal(`times + ${order.coin}`)},{id:order.buyer});
+        let user = await  this.ctx.service.user.findOne({col:['id',"openid",'times'],where:{id:order.buyer}});
+
+        let content = `充值成功!😄\n订单编号:${order.order_id}\n充值积分:${order.coin}\n当前余额:${user.times}\n`;
+        await this.ctx.service.weixin.sendServiceMessage({content,openid:user.openid});
         console.log(`调试:数据库更新返回值`, result);
-        this.ctx.body = "debuging"
+        this.ctx.body = "success"
     }
 
     //充值
@@ -479,12 +492,12 @@ module.exports = class WeixinController extends BaseController {
             openid,
             uid:user.id,
             items: [
-                {name: '50积分', price: 0.01},
-                {name: '61积分', price: 5.99},
-                {name: '70积分', price: 6.99},
-                {name: '80积分', price: 7.99},
-                {name: '91积分', price: 8.99},
-                {name: '100积分', price: 9.99}
+                {name: '50积分', price: 0.01,coin:50},
+                {name: '61积分', price: 5.99,coin:61},
+                {name: '70积分', price: 6.99,coin:70},
+                {name: '80积分', price: 7.99,coin:80},
+                {name: '91积分', price: 8.99,coin:91},
+                {name: '100积分', price: 9.99,coin:100}
             ]
         }
         await this.ctx.render("recharge.html", data)

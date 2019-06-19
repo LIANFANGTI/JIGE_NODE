@@ -50,7 +50,7 @@
         <div class="weui-flex" style="text-align: center;margin: 10px auto;">
     {% endif %}
     <div class="weui-flex__item" >
-        <div class="rechageg_item" index="{{ loop.index0 }}" lianfangti="练方梯" price="{{ item.price }}">
+        <div class="rechageg_item" index="{{ loop.index0 }}" coin="{{  item.coin }}" name="{{ item.name }}" price="{{ item.price }}">
             <div>
                 <div class="rechage_name">{{ item.name }}</div>
                 <div class="rechageg_price">售价￥{{ item.price | float(item.price,2) }}</div>
@@ -80,6 +80,8 @@
 
 <script>
     let price = 0;
+    let coin = 0;
+    let name = '';
     let openid ='{{ openid }}';
     let uid = {{ uid }}
     console.log(`调试:`, openid);
@@ -87,6 +89,8 @@
     $(".rechageg_item").click(function (e){
         let cindex =  $(this).attr("index");
         price = $(this).attr("price");
+        name = $(this).attr("name");
+        coin = $(this).attr("coin");
 
         $(".rechageg_item").each(function (index,element) {
              if (cindex == index){
@@ -117,6 +121,8 @@
             type: "POST",
             data:{
                 price,
+                coin,
+                name,
                 uid
             },
             dataType: "json",

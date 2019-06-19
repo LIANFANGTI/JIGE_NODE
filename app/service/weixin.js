@@ -158,11 +158,11 @@ module.exports = class WeixinService extends Service {
     }
 
     // 发送客服消息
-    async sendServiceMessage({type = 'text',content ='',head_content = "您对本次服务是否满意呢? ",articles = {},tail_content = "欢迎再次光临",media_id = ''}) {
+    async sendServiceMessage({type = 'text',openid,content ='',head_content = "您对本次服务是否满意呢? ",articles = {},tail_content = "欢迎再次光临",media_id = ''}) {
         const { access_token } = await  this.getAccessToken();
         const url =`https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=${access_token}`;
         let data = {
-            "touser":this.ctx.request.body.FromUserName || '',
+            "touser": openid || this.ctx.request.body.FromUserName ,
             "msgtype":`${type}`,
         };
         switch (type) {
