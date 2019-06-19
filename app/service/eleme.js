@@ -33,6 +33,7 @@ module.exports = class ElemeService extends Service {
                 }
 
             }
+            res['result']['token'] = token;
             return Promise.resolve({
                 ...res,
                 msg: errors[res.code] || '未知错误',

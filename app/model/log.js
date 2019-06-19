@@ -13,6 +13,6 @@ module.exports = app => {
   },{
     freezeTableName:true //表名将与modal名相同
   });
-  Log.sync({force: true}).then(()=>{})
+  // Log.sync({force: true}).then(()=>{})
   return Log;
 };

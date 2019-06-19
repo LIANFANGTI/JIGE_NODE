@@ -179,7 +179,7 @@ module.exports = class WeixinController extends BaseController {
                         console.log(`调试:上传到微信服务器返回值`, res);
                         let {media_id} = res;
                         console.log(`调试:返回的媒体ID`, media_id, typeof (res));
-                        await this.ctx.service.weixin.sendServiceMessage({content:'推广码获取成功  请点击查看原图 长按发送给朋友\n成功邀请一位朋友您将获得1积分'});
+                        await this.ctx.service.weixin.sendServiceMessage({content: '推广码获取成功  请点击查看原图 长按发送给朋友\n成功邀请一位朋友您将获得1积分'});
                         await this.ctx.service.weixin.sendServiceMessage({media_id, type: 'image'});
                     })
 
@@ -316,7 +316,7 @@ module.exports = class WeixinController extends BaseController {
                 console.log(`调试:用户已绑定手机号`);
                 // this.reply({content});
                 console.log(`调试:开始调用ele接口`);
-                this.reply({content:'数据获取中...请稍后\n ⚠️切勿重复点击！'});
+                this.reply({content: '数据获取中...请稍后\n ⚠️切勿重复点击！'});
                 try {
                     ctx.service.eleme.getEleme(validate_code ? {phone, validate_code, type} : {
                         phone,
@@ -324,11 +324,22 @@ module.exports = class WeixinController extends BaseController {
                     }).then(async res => {
                         console.log(`调试:调用Eleme接口返回值`, res);
                         if (res.code == 1) {
-                            await ctx.service.user.update({times:user.times - 1},{openid})
-                            res.msg = `领取成功！！,请在饿了么中查看\n红包类型:${type === 20 ? '拼手气': '品质联盟'}\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n积分使用: -1,\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
+                            await ctx.service.user.update({times: user.times - 1}, {openid});
+                            let log = {
+                                uid: user.id,
+                                times: user.times - 1,
+                                ...res.result
+                            }
+                            res.msg = `领取成功！！😄\n请在饿了么中查看\n红包类型:${type === 20 ? '拼手气' : '品质联盟'}\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n积分使用: -1\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
+
+                            ctx.service.logs.add(log) //领红包日志表中插入数据
                         }
+
+
                         // console.log(`调试:Controller.weixin#182行`, res);
                         ctx.service.weixin.sendServiceMessage({content: res.msg});
+
+
                     });
 
                 } catch (e) {
@@ -346,62 +357,81 @@ module.exports = class WeixinController extends BaseController {
         }
 
     }
-    async pay(){
+
+    // 日志测试
+
+    async log() {
+        let log = {
+            uid: 1,
+            sn: '',
+            balance: 94.7891,
+            message: '成功',
+            amount: '5',
+            type: '品质联盟专享红包',
+            sum_condition: '30',
+            token: '111111',
+        }
+        this.ctx.body = await this.ctx.service.logs.add(log);
+    }
+
+    async pay() {
         try {
             const md5 = crypto.createHash('md5');
             const url = `https://xorpay.com/api/cashier/4472`;
-            const  apps ='fccd1864af5b43c99784d36855aa9f3d';
-            let body = await this.validate({rules:{price:[{required:true}]},type:"POST"});
+            const apps = 'fccd1864af5b43c99784d36855aa9f3d';
+            let body = await this.validate({rules: {price: [{required: true}]}, type: "POST"});
             let data = {
-                name:"HUANGJI",
-                pay_type:'jsapi',
-                price:body.price,
-                order_id:`order${new Date().getTime()}`,
-                order_uid:8,
-                notify_url:"http://eleme.lianfangti.cn/pay_callback",
-                cancel_url:"http://eleme.lianfangti.cn/view",
-                more:'TEST',
-                expire:1300,
+                name: "HUANGJI",
+                pay_type: 'jsapi',
+                price: body.price,
+                order_id: `order${new Date().getTime()}`,
+                order_uid: 8,
+                notify_url: "http://eleme.lianfangti.cn/pay_callback",
+                cancel_url: "http://eleme.lianfangti.cn/view",
+                more: 'TEST',
+                expire: 1300,
             }
             let str = `${data.name}${data.pay_type}${data.price}${data.order_id}${data.notify_url}${apps}`;
             console.log(`调试:拼接的字符串`, str);
             data['sign'] = md5.update(str).digest('hex').toUpperCase();
             // this.ctx.body= data
             console.log(`调试:最终发送的数据`, data);
-            this.ctx.body =  {
-                code:0,
-                result:`${url}${utils.encodeParams(data)}`
+            this.ctx.body = {
+                code: 0,
+                result: `${url}${utils.encodeParams(data)}`
             }
-        }catch (e) {
+        } catch (e) {
             console.log(`调试:出错`, e)
         }
 
     }
-    async payCallback(){
+
+    async payCallback() {
         let query = this.ctx.request.query
         let data = this.ctx.request.body
         console.log(`\n\n==================================[${new Date()}]接收到网络请求==================================`);
         console.log(`调试:接收到的GET参数`, query);
         console.log(`调试:接收到的POST参数`, data);
-       this.ctx.status = 400
-       this.ctx.body= "debuging"
+        this.ctx.status = 400
+        this.ctx.body = "debuging"
     }
 
     //充值
-    async recharge(){
+    async recharge() {
         const data = {
-            name:"练方梯",
-            items:[
-                {name:'50积分', price:5.00},
-                {name:'61积分', price:5.99},
-                {name:'70积分',price:6.99 },
-                {name:'80积分', price:7.99},
-                {name:'91积分', price:8.99},
-                {name:'100积分',price:9.99 }
+            name: "练方梯",
+            items: [
+                {name: '50积分', price: 5.00},
+                {name: '61积分', price: 5.99},
+                {name: '70积分', price: 6.99},
+                {name: '80积分', price: 7.99},
+                {name: '91积分', price: 8.99},
+                {name: '100积分', price: 9.99}
             ]
         }
-        await  this.ctx.render("recharge.html",data)
+        await this.ctx.render("recharge.html", data)
     }
+
     async sendTemplateMessage() {
         this.ctx.body = await this.ctx.service.weixin.sendTemplateMessage();
     }

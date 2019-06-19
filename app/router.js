@@ -19,6 +19,7 @@ module.exports = app => {
   router.get('/template_message', controller.weixin.sendTemplateMessage);
   router.get('/service_message', controller.weixin.sendServiceMessage);
   router.get('/pay', controller.weixin.pay);
+  router.get('/log', controller.weixin.log);
   router.post('/pay', controller.weixin.pay);
   router.post('/pay_callback', controller.weixin.payCallback);
 };
