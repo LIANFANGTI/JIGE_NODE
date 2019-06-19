@@ -439,7 +439,7 @@ module.exports = class WeixinController extends BaseController {
         detail = detail.replace(/'/g,"");
         detail = JSON.parse(detail);
         // console.log(`调试:detail`, detail);
-
+        data["status"] = 1;
         data =  Object.assign(data,detail);
         delete data["detail"];
         delete data["sign"];
