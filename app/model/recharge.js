@@ -3,8 +3,10 @@ module.exports = app => {
     const Recharge = app.model.define("recharge", {
         id: {type: INTEGER, primaryKey: true, autoIncrement: true},
         aoid: STRING,// 平台唯一标识
+        name:STRING,// 订单标题
         order_id: STRING, // 订单id
-        pay_price: FLOAT, // 充值金额
+        price:FLOAT,//订单金额
+        pay_price: FLOAT, // 充值 实际支付金额
         pay_time: DATE, // 支付时间
         more: STRING,  // 订单信息
         transaction_id: STRING, //流水号

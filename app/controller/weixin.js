@@ -188,7 +188,7 @@ module.exports = class WeixinController extends BaseController {
                     this.reply({content: '你点击了每日签到按钮'});
                     break;
                 case "ZHCZ": // 账户充值
-                    // this.reply({content: '你点击了账户充值按钮'});
+                    this.reply();
                     this.ctx.service.weixin.typing();
                     this.ctx.service.weixin.sendRechargeLink();
 
@@ -386,18 +386,32 @@ module.exports = class WeixinController extends BaseController {
             const md5 = crypto.createHash('md5');
             const url = `https://xorpay.com/api/cashier/4472`;
             const apps = 'fccd1864af5b43c99784d36855aa9f3d';
-            let body = await this.validate({rules: {price: [{required: true}]}, type: "POST"});
+            const  rules = {
+                price:[ {required:true} ],
+                uid:[ {required:true} ]
+            }
+            let body = await this.validate({rules, type: "POST"});
             let data = {
                 name: "HUANGJI",
                 pay_type: 'jsapi',
                 price: body.price,
-                order_id: `order${new Date().getTime()}`,
-                order_uid: 8,
+                order_id: `CZ${body.uid}${new Date().getTime()}`,
+                order_uid: body.uid,
                 notify_url: "http://eleme.lianfangti.cn/pay_callback",
                 cancel_url: "http://eleme.lianfangti.cn/recharge",
                 more: 'TEST',
                 expire: 1300,
-            }
+            };
+            let  {order_id,price,more,name} =  data;
+            let order
+            console.log(`调试:摘取的订单 信息`, order);
+            let orders =  await  this.ctx.service.orders.add({
+                ...{order_id,price,more,name},
+                status:0,
+                buyer:data.order_uid
+
+            });
+
             let str = `${data.name}${data.pay_type}${data.price}${data.order_id}${data.notify_url}${apps}`;
             console.log(`调试:拼接的字符串`, str);
             data['sign'] = md5.update(str).digest('hex').toUpperCase();
@@ -409,24 +423,61 @@ module.exports = class WeixinController extends BaseController {
             }
         } catch (e) {
             console.log(`调试:出错`, e)
+            this.ctx.body =e
         }
 
     }
 
     async payCallback() {
         let query = this.ctx.request.query
-        let data = this.ctx.request.body
-        console.log(`\n\n==================================[${new Date()}]接收到网络请求==================================`);
+        let data = this.ctx.request.body;
+        console.log(`\n\n==================================[${new Date()}]支付接口回调==================================`);
         console.log(`调试:接收到的GET参数`, query);
         console.log(`调试:接收到的POST参数`, data);
-        this.ctx.status = 400
+        let  {  order_id  } = data
+        let { detail } = data;
+        detail = detail.replace(/'/g,"");
+        detail = JSON.parse(detail);
+        // console.log(`调试:detail`, detail);
+
+        data =  Object.assign(data,detail);
+        delete data["detail"];
+        delete data["sign"];
+        delete data['buyer'];
+
+        console.log(`调试:处理后的data`, data)
+        let  result =  await  this.ctx.service.orders.update(data,{order_id});
+        console.log(`调试:数据库更新返回值`, result);
         this.ctx.body = "debuging"
     }
 
     //充值
     async recharge() {
+        // const rules ={openid:[{required:true}]}
+        const { openid } = this.ctx.request.query;
+        let user;
+        // const  = query
+        if(!openid){
+            this.ctx.body = {
+                error:404,
+                msg:"无效链接"
+            }
+            return 0
+        }else{
+            user = await this.ctx.service.user.exist({showCol:true,where:{openid}});
+            if(!user){
+                this.ctx.body = {
+                    error:403,
+                    msg:"无效参数"
+                }
+                return ;
+            }
+             console.log(`调试:获取到用户信息`, user)
+        }
         const data = {
             name: "练方梯",
+            openid,
+            uid:user.id,
             items: [
                 {name: '50积分', price: 0.01},
                 {name: '61积分', price: 5.99},

@@ -79,7 +79,10 @@
 
 
 <script>
-    let price = 0
+    let price = 0;
+    let openid ='{{ openid }}';
+    let uid = {{ uid }}
+    console.log(`调试:`, openid);
 
     $(".rechageg_item").click(function (e){
         let cindex =  $(this).attr("index");
@@ -113,12 +116,13 @@
             url,
             type: "POST",
             data:{
-                price
+                price,
+                uid
             },
             dataType: "json",
             success(res) {
                 console.log(`调试:成功 `, res);
-                location.href = res.result
+                // location.href = res.result
             },
             error(err) {
 

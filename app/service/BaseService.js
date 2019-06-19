@@ -18,7 +18,7 @@ module.exports = class BaseService extends Service {
   };
   // showCol字段  如果查询结果存在  是否返回数据  默认false 返回 布尔值
   async exist({where={},col = ["id"],showCol = false}){
-      // console.log(`调试:是否存在查询`, where);
+      console.log(`调试:是否显示字段`, showCol);
       let result = await  this.select({col,where});
       return  showCol ? ( Boolean(result.length) ? result[0].dataValues : true) : Boolean(result.length)
   }
