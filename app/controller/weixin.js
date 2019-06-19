@@ -403,8 +403,8 @@ module.exports = class WeixinController extends BaseController {
                 expire: 1300,
             };
             let  {order_id,price,more,name} =  data;
-            let order
-            console.log(`调试:摘取的订单 信息`, order);
+            // let order
+            // console.log(`调试:摘取的订单 信息`, order);
             let orders =  await  this.ctx.service.orders.add({
                 ...{order_id,price,more,name},
                 status:0,

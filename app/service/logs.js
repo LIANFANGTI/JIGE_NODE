@@ -2,7 +2,7 @@ const {Service} = require("egg")
 
 class LogsService extends Service {
     async add(log) {
-        console.log(`调试:打印下Server的this`, this)
+        // console.log(`调试:打印下Server的this`, this)
         return await this.ctx.model.Log.create(log);
     }
 

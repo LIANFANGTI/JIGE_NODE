@@ -2,7 +2,7 @@ const {Service} = require("egg")
 
 class RechargeService extends Service {
     async add(order) {
-        console.log(`调试:打印下Server的this`, this)
+        // console.log(`调试:打印下Server的this`, this)
         return await this.ctx.model.Recharge.create(order);
     }
 
