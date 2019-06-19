@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>账户充值</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/weui/1.1.3/style/weui.min.css">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/jquery-weui/1.2.1/css/jquery-weui.min.css">
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <style type="text/css">
+        .rechageg_item {
+            width: 90px;
+            /*background: red;*/
+            height: 50px;
+            display: inline-block;
+            padding: 10px;
+            color: #3cc51f;
+            border: 1px solid #3cc51f;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+        }
+
+        .rechage_name {
+            font-size: 14px;
+        }
+
+        .rechageg_price {
+            font-size: 12px;
+        }
+        .remark{
+            font-size: 10px;
+            color: gray;
+           width: 90%;
+            margin:  0 auto;
+            margin-top: 20px;
+        }
+        .selected{
+            background: #3cc51f;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div style="margin-top: 20px;">
+  {% for item in items %}
+    {% if ( (loop.index0 + 0 ) % 3 === 0 ) %}
+        <div class="weui-flex" style="text-align: center;margin: 10px auto;">
+    {% endif %}
+    <div class="weui-flex__item" >
+        <div class="rechageg_item" index="{{ loop.index0 }}" lianfangti="练方梯" price="{{ item.price }}">
+            <div>
+                <div class="rechage_name">{{ item.name }}</div>
+                <div class="rechageg_price">售价￥{{ item.price | float(item.price,2) }}</div>
+            </div>
+        </div>
+    </div>
+    {% if ( (loop.index0 + 1 ) % 3 === 0 ) %}
+        </div>
+     {% endif %}
+{% endfor %}
+</div>
+</div>
+<div class="remark">
+    提示：由于一些不可控因素，如果服务停止，不退款，不放心的朋友建议充值单次
+</div>
+<!--<div id="console" style="width: 100%;height: 300px;color: white;background: black;word-wrap:break-word ;"></div>-->
+<button id="submit" class="weui-btn weui-btn_primary" style="width: 80%;position: fixed;bottom: 30px;left: 0;right: 0;">立即支付</button>
+
+
+</body>
+<script src="https://cdn.bootcss.com/jquery/1.11.0/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js"></script>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.4.0.js"></script>
+<script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/swiper.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/city-picker.min.js"></script>
+
+
+<script>
+    let price = 0
+
+    $(".rechageg_item").click(function (e){
+        let cindex =  $(this).attr("index");
+        price = $(this).attr("price");
+
+        $(".rechageg_item").each(function (index,element) {
+             if (cindex == index){
+                 $(element).eq(0).addClass('selected');
+             }else{
+                 $(element).eq(0).removeClass('selected');
+
+             }
+        })
+        console.log(`调试:点击了`,cindex,price)
+    });
+    document.getElementById("submit").onclick = (e) => {
+        console.log(`调试:`, price);
+        if(price === 0){
+            $.toast("请选择充值套餐","cancel")
+        }
+        let  {protocol,host} = window.location
+        const url = `${protocol}//${host}/pay`;
+
+        console.log(`调试:协议`, protocol);
+        console.log(`调试:主机加端口`,host);
+        console.log(`调试:拼接后的url`,url);
+        console.log(`调试:location`, window.location);
+
+// return;
+        $.ajax({
+            url,
+            type: "POST",
+            data:{
+                price
+            },
+            dataType: "json",
+            success(res) {
+                console.log(`调试:成功 `, res);
+                location.href = res.result
+            },
+            error(err) {
+
+                console.log(`调试:出错`, err)
+            }
+        });
+        return
+    }
+
+</script>
+</html>

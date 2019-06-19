@@ -130,7 +130,7 @@ module.exports = class WeixinService extends Service {
                     "sub_button": [
                         { "type": "click", "name": "推广码", "key": "TGM"},
                         { "type": "click", "name": "每日签到", "key": "MRQD"},
-                        { "type": "click", "name": "账户充值", "key": "ZHCZ"},
+                        { "type": "view", "name": "账户充值", "url": "http://eleme"},
                         { "type": "click", "name": "余额查询", "key": "YECX"},
                         { "type": "click", "name": "联系客服", "key": "LXKF"},
                     ]

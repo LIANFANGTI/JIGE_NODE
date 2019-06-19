@@ -14,8 +14,11 @@ module.exports = app => {
   router.get('/service', controller.weixin.getCustomService);
   router.get('/qr', controller.weixin.qr);
   router.get('/draw', controller.weixin.draw);
+  router.get('/recharge', controller.weixin.recharge);
   router.get('/access_token', controller.weixin.getAccessToken);
   router.get('/template_message', controller.weixin.sendTemplateMessage);
   router.get('/service_message', controller.weixin.sendServiceMessage);
+  router.get('/pay', controller.weixin.pay);
+  router.post('/pay', controller.weixin.pay);
 };
 

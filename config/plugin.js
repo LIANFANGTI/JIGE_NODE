@@ -13,5 +13,13 @@ module.exports = {
   validatePlus : {
     enable: true,
     package: 'egg-validate-plus',
+  },
+  nunjucks: {
+    enable: true,
+    package: 'egg-view-nunjucks',
+  },
+  assets : {
+    enable: true,
+    package: 'egg-view-assets',
   }
 };

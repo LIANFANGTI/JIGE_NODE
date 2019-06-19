@@ -1,5 +1,5 @@
 /* eslint valid-jsdoc: "off" */
-
+const path = require('path');
 "use strict";
 
 /**
@@ -15,6 +15,17 @@ module.exports = appInfo => {
       listen: {
         port: 7003
       }
+    },
+    view :{
+      root:[
+          path.join(appInfo.baseDir, 'app/view'),
+      ].join(','),
+      mapping: {
+        '.nj': 'nunjucks',
+        '.js': 'assets',
+        '.css': 'assets'
+      },
+      defaultViewEngine: 'nunjucks',
     },
     validatePlus :{
       resolveError(ctx, errors) {

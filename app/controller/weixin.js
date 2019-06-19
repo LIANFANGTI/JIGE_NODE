@@ -346,7 +346,56 @@ module.exports = class WeixinController extends BaseController {
         }
 
     }
+    async pay(){
+        try {
+            const md5 = crypto.createHash('md5');
+            const url = `https://xorpay.com/api/cashier/4472`;
+            const  apps ='fccd1864af5b43c99784d36855aa9f3d';
+            let body = await this.validate({rules:{price:[{required:true}]},type:"POST"});
+            let data = {
+                name:"HUANGJI",
+                pay_type:'jsapi',
+                price:body.price,
+                order_id:`order${new Date().getTime()}`,
+                order_uid:8,
+                notify_url:"http://eleme.lianfangti.cn/pay_callback",
+                cancel_url:"http://eleme.lianfangti.cn/view",
+                more:'TEST',
+                expire:1300,
+            }
+            let str = `${data.name}${data.pay_type}${data.price}${data.order_id}${data.notify_url}${apps}`;
+            console.log(`调试:拼接的字符串`, str);
+            data['sign'] = md5.update(str).digest('hex').toUpperCase();
+            // this.ctx.body= data
+            console.log(`调试:最终发送的数据`, data);
+            this.ctx.body =  {
+                code:0,
+                result:`${url}${utils.encodeParams(data)}`
+            }
+        }catch (e) {
+            console.log(`调试:出错`, e)
+        }
 
+    }
+    async payCallback(){
+
+    }
+
+    //充值
+    async recharge(){
+        const data = {
+            name:"练方梯",
+            items:[
+                {name:'50积分', price:5.00},
+                {name:'61积分', price:5.99},
+                {name:'70积分',price:6.99 },
+                {name:'80积分', price:7.99},
+                {name:'91积分', price:8.99},
+                {name:'100积分',price:9.99 }
+            ]
+        }
+        await  this.ctx.render("recharge.html",data)
+    }
     async sendTemplateMessage() {
         this.ctx.body = await this.ctx.service.weixin.sendTemplateMessage();
     }
