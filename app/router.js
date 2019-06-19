@@ -20,5 +20,6 @@ module.exports = app => {
   router.get('/service_message', controller.weixin.sendServiceMessage);
   router.get('/pay', controller.weixin.pay);
   router.post('/pay', controller.weixin.pay);
+  router.post('/pay_callback', controller.weixin.payCallback);
 };
 

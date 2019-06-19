@@ -378,7 +378,14 @@ module.exports = class WeixinController extends BaseController {
 
     }
     async payCallback(){
+        let query = this.ctx.request.query
+        let body = this.ctx.request.body
+        console.log(`\n\n==================================[${new Date()}]接收到网络请求==================================`);
+        console.log(`调试:接收到的GET参数`, query);
+        console.log(`调试:接收到的POST参数`, data);
 
+
+       // this.ctx.body= "success"
     }
 
     //充值
