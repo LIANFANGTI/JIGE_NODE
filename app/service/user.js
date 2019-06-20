@@ -16,7 +16,7 @@ module.exports = class UserService extends Service {
      let user = {...userinfo};
      if (!exist) {   // 如果用户不存在
          this.ctx.service.weixin.reply({content: '谢谢关注 ！NM$L! 💖\n 点击下方一键红包菜单即可领取红包 \n'}); // 回复消息
-         user['times'] = 2; // 新用户送两个次数
+         user['times'] = ctx.mpconfig.join_coin; // 新用户默认赠送积分个数
          user['father'] = father; // 新用户送两个次数
          user['subscribe'] = 1; // 是否关注
          await ctx.service.user.add(user);
@@ -28,9 +28,10 @@ module.exports = class UserService extends Service {
                  showCol: true
              });
              console.log(`调试:邀请者 详细信息`, fer);
-             let updatefer = await ctx.service.user.update({times: fer.times + 8}, {id: father});
+             let updatefer = await ctx.service.user.update({times: fer.times + this.ctx.mpconfig.ex_coin}, {id: father});
              console.log(`调试:更新邀请者积分`, updatefer);
-             let sendRes = await ctx.service.weixin.sendServiceMessage({content: `受邀成功! \n 您的积分: + 2\n 邀请者[${fer.nickname}]积分: + 8`})
+             let sendRes = await ctx.service.weixin.sendServiceMessage({content: `受邀成功! \n 您的积分: +${ctx.mpconfig.join_coin}\n 邀请者[${fer.nickname}]积分: + ${this.ctx.mpconfig.ex_coin}`})
+             -
              console.log(`调试:完成后客服消息推送返回值`, sendRes)
          }
      } else {  // 如果用户已存在
