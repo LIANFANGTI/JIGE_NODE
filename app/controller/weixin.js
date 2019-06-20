@@ -33,13 +33,13 @@ module.exports = class WeixinController extends BaseController {
                                 let fid = data.EventKey;
                                 // let fUser = await  ctx.service.user.exist({col:["nickname","id","times"],showCol:true,where:{id:fid}});
                                 let iUser = await ctx.service.user.exist({
-                                    col: ["id", "times", "father"],
+                                    col: ["id", "times", "father","nikename"],
                                     where: {openid},
                                     showCol: true
                                 });
                                 if (iUser.father) {
                                     console.log(`调试:已经填写过邀请码`, iUser)
-                                    this.reply({content: '您已填写过邀请码'});
+                                    this.reply();
                                     return
                                 }
                                 let fUser = await ctx.service.user.exist({
@@ -47,16 +47,19 @@ module.exports = class WeixinController extends BaseController {
                                     where: {id: fid},
                                     showCol: true
                                 });
-                                console.log(`调试:两个User的值`, fUser, "\n-----------", iUser)
+                                console.log(`调试:两个User的值`, fUser, "\n-----------", iUser);
 
                                 let res1 = await ctx.service.user.update({
                                     father: fid,
-                                    times: iUser.times + 1
+                                    times: iUser.times + 0
                                 }, {openid});
                                 let res2 = await ctx.service.user.update({
                                     father: fid,
-                                    times: fUser.times + 1
+                                    times: fUser.times + this.ctx.mpconfig.ex_coin
                                 }, {id: fid});
+                                let content = `邀请成功！🎉\n您成功邀请了[${iUser.nickname}\n您的积分:+${this.ctx.mpconfig.ex_coin}]\n当前余额:${fUser.times + this.ctx.mpconfig.ex_coin}`;
+                                this.ctx.service.weixin.sendServiceMessage({content});
+
                                 if (res1 && res2) {
                                     this.reply({content: `邀请码填写成功 \n您的积分:+1,\n邀请者[${fUser.nickname}]积分:+1`});
                                 } else {
