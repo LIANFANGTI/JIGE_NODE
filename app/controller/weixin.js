@@ -307,10 +307,10 @@ module.exports = class WeixinController extends BaseController {
                             await ctx.service.user.update({times: user.times - 8}, {openid});
                             let log = {
                                 uid: user.id,
-                                times: user.times - 8,
+                                times: user.times - 9,
                                 ...res.result
                             }
-                            res.msg = `领取成功！！😄\n请在饿了么中查看\n红包类型:${type === 20 ? '拼手气' : '品质联盟'}\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n积分使用: -1\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
+                            res.msg = `领取成功！！😄\n请在饿了么中查看\n红包类型:${type === 20 ? '拼手气' : '品质联盟'}\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n积分使用: -9\n剩余积分:${user.times - 9} \n绑定账号: ${user.phone} `
 
                             ctx.service.logs.add(log) //领红包日志表中插入数据
                         }
