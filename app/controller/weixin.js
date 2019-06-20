@@ -321,7 +321,7 @@ module.exports = class WeixinController extends BaseController {
                         if (res.code === 1) {
                             await ctx.service.user.update({times: user.times - ctx.mpconfig.unit_coin}, {openid});
                             console.log(`调试:领取成功商户余额 -￥${this.ctx.mpconfig.unit_price}`);
-                            await ctx.service.mpconfig.update({blance: Sequelize.literal(`blance - ${this.ctx.mpconfig.unit_price}`)});//减去账户余额测试
+                            await ctx.service.mpconfig.update({blance: Sequelize.literal(`blance - ${this.ctx.mpconfig.unit_price}`)},{id:this.ctx.mpconfig.id});//减去账户余额测试
                             let log = {
                                 uid: user.id,
                                 times: user.times - this.ctx.mpconfig.unit_coin,
