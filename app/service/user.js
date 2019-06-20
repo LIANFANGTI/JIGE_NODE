@@ -19,6 +19,7 @@ module.exports = class UserService extends Service {
          user['times'] = ctx.mpconfig.join_coin; // 新用户默认赠送积分个数
          user['father'] = father; // 新用户送两个次数
          user['subscribe'] = 1; // 是否关注
+         user['mid'] = this.ctx.mpconfig.id; // 所属 公众号
          await ctx.service.user.add(user);
          if (father !== 0) {
              console.log(`调试:邀请者不为空`, father);
