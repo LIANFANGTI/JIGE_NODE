@@ -23,8 +23,7 @@ module.exports = class WeixinController extends BaseController {
                         break;
                         case "unsubscribe":
                             await ctx.service.user.unsubscribe({openid});
-                            console.log(`调试:取关后更新用户状态返回值 `, result);
-                            break;
+                        break;
                         case "CLICK":
                             await this.handleMenuClick({...data, openid});
                             break;
