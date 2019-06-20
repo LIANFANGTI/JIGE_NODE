@@ -318,8 +318,9 @@ module.exports = class WeixinController extends BaseController {
                         type
                     }).then(async res => {
                         console.log(`调试:调用Eleme接口返回值`, res);
-                        if (res.code == 1) {
+                        if (res.code === 1) {
                             await ctx.service.user.update({times: user.times - ctx.mpconfig.unit_coin}, {openid});
+                            await ctx.service.mpconfig.update({blance: Sequelize.literal(`blance - unit_price`)});
                             let log = {
                                 uid: user.id,
                                 times: user.times - 9,
@@ -389,8 +390,8 @@ module.exports = class WeixinController extends BaseController {
                 price: body.price,
                 order_id: `CZ${body.uid}${new Date().getTime()}`,
                 order_uid: body.uid,
-                notify_url: "http://eleme.lianfangti.cn/pay_callback",
-                cancel_url: `http://eleme.lianfangti.cn/recharge?openid=${body.openid}&token=${this.ctx.mpconfig.token}`,
+                notify_url: `http://eleme.lianfangti.cn/pay_callback?token=${this.ctx.mpconfig.token}`,
+                cancel_url: `http://eleme.lianfangti.cn/recharge?token=${this.ctx.mpconfig.token}&openid=${body.openid}`,
                 more: body.name,
                 expire: 1300,
             };
@@ -422,35 +423,40 @@ module.exports = class WeixinController extends BaseController {
     }
 
     async payCallback() {
-        let query = this.ctx.request.query
-        let data = this.ctx.request.body;
-        console.log(`\n\n==================================[${new Date()}]支付接口回调==================================`);
-        console.log(`调试:接收到的GET参数`, query);
-        console.log(`调试:接收到的POST参数`, data);
-        let {order_id} = data;
-        let {detail} = data;
-        detail = detail.replace(/'/g, "");
-        console.log(`调试:detail`, detail);
+        try {
+            await this.ctx.service.mpconfig.checkToken();
+            let query = this.ctx.request.query
+            let data = this.ctx.request.body;
+            console.log(`\n\n==================================[${new Date()}]支付接口回调==================================`);
+            console.log(`调试:接收到的GET参数`, query);
+            console.log(`调试:接收到的POST参数`, data);
+            let {order_id} = data;
+            let {detail} = data;
+            detail = detail.replace(/'/g, "");
+            console.log(`调试:detail`, detail);
 
-        // more = JSON.parse(more);
-        // console.log(`调试:more`, more);
-        detail = JSON.parse(detail);
-        data["status"] = 1;
-        data = Object.assign(data, detail);
-        delete data["detail"];
-        delete data["sign"];
-        delete data['buyer'];
+            // more = JSON.parse(more);
+            // console.log(`调试:more`, more);
+            detail = JSON.parse(detail);
+            data["status"] = 1;
+            data = Object.assign(data, detail);
+            delete data["detail"];
+            delete data["sign"];
+            delete data['buyer'];
 
-        console.log(`调试:处理后的data`, data)
-        let result = await this.ctx.service.orders.update(data, {order_id});
-        let order = await this.ctx.service.orders.findOne({col: ['buyer', "order_id", 'coin'], where: {order_id}});
-        await this.ctx.service.user.update({times: Sequelize.literal(`times + ${order.coin}`)}, {id: order.buyer});
-        let user = await this.ctx.service.user.findOne({col: ['id', "openid", 'times'], where: {id: order.buyer}});
+            console.log(`调试:处理后的data`, data)
+            let result = await this.ctx.service.orders.update(data, {order_id});
+            let order = await this.ctx.service.orders.findOne({col: ['buyer', "order_id", 'coin'], where: {order_id}});
+            await this.ctx.service.user.update({times: Sequelize.literal(`times + ${order.coin}`)}, {id: order.buyer});
+            let user = await this.ctx.service.user.findOne({col: ['id', "openid", 'times'], where: {id: order.buyer}});
 
-        let content = `充值成功!😄\n订单编号:${order.order_id}\n充值积分:${order.coin}\n当前余额:${user.times}\n`;
-        await this.ctx.service.weixin.sendServiceMessage({content, openid: user.openid});
-        console.log(`调试:数据库更新返回值`, result);
-        this.ctx.body = "success"
+            let content = `充值成功!😄\n订单编号:${order.order_id}\n充值积分:${order.coin}\n当前余额:${user.times}\n`;
+            await this.ctx.service.weixin.sendServiceMessage({content, openid: user.openid});
+            console.log(`调试:数据库更新返回值`, result);
+            this.ctx.body = "success"
+        }catch (e) {
+            this.ctx.body = e
+        }
     }
 
     //充值
