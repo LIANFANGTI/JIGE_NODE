@@ -33,7 +33,7 @@ module.exports = class UserService extends Service {
              let content = `邀请成功！🎉\n您成功邀请了[${user.nickname}\n您的积分:+${this.ctx.mpconfig.ex_coin}]\n当前余额:${fer.times + this.ctx.mpconfig.ex_coin}`
              this.ctx.service.weixin.sendServiceMessage({content});
              console.log(`调试:更新邀请者积分`, updatefer);
-             let sendRes = await ctx.service.weixin.sendServiceMessage({content: `受邀成功! \n 您的积分: +${ctx.mpconfig.join_coin}\n 邀请者[${fer.nickname}]积分: + ${this.ctx.mpconfig.ex_coin}`};
+             let sendRes = await ctx.service.weixin.sendServiceMessage({content: `受邀成功! \n 您的积分: +${ctx.mpconfig.join_coin}\n 邀请者[${fer.nickname}]积分: + ${this.ctx.mpconfig.ex_coin}`});
              console.log(`调试:完成后客服消息推送返回值`, sendRes)
          }
      } else {  // 如果用户已存在
