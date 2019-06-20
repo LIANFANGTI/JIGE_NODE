@@ -466,12 +466,12 @@ module.exports = class WeixinController extends BaseController {
             openid,
             uid:user.id,
             items: [
-                {name: '50积分', price: 0.01,coin:50},
-                {name: '61积分', price: 5.99,coin:61},
-                {name: '70积分', price: 6.99,coin:70},
-                {name: '80积分', price: 7.99,coin:80},
-                {name: '91积分', price: 8.99,coin:91},
-                {name: '100积分', price: 9.99,coin:100}
+                {name: '10积分', price: 0.6,coin:10},
+                {name: '50积分', price: 2.8,coin:50},
+                {name: '100积分', price: 5.00,coin:100},
+                {name: '150积分', price: 6.5,coin:150},
+                {name: '200积分', price: 9.00,coin:91},
+                {name: '10测试积分', price: 0.01,coin:10}
             ]
         }
         await this.ctx.render("recharge.html", data)
