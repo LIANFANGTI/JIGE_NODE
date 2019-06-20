@@ -6,6 +6,7 @@ module.exports = app => {
     name: STRING,  // 公众号名称
     blance:FLOAT,  // 账户余额
     ex_coin:INTEGER, // 推广奖励金
+    in_coin:INTEGER, // 被邀请者加积分
     join_coin:INTEGER, // 新用户奖励金
     unit_coin:INTEGER, // 单个红包消耗积分
     unit_price:FLOAT, // 单个红包价格 由超管设置
@@ -21,6 +22,6 @@ module.exports = app => {
     freezeTableName: true //表名将与modal名相同
   });
   // Config.sync({ alter: true })
-
+  //
   return Config;
 };

@@ -5,7 +5,7 @@ class ConfigService extends Service {
         const {ctx} = this;
         token = token || ctx.request.query.token
         if(token){
-            const  mpconfig = await  ctx.service.mpconfig.exist({col:["appid","id","unit_coin","token","ex_coin","join_coin","unit_price","appsecret"],showCol:true,where:{token}});
+            const  mpconfig = await  ctx.service.mpconfig.exist({col:["appid","id","in_coin","unit_coin","token","ex_coin","join_coin","unit_price","appsecret"],showCol:true,where:{token}});
             if(mpconfig){
                  this.ctx.mpconfig = mpconfig;
                   return  Promise.resolve(mpconfig)

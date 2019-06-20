@@ -43,7 +43,7 @@ module.exports = class WeixinController extends BaseController {
                                     return
                                 }
                                 let fUser = await ctx.service.user.exist({
-                                    col: ["id", "times", "father", "nickname"],
+                                    col: ["id", "times", "father", "nickname","openid"],
                                     where: {id: fid},
                                     showCol: true
                                 });
@@ -58,10 +58,10 @@ module.exports = class WeixinController extends BaseController {
                                     times: fUser.times + this.ctx.mpconfig.ex_coin
                                 }, {id: fid});
                                 let content = `邀请成功！🎉\n您成功邀请了${iUser.nickname}\n您的积分:+${this.ctx.mpconfig.ex_coin}\n当前余额:${fUser.times + this.ctx.mpconfig.ex_coin}`;
-                                this.ctx.service.weixin.sendServiceMessage({content});
+                                this.ctx.service.weixin.sendServiceMessage({content,openid:fUser.openid});
 
                                 if (res1 && res2) {
-                                    this.reply({content: `邀请码填写成功 \n您的积分:+1,\n邀请者[${fUser.nickname}]积分:+1`});
+                                    this.reply({content: `邀请码填写成功 \n您的积分:+${this.ctx.mpconfig.in_coin},\n邀请者[${fUser.nickname}]积分:+${this.ctx.mpconfig.ex_coin}`});
                                 } else {
                                     this.reply();
                                 }
