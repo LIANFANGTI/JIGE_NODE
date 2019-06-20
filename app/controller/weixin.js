@@ -320,6 +320,7 @@ module.exports = class WeixinController extends BaseController {
                         console.log(`调试:调用Eleme接口返回值`, res);
                         if (res.code === 1) {
                             await ctx.service.user.update({times: user.times - ctx.mpconfig.unit_coin}, {openid});
+                            console.log(`调试:领取成功商户余额 -￥${this.ctx.mpconfig.unit_price}`);
                             await ctx.service.mpconfig.update({blance: Sequelize.literal(`blance - ${this.ctx.mpconfig.unit_price}`)});//减去账户余额测试
                             let log = {
                                 uid: user.id,
