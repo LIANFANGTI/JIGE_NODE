@@ -25,13 +25,13 @@ module.exports = class UserService extends Service {
              console.log(`调试:邀请者不为空`, father);
              let fer = await ctx.service.user.exist({
                  where: {id: father},
-                 col: ["id", "times", "nickname"],
+                 col: ["id", "times", "nickname","openid"],
                  showCol: true
              });
              console.log(`调试:邀请者 详细信息`, fer);
              let updatefer = await ctx.service.user.update({times: fer.times + this.ctx.mpconfig.ex_coin}, {id: father});
              let content = `邀请成功！🎉\n您成功邀请了[${user.nickname}\n您的积分:+${this.ctx.mpconfig.ex_coin}]\n当前余额:${fer.times + this.ctx.mpconfig.ex_coin}`
-             this.ctx.service.weixin.sendServiceMessage({content});
+             this.ctx.service.weixin.sendServiceMessage({content,openid:fer.openid});
              console.log(`调试:更新邀请者积分`, updatefer);
              content =`受邀成功! \n 您的积分: +${ctx.mpconfig.join_coin}\n 邀请者[${fer.nickname}]积分: + ${this.ctx.mpconfig.ex_coin}`;
              let sendRes = await ctx.service.weixin.sendServiceMessage({content});
