@@ -320,10 +320,10 @@ module.exports = class WeixinController extends BaseController {
                         console.log(`调试:调用Eleme接口返回值`, res);
                         if (res.code === 1) {
                             await ctx.service.user.update({times: user.times - ctx.mpconfig.unit_coin}, {openid});
-                            await ctx.service.mpconfig.update({blance: Sequelize.literal(`blance - unit_price`)});
+                            await ctx.service.mpconfig.update({blance: Sequelize.literal(`blance - unit_price`)});//减去账户余额测试
                             let log = {
                                 uid: user.id,
-                                times: user.times - 9,
+                                times: user.times - this.ctx.mpconfig.unit_coin,
                                 ...res.result
                             }
                             res.msg = `领取成功！！😄\n请在饿了么中查看\n红包类型:${type === 20 ? '拼手气' : '品质联盟'}\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n积分使用: -${ctx.mpconfig.unit_coin}\n剩余积分:${user.times - ctx.mpconfig.unit_coin} \n绑定账号: ${user.phone} `
