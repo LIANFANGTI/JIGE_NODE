@@ -130,10 +130,11 @@ module.exports = class WeixinController extends BaseController {
                     break;
                 case "PSQ":  // 拼手气红包
 
-                    this.reply({content: '你点击了拼手气红包'});
+                    // this.reply({content: '你点击了拼手气红包'});
                     await this.getEleme({type: 20});
                     break;
                 case "PZLM": // 品质联盟
+
                     await this.getEleme({type: 21});
                     break;
                 case "TGM":  // 推广码
@@ -275,7 +276,7 @@ module.exports = class WeixinController extends BaseController {
         const {ctx} = this;
         const data = ctx.request.body;
         const openid = data.FromUserName;
-        console.log(`调试:开始检测用户是否存在 `)
+        console.log(`调试:开始检测用户是否存在 `);
         let user = await this.ctx.service.user.exist({
             where: {openid},
             col: ['phone', 'id', "times"],
@@ -292,6 +293,7 @@ module.exports = class WeixinController extends BaseController {
                 // this.reply({content});
                 console.log(`调试:开始调用ele接口`);
                 this.reply({content: '数据获取中...请稍后\n ⚠️切勿重复点击！'});
+                await ctx.service.weixin.typing();
                 try {
                     ctx.service.eleme.getEleme(validate_code ? {phone, validate_code, type} : {
                         phone,
@@ -299,10 +301,10 @@ module.exports = class WeixinController extends BaseController {
                     }).then(async res => {
                         console.log(`调试:调用Eleme接口返回值`, res);
                         if (res.code == 1) {
-                            await ctx.service.user.update({times: user.times - 1}, {openid});
+                            await ctx.service.user.update({times: user.times - 8}, {openid});
                             let log = {
                                 uid: user.id,
-                                times: user.times - 1,
+                                times: user.times - 8,
                                 ...res.result
                             }
                             res.msg = `领取成功！！😄\n请在饿了么中查看\n红包类型:${type === 20 ? '拼手气' : '品质联盟'}\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n积分使用: -1\n剩余积分:${user.times - 1} \n绑定账号: ${user.phone} `
