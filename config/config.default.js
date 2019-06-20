@@ -57,7 +57,11 @@ module.exports = appInfo => {
       host: "ele.lianfangti.cn",
       port: 3306,
       username: "eleme",
-      password: "lianfangti*"
+      password: "lianfangti*",
+      dialectOptions: {
+        useUTC: false //for reading from database
+      },
+      timezone: '+08:00'
     }
   };
 

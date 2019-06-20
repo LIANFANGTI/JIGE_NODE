@@ -19,43 +19,10 @@ module.exports = class WeixinController extends BaseController {
                     let openid = data.FromUserName, exist;
                     switch (data.Event) {
                         case "subscribe":
-                            let userinfo = await ctx.service.weixin.getUserInfo({openid});
-                            console.log(`调试:用户信息userinfo返回值`, userinfo)
-                            let father = userinfo.qr_scene;
-
-                            exist = await ctx.service.user.exist({where: {openid}});
-                            let user = {...userinfo};
-                            if (!exist) {
-                                this.reply({content: '谢谢关注 ！NM$L! 💖\n 点击下方一键红包菜单即可领取红包 \n'});
-                                user['times'] = 2; // 新用户送两个次数
-                                user['father'] = father; // 新用户送两个次数
-                                user['subscribe'] = 1; // 是否关注
-                                let addResult = await ctx.service.user.add(user);
-                                // console.log(`调试:添加用户返回值`, addResult);
-                            } else {
-                                this.reply({content: '欢迎回来 ！NM$L! 💖\n 点击下方一键红包菜单即可领取红包 \n'});
-                                user['subscribe'] = 1; // 是否关注
-                                let updateResult = await ctx.service.user.update(user, {openid})
-                                console.log(`调试:用户已存在 信息更新成功`, updateResult)
-                            }
-
-                            if (father !== 0) {
-                                console.log(`调试:邀请者不为空`, father);
-                                let fer = await ctx.service.user.exist({
-                                    where: {id: father},
-                                    col: ["id", "times", "nickname"],
-                                    showCol: true
-                                });
-                                console.log(`调试:邀请者 详细信息`, fer)
-                                let updatefer = await ctx.service.user.update({times: fer.times + 1}, {id: father});
-                                console.log(`调试:更新邀请者积分`, updatefer)
-                                let sendRes = await ctx.service.weixin.sendServiceMessage({content: `受邀成功! \n 您的积分: + 2\n 邀请者[${fer.nickname}]积分: + 1`})
-                                console.log(`调试:完成后客服消息推送返回值`, sendRes)
-
-                            }
-                            break;
+                            await  ctx.service.user.subscribe({openid});
+                        break;
                         case "unsubscribe":
-                            let result = await ctx.service.user.update({subscribe: 0}, {openid})
+                            await ctx.service.user.unsubscribe({openid});
                             console.log(`调试:取关后更新用户状态返回值 `, result);
                             break;
                         case "CLICK":

@@ -277,6 +277,7 @@ module.exports = class WeixinService extends Service {
 
        return  await this.ctx.service.http.upload({url,data,json:true})
     }
+    // 向用户发送正在输入中状态
     async typing(){
         const {access_token} = await this.getAccessToken();
         const url = `https://api.weixin.qq.com/cgi-bin/message/custom/typing?access_token=${access_token}`;
@@ -284,5 +285,25 @@ module.exports = class WeixinService extends Service {
         const data = { "touser":openid, "command":"Typing"};
         return  await this.ctx.service.http.post({url,data})
     }
+
+   // 用户回复
+   async reply({type = 'text', content} = {}) {
+        console.log(`\n\n 00000000000000000000000000000000[${new Date()}回复调用日志00000000000000000000000000000000\n]`);
+        const {ctx} = this;
+        const data = ctx.request.body;
+        const head = `<xml><ToUserName><![CDATA[${data.FromUserName}]]></ToUserName> <FromUserName><![CDATA[${data.ToUserName}]]></FromUserName> <CreateTime>${new Date().getTime()}</CreateTime> <MsgType><![CDATA[${type}]]></MsgType>`;
+        let body;
+        const end = `</xml>`;
+        switch (type) {
+            case 'text':
+                body = `<Content><![CDATA[${content}]]></Content>`;
+                break;
+        }
+        ctx.set("Content-Type", "text/xml");
+        console.log(`调试:回复响应内容`, content ? `${head}${body}${end}` : 'success', "\n\n");
+        ctx.body = content ? `${head}${body}${end}` : 'success'
+        return true
+    }
+
 
 }
