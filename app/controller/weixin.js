@@ -284,6 +284,10 @@ module.exports = class WeixinController extends BaseController {
         }).catch(res => {
             console.log(`调试:检测用户是否存在出错`, res)
         });
+        if(user.times < 9){
+            await ctx.service.weixin.sendServiceMessage({content:'领取失败😢\n余额不足快去邀请好友 或充值吧😗'});
+            return 0;
+        }
         if (user) { // 判断用户是否存在
             console.log(`调试:用户是否存在判断完毕`, user);
             console.log(`调试:判断用户是否存在手机号`, user.phone);
