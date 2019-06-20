@@ -19,32 +19,32 @@ module.exports = class WeixinService extends Service {
         let url = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${options.appid}&secret=${options.appsecret}`;
         let access_token = '';
         // cache.del("access_token")
-        if(!cache.get("access_token")){
+        if (!cache.get("access_token")) {
             console.log(`调试:缓存中不存在 重新获取`)
-            access_token = await   this.ctx.service.http.get({url}).then(res=>{
-                if(res.errcode){
-                    return  Promise.reject({from:'获取TOKEN',result:res})
-                }else{
-                    let { access_token, expires_in } = res;
+            access_token = await this.ctx.service.http.get({url}).then(res => {
+                if (res.errcode) {
+                    return Promise.reject({from: '获取TOKEN', result: res})
+                } else {
+                    let {access_token, expires_in} = res;
                     // console.log(`调试:开始写入缓存啊啊啊存储时间[${expires_in}]，[${typeof (expires_in)}]`, access_token);
-                    cache.put("access_token",{access_token,time:new Date(),expires_in:expires_in * 1000},7200000);
-                    return  Promise.resolve(res)
+                    cache.put("access_token", {access_token, time: new Date(), expires_in: expires_in * 1000}, 7200000);
+                    return Promise.resolve(res)
                 }
-            }).catch(err=>{
+            }).catch(err => {
                 console.log(`调试:获取Token失败`, err)
-                return  Promise.reject({from:'获取TOKEN',result:err})
+                return Promise.reject({from: '获取TOKEN', result: err})
 
             });
             console.log(`调试:获取到access_token`, access_token);
-        } else{
+        } else {
             console.log(`调试:缓存中存在直接拿`)
             let res = cache.get("access_token");
-            let {access_token,time}  = res
+            let {access_token, time} = res
             // console.log(`调试:缓存中存在`, access_token);
             // console.log(`调试:存入时间`, time);
             // console.log(`调试:剩余时间`,7200 - (new Date().getTime() -  time.getTime())/ 1000);
-            res['residue'] = (7200 - (new Date().getTime() -  time.getTime())/ 1000)
-            return  Promise.resolve(res)
+            res['residue'] = (7200 - (new Date().getTime() - time.getTime()) / 1000)
+            return Promise.resolve(res)
         }
 
         return access_token
@@ -70,11 +70,11 @@ module.exports = class WeixinService extends Service {
             scene_str: 'lft0000000001'         // 字符串型场景值ID  长度范围为[1,64]
         };
         let result = await this.ctx.service.http.post({url, data});
-        if(type ===  'json'){
-            return  result
-        }else{
+        if (type === 'json') {
+            return result
+        } else {
             console.log(`调试:生成二维码成功 当前 是Buffer模式输出 `,)
-            return  qr.imageSync(result.url, {type: 'png'});
+            return qr.imageSync(result.url, {type: 'png'});
         }
     }
 
@@ -121,67 +121,68 @@ module.exports = class WeixinService extends Service {
                 {
                     "name": "一键红包",
                     "sub_button": [
-                        { "type": "click", "name": "拼手气", "key": "PSQ"},
-                        { "type": "click", "name": "品质联盟", "key": "PZLM"}
+                        {"type": "click", "name": "拼手气", "key": "PSQ"},
+                        {"type": "click", "name": "品质联盟", "key": "PZLM"}
                     ]
                 },
                 {
                     "name": "个人中心",
                     "sub_button": [
-                        { "type": "click", "name": "推广码", "key": "TGM"},
-                        { "type": "click", "name": "每日签到", "key": "MRQD"},
-                        { "type": "click", "name": "账户充值", "key": "ZHCZ"},
-                        { "type": "click", "name": "余额查询", "key": "YECX"},
-                        { "type": "click", "name": "联系客服", "key": "LXKF"},
+                        {"type": "click", "name": "推广码", "key": "TGM"},
+                        {"type": "click", "name": "每日签到", "key": "MRQD"},
+                        {"type": "click", "name": "账户充值", "key": "ZHCZ"},
+                        {"type": "click", "name": "余额查询", "key": "YECX"},
+                        {"type": "click", "name": "联系客服", "key": "LXKF"},
                     ]
                 }
-                ]
+            ]
         }
-        return  await this.ctx.service.http.post({url,data})
+        return await this.ctx.service.http.post({url, data})
     }
 
     // 添加客服
-    async addServive(data){
+    async addServive(data) {
         const {access_token} = await this.getAccessToken();
-        const  url =`https://api.weixin.qq.com/customservice/kfaccount/add?access_token=${access_token}`
+        const url = `https://api.weixin.qq.com/customservice/kfaccount/add?access_token=${access_token}`
         data = {
-            "kf_account" : "admin@lianfangti",
-            "nickname" : "1号技师",
-            "password" : "123456"
+            "kf_account": "admin@lianfangti",
+            "nickname": "1号技师",
+            "password": "123456"
         }
-        return   await  this.ctx.service.http.post({url,data})
+        return await this.ctx.service.http.post({url, data})
     }
-    async getCustomService(){
+
+    async getCustomService() {
         const {access_token} = await this.getAccessToken();
         const url = `https://api.weixin.qq.com/cgi-bin/customservice/getkflist?access_token=${access_token}`
-        return   await  this.ctx.service.http.get({url})
+        return await this.ctx.service.http.get({url})
     }
 
     // 发送客服消息
-    async sendServiceMessage({type = 'text',openid,content ='',head_content = "您对本次服务是否满意呢? ",articles = {},tail_content = "欢迎再次光临",media_id = ''}) {
-        const { access_token } = await  this.getAccessToken();
-        const url =`https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=${access_token}`;
+    async sendServiceMessage({type = 'text', openid, content = '', head_content = "您对本次服务是否满意呢? ", articles = {}, tail_content = "欢迎再次光临", media_id = ''}) {
+        const {access_token} = await this.getAccessToken();
+        const url = `https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=${access_token}`;
         let data = {
-            "touser": openid || this.ctx.request.body.FromUserName ,
-            "msgtype":`${type}`,
+            "touser": openid || this.ctx.request.body.FromUserName,
+            "msgtype": `${type}`,
         };
         switch (type) {
             case "text":
-                data[type] =  {  "content":`${content}` }
+                data[type] = {"content": `${content}`}
                 break;
             case "image":
-                data[type] =  {  media_id };
+                data[type] = {media_id};
                 break;
             case "msgmenu":
-                    let list =  [
-                            { "id": "101", "content": "满意"},
-                            { "id": "102", "content": "不满意" }
-                        ]
-                    data[type] = {
-                        head_content,
-                        tail_content,
-                        list
-                    };
+                let list = [
+                    {"id": "101", "content": "满意"},
+                    {"id": "102", "content": "不满意"}
+                ]
+                data[type] = {
+                    head_content,
+                    tail_content,
+                    list
+                };
                 break;
             case "news":
                 /* articles 格式
@@ -193,81 +194,82 @@ module.exports = class WeixinService extends Service {
                         }
                 * */
                 data[type] = {
-                    "articles":[ articles ]
+                    "articles": [articles]
                 }
                 break;
 
         }
 
         console.log(`\n\n *************[${new Date()}]客服消息发送日志 *************[ `);
-        console.log(`\n发送数据:\n`, JSON.stringify(data) , "\n\n");
+        console.log(`\n发送数据:\n`, JSON.stringify(data), "\n\n");
 
 
-        return  await  this.ctx.service.http.post({url,data}).then(res=>{
+        return await this.ctx.service.http.post({url, data}).then(res => {
             console.log(`调试:客服消息发送返回值`, res)
-             if(res.errcode){
-                 return Promise.reject(res);
-             }else{
-                 return Promise.resolve(res);
-             }
-        }).catch(err=>{
-            console.log('错误:发送客服消息失败',err);
-             return Promise.reject(err)
+            if (res.errcode) {
+                return Promise.reject(res);
+            } else {
+                return Promise.resolve(res);
+            }
+        }).catch(err => {
+            console.log('错误:发送客服消息失败', err);
+            return Promise.reject(err)
         })
     }
+
     //发送充值链接
-    async sendRechargeLink(openid){
-        openid =  openid || this.ctx.request.body.FromUserName;
+    async sendRechargeLink(openid) {
+        openid = openid || this.ctx.request.body.FromUserName;
         const articles = {
-            "title":"充值中心",
-            "description":"0.5元帮您领到最大红包实时充值实时到账",
-            "url":`http://eleme.lianfangti.cn/recharge?openid=${openid}`,
-            "picurl":"https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/200x200-lk.png"
+            "title": "充值中心",
+            "description": "0.5元帮您领到最大红包实时充值实时到账",
+            "url": `http://eleme.lianfangti.cn/recharge?openid=${openid}`,
+            "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/200x200-lk.png"
         }
-        return  await  this.sendServiceMessage({type:'news',articles});
+        return await this.sendServiceMessage({type: 'news', articles});
     }
 
     // 发送模板消息
-    async sendTemplateMessage(openid){
+    async sendTemplateMessage(openid) {
         const {access_token} = await this.getAccessToken();
         const url = `https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=${access_token}`;
-        let data  = {
-            "touser":`o-GhE5lF3AND63TVdilZMNlNbbNk`,
-            "template_id":"Uo5zXHQk8kPhs-BjOSwaNU3I0R9YyV4lDFgZ6kHMU4w",
-            "url":"http://weixin.qq.com/download",
+        let data = {
+            "touser": `o-GhE5lF3AND63TVdilZMNlNbbNk`,
+            "template_id": "Uo5zXHQk8kPhs-BjOSwaNU3I0R9YyV4lDFgZ6kHMU4w",
+            "url": "http://weixin.qq.com/download",
             // "miniprogram":{ //点击打开小程序
             //     "appid":"xiaochengxuappid12345",
             //     "pagepath":"index?foo=bar"
             // },
-            "data":{
+            "data": {
                 "first": {
-                    "value":"发送成功",
-                    "color":"#173177"
+                    "value": "发送成功",
+                    "color": "#173177"
                 },
-                "keyword1":{
-                    "value":'18757739042',
-                    "color":"#173177"
+                "keyword1": {
+                    "value": '18757739042',
+                    "color": "#173177"
                 },
-                "keyword2":{
-                    "value":new Date(),
-                    "color":"#173177"
+                "keyword2": {
+                    "value": new Date(),
+                    "color": "#173177"
                 },
-                "remark":{
-                    "value":"请在30分钟内回复6位短信验证码 如果这不是您的手机号 您可重新发送手机号绑定",
-                    "color":"#173177"
+                "remark": {
+                    "value": "请在30分钟内回复6位短信验证码 如果这不是您的手机号 您可重新发送手机号绑定",
+                    "color": "#173177"
                 }
             }
         };
-        return  await  this.ctx.service.http.post({url,data})
+        return await this.ctx.service.http.post({url, data})
     }
 
     // 新增素材
-    async uploadMedia({type = 'image',media}){
+    async uploadMedia({type = 'image', media}) {
         const {access_token} = await this.getAccessToken();
-        console.log(`调试:获取到access_token`,access_token)
+        console.log(`调试:获取到access_token`, access_token)
         const url = `https://api.weixin.qq.com/cgi-bin/media/upload?access_token=${access_token}&type=${type}`;
         let data = {
-            media:{
+            media: {
                 value: media,
                 options: {
                     filename: `pic_${new Date().getTime()}.png`
@@ -275,19 +277,20 @@ module.exports = class WeixinService extends Service {
             }
         };
 
-       return  await this.ctx.service.http.upload({url,data,json:true})
-    }
-    // 向用户发送正在输入中状态
-    async typing(){
-        const {access_token} = await this.getAccessToken();
-        const url = `https://api.weixin.qq.com/cgi-bin/message/custom/typing?access_token=${access_token}`;
-        const openid = this.ctx.request.body.FromUserName ;
-        const data = { "touser":openid, "command":"Typing"};
-        return  await this.ctx.service.http.post({url,data})
+        return await this.ctx.service.http.upload({url, data, json: true})
     }
 
-   // 用户回复
-   async reply({type = 'text', content} = {}) {
+    // 向用户发送正在输入中状态
+    async typing() {
+        const {access_token} = await this.getAccessToken();
+        const url = `https://api.weixin.qq.com/cgi-bin/message/custom/typing?access_token=${access_token}`;
+        const openid = this.ctx.request.body.FromUserName;
+        const data = {"touser": openid, "command": "Typing"};
+        return await this.ctx.service.http.post({url, data})
+    }
+
+    // 用户回复
+    async reply({type = 'text', content} = {}) {
         console.log(`\n\n 00000000000000000000000000000000[${new Date()}回复调用日志00000000000000000000000000000000\n]`);
         const {ctx} = this;
         const data = ctx.request.body;

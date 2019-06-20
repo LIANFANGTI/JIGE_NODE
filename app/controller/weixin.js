@@ -364,6 +364,7 @@ module.exports = class WeixinController extends BaseController {
                 price:[ {required:true} ],
                 uid:[ {required:true} ],
                 name:[ {required:true} ],
+                openid:[ {required:true} ],
 
             }
             let body = await this.validate({rules, type: "POST"});
@@ -374,7 +375,7 @@ module.exports = class WeixinController extends BaseController {
                 order_id: `CZ${body.uid}${new Date().getTime()}`,
                 order_uid: body.uid,
                 notify_url: "http://eleme.lianfangti.cn/pay_callback",
-                cancel_url: "http://eleme.lianfangti.cn/recharge",
+                cancel_url: `http://eleme.lianfangti.cn/recharge?openid=${body.openid}`,
                 more: body.name,
                 expire: 1300,
             };
