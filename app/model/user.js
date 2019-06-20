@@ -10,11 +10,13 @@ module.exports = app => {
         sex: INTEGER,
         city: STRING,
         headimgurl: STRING,
+        mid:INTEGER,
         subscribe: BOOLEAN,
         created_at: DATE
     }, {
         freezeTableName: true //表名将与modal名相同
     });
+    // User.sync({ alter: true })
     // User.sync({force: true}).then(() => {
     // });
     return User;

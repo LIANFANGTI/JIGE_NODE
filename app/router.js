@@ -23,4 +23,3 @@ module.exports = app => {
   router.post('/pay', controller.weixin.pay);
   router.post('/pay_callback', controller.weixin.payCallback);
 };
-

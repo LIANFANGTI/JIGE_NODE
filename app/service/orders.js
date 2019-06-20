@@ -1,6 +1,14 @@
 const {Service} = require("egg")
 
 class RechargeService extends Service {
+
+    //获取充值方案
+    async getRechargePlans(){
+
+    }
+
+
+
     async add(order) {
         // console.log(`调试:打印下Server的this`, this)
         return await this.ctx.model.Recharge.create(order);
@@ -25,7 +33,7 @@ class RechargeService extends Service {
     async exist({where = {}, col = ["id"], showCol = false}) {
         // console.log(`调试:是否存在查询`, where);
         let result = await this.select({col, where});
-        return showCol ? (Boolean(result.length) ? result[0].dataValues : true) : Boolean(result.length)
+        return showCol ? (Boolean(result.length) ? result[0].dataValues : false) : Boolean(result.length)
     }
 
     async update(map, condition) {

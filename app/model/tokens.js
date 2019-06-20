@@ -8,6 +8,6 @@ module.exports = app => {
   },{
     freezeTableName:true //表名将与modal名相同
   });
-  Tokens.sync({force: true}).then(()=>{});
+  // Tokens.sync({force: true}).then(()=>{});
   return Tokens;
 };

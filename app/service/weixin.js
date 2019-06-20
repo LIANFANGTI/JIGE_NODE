@@ -16,18 +16,22 @@ const options = {
 module.exports = class WeixinService extends Service {
     // 获取access_token
     async getAccessToken() {
+        console.log(`调试:获取TOKEN的地方打印mpconfig`, this.ctx.mpconfig);
+        const {id } =this.ctx.mpconfig;
+        console.log(`调试:获取到公众号id`, id)
+        // return ;
         let url = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${options.appid}&secret=${options.appsecret}`;
         let access_token = '';
         // cache.del("access_token")
-        if (!cache.get("access_token")) {
-            console.log(`调试:缓存中不存在 重新获取`)
+        if (!cache.get(`${id}_access_token`)) {
+            console.log(`调试:缓存中不存在 重新获取`);
             access_token = await this.ctx.service.http.get({url}).then(res => {
                 if (res.errcode) {
                     return Promise.reject({from: '获取TOKEN', result: res})
                 } else {
                     let {access_token, expires_in} = res;
                     // console.log(`调试:开始写入缓存啊啊啊存储时间[${expires_in}]，[${typeof (expires_in)}]`, access_token);
-                    cache.put("access_token", {access_token, time: new Date(), expires_in: expires_in * 1000}, 7200000);
+                    cache.put(`${id}_access_token`, {access_token,mid:id, time: new Date(), expires_in: expires_in * 1000}, 7200000);
                     return Promise.resolve(res)
                 }
             }).catch(err => {
@@ -38,7 +42,7 @@ module.exports = class WeixinService extends Service {
             console.log(`调试:获取到access_token`, access_token);
         } else {
             console.log(`调试:缓存中存在直接拿`)
-            let res = cache.get("access_token");
+            let res = cache.get(`${id}_access_token`);
             let {access_token, time} = res
             // console.log(`调试:缓存中存在`, access_token);
             // console.log(`调试:存入时间`, time);
@@ -223,7 +227,7 @@ module.exports = class WeixinService extends Service {
         const articles = {
             "title": "充值中心",
             "description": "0.5元帮您领到最大红包实时充值实时到账",
-            "url": `http://eleme.lianfangti.cn/recharge?openid=${openid}`,
+            "url": `http://eleme.lianfangti.cn/recharge?openid=${openid}&token=${this.ctx.mpconfig.token}`,
             "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/200x200-lk.png"
         }
         return await this.sendServiceMessage({type: 'news', articles});

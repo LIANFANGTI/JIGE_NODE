@@ -83,6 +83,7 @@
     let coin = 0;
     let name = '';
     let openid ='{{ openid }}';
+    let token ='{{ token }}';
     let uid = {{ uid }}
     console.log(`调试:`, openid);
 
@@ -108,7 +109,7 @@
             $.toast("请选择充值套餐","cancel")
         }
         let  {protocol,host} = window.location
-        const url = `${protocol}//${host}/pay`;
+        const url = `${protocol}//${host}/pay?token=${token}`;
 
         console.log(`调试:协议`, protocol);
         console.log(`调试:主机加端口`,host);
