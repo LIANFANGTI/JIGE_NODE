@@ -31,7 +31,7 @@ module.exports = class UserService extends Service {
              });
              console.log(`调试:邀请者 详细信息`, fer);
              let updatefer = await ctx.service.user.update({times: fer.times + this.ctx.mpconfig.ex_coin}, {id: father});
-             let content = `邀请成功！🎉\n您成功邀请了[${user.nickname}\n您的积分:+${this.ctx.mpconfig.ex_coin}]\n当前余额:${fer.times + this.ctx.mpconfig.ex_coin}`
+             let content = `邀请成功！🎉\n您成功邀请了${user.nickname}\n您的积分:+${this.ctx.mpconfig.ex_coin}\n当前余额:${fer.times + this.ctx.mpconfig.ex_coin}`
              this.ctx.service.weixin.sendServiceMessage({content,openid:fer.openid});
              console.log(`调试:更新邀请者积分`, updatefer);
              content =`受邀成功! \n 您的积分: +${ctx.mpconfig.in_coin}\n 邀请者[${fer.nickname}]积分: + ${this.ctx.mpconfig.ex_coin}`;
