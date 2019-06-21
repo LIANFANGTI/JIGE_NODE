@@ -16,13 +16,6 @@ module.exports = class WeixinController extends BaseController {
             this.ctx.logger.info("==================================接收到来自微信服务器的网络请求==================================");
             this.ctx.logger.info("GET参数:",query);
             this.ctx.logger.info("POST参数:",data);
-            ctx.logger.debug('debug info');
-            ctx.logger.info('some request data: %j', ctx.request.body);
-            ctx.logger.warn('WARNNING!!!!');
-
-// 错误日志记录，直接会将错误日志完整堆栈信息记录下来，并且输出到 errorLog 中
-// 为了保证异常可追踪，必须保证所有抛出的异常都是 Error 类型，因为只有 Error 类型才会带上堆栈信息，定位到问题。
-            ctx.logger.error(new Error('whoops'));
             console.log(`调试:接收到的GET参数`, query);
             console.log(`调试:接收到的POST参数`, data);
             if (ctx.request.method === "POST") {
@@ -213,11 +206,23 @@ module.exports = class WeixinController extends BaseController {
 
 
     async menu() {
-        this.ctx.body = await this.ctx.service.weixin.getMenu();
+        try {
+            await this.ctx.service.mpconfig.checkToken();
+            this.ctx.body = await this.ctx.service.weixin.getMenu();
+        }catch (e) {
+            this.ctx.logger.error(new Error(e));
+            this.ctx.body =e
+        }
     }
 
     async createMenu() {
-        this.ctx.body = await this.ctx.service.weixin.createMenu()
+        try {
+            await this.ctx.service.mpconfig.checkToken();
+            this.ctx.body = await this.ctx.service.weixin.createMenu();
+        }catch (e) {
+            this.ctx.logger.error(new Error(e));
+            this.ctx.body =e
+        }
     }
 
 

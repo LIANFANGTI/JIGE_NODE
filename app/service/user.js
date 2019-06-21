@@ -8,7 +8,8 @@ module.exports = class UserService extends Service {
  }
  // 用户关注
  async subscribe({openid}){
-     const { ctx } =this
+     const { ctx } =this;
+     console.log(`用户关注:openid[${openid}]` )
      let userinfo = await ctx.service.weixin.getUserInfo({openid});  // 从微信服务器获取用户详细信息
      console.log(`调试:用户信息userinfo返回值`, userinfo);
      let father = userinfo.qr_scene;    //从用户详细信息中后去推广码信息

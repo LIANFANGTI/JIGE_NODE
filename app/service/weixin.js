@@ -18,7 +18,8 @@ module.exports = class WeixinService extends Service {
     async getAccessToken() {
         console.log(`调试:获取TOKEN的地方打印mpconfig`, this.ctx.mpconfig);
         const {id } =this.ctx.mpconfig;
-        console.log(`调试:获取到公众号id`, id)
+        console.log(`调试:获取到公众号id`, id);
+        console.log(`调试:从缓存中取access_token cache.get(${id}_access_token) = [${cache.get(`${id}_access_token`)}]`,)
         // return ;
         let url = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${options.appid}&secret=${options.appsecret}`;
         let access_token = '';
@@ -84,7 +85,7 @@ module.exports = class WeixinService extends Service {
 
     //获取用户信息
     async getUserInfo({openid = ''}) {
-        // console.log(`openid:[${openid}]`)
+        console.log(`获取用户信息weixin.getUserInfo:[${openid}]`)
         let {access_token} = await this.getAccessToken();
         // console.log(`调试获取用户信息:access_token[${access_token}]`);
 
