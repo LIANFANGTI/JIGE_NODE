@@ -515,12 +515,11 @@ module.exports = class WeixinController extends BaseController {
                 }
                 console.log(`调试:获取到用户信息`, user)
             }
-            let pidsql = `(SELECT recharge_plan FROM  mpconfig WHERE id = ${this.ctx.mpconfig.id})`;
+            let pidsql = `pid = (SELECT recharge_plan FROM  mpconfig WHERE id = ${this.ctx.mpconfig.id})`;
             let items = await  this.ctx.model.RechargePlan.findAll({
                 attributes:["name","price","pay_price","coin","pid"],
-                where:{pid:Sequelize.literal(pidsql)}
+                where:Sequelize.literal(pidsql)
             });
-            // console.log(`调试:查询结果`, items);
             const data = {
                 name: "练方梯",
                 openid,
