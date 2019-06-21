@@ -413,7 +413,7 @@ module.exports = class WeixinController extends BaseController {
             }
             let body = await this.validate({rules, type: "POST"});
             let data = {
-                name: "HUANGJI",
+                name: body.name,
                 pay_type: 'jsapi',
                 price: body.price,
                 order_id: `CZ${body.uid}${new Date().getTime()}`,
@@ -461,6 +461,15 @@ module.exports = class WeixinController extends BaseController {
             this.ctx.logger.info(`POST参数`,data);
 
             let {order_id} = data;
+            let status = await  this.ctx.service.orders.getOrderStatus(order_id);
+            console.log(`调试:获取到的订单状态`, status)
+            if(status !== 0){
+                this.ctx.body = {
+                    code:0,
+                    msg:"该订单已经更新过状态"
+                }
+                return ;
+            }
             let {detail} = data;
             detail = detail.replace(/'/g, "");
             console.log(`调试:detail`, detail);
