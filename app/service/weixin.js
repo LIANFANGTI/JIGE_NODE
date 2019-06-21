@@ -90,7 +90,7 @@ module.exports = class WeixinService extends Service {
         // console.log(`调试获取用户信息:access_token[${access_token}]`);
 
         let url = `https://api.weixin.qq.com/cgi-bin/user/info?openid=${openid}&access_token=${access_token}&lang=zh_CN`;
-        // console.log(`调试:最终请求的url[${url}]`)
+        console.log(`调试:获取用户信息url[${url}]`);
         return await this.ctx.service.http.get({url}).then(res => {
             console.log(`调试:用户信息接口返回值`, JSON.stringify(res));
             if (res.errcode) {
