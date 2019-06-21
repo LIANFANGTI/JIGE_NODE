@@ -82,7 +82,7 @@ module.exports = class WeixinController extends BaseController {
                     if (utils.checkPhone(content)) { // 判断是否为手机号
                         let phone = content;
                         console.log(`调试:收到的是手机号`, content);
-                        let exist = await ctx.service.user.exist({where: {phone}});
+                        let exist = await ctx.service.user.exist({where: {phone,mid:this.ctx.mpconfig.id}});
                         if (exist) {
                             this.reply({content: `号码[${phone}]已被绑定,请检查`});
                         } else {
