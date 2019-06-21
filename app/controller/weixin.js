@@ -196,6 +196,9 @@ module.exports = class WeixinController extends BaseController {
                 case "ACCESS_TOKEN":
                     this.ctx.body = await this.ctx.service.weixin.getAccessToken();
                     break;
+                case "BUILD_MENU":
+                    this.ctx.body = await this.ctx.service.mpconfig.buildMenu();
+                break;
             }
         } catch (e) {
             // console.error(`错误:`, e);
@@ -491,7 +494,6 @@ module.exports = class WeixinController extends BaseController {
     async recharge() {
         try {
             // const rules ={openid:[{required:true}]}
-            console.log(`调试:1111`)
             await  this.ctx.service.mpconfig.checkToken();
             const {openid} = this.ctx.request.query;
             let user;
@@ -513,13 +515,18 @@ module.exports = class WeixinController extends BaseController {
                 }
                 console.log(`调试:获取到用户信息`, user)
             }
-
+            let pidsql = `(SELECT recharge_plan FROM  mpconfig WHERE id = ${this.ctx.mpconfig.id})`;
+            let items = await  this.ctx.model.RechargePlan.findAll({
+                attributes:["name","price","pay_price","coin","pid"],
+                where:{pid:Sequelize.literal(pidsql)}
+            });
+            // console.log(`调试:查询结果`, items);
             const data = {
                 name: "练方梯",
                 openid,
                 token:this.ctx.mpconfig.token,
                 uid: user.id,
-                items: [
+                items: items || [
                     {name: '10积分', price: 0.6, coin: 10},
                     {name: '50积分', price: 2.8, coin: 50},
                     {name: '100积分', price: 5.00, coin: 100},

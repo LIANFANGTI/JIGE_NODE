@@ -108,7 +108,7 @@ module.exports = class WeixinService extends Service {
         return await this.ctx.service.http.get({url})
     }
 
-    async createMenu() {
+    async createMenu({menu}) {
         let {access_token} = await this.getAccessToken();
         const url = `https://api.weixin.qq.com/cgi-bin/menu/create?access_token=${access_token}`;
         /*
@@ -116,7 +116,7 @@ module.exports = class WeixinService extends Service {
                  {  "type": "miniprogram", "name": "wxa",  "url": "http://mp.weixin.qq.com", "appid": "wx286b93c14bbf93aa","pagepath": "pages/lunar/index"}, // 小程序
                  { "type": "click", "name": "赞一下我们", "key": "V1001_GOOD"} // 按钮
         * */
-        let data = {
+        let data = menu || {
             "button": [
                 {
                     "type": "click",
@@ -141,7 +141,8 @@ module.exports = class WeixinService extends Service {
                     ]
                 }
             ]
-        }
+        };
+        console.log(`调试:构建菜单参数`, data)
         return await this.ctx.service.http.post({url, data})
     }
 

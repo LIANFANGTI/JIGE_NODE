@@ -1,23 +1,29 @@
 const {Service} = require("egg")
+const Sequelize = require('sequelize');
+const db = new Sequelize('mysql://eleme:lianfangti*@example.com:3306/eleme');
 
 class ConfigService extends Service {
-    async checkToken(token){
+    async checkToken(token) {
         const {ctx} = this;
         token = token || ctx.request.query.token
-        if(token){
-            const  mpconfig = await  ctx.service.mpconfig.exist({col:["appid","id","in_coin","unit_coin","token","ex_coin","join_coin","unit_price","appsecret"],showCol:true,where:{token}});
-            if(mpconfig){
-                 this.ctx.mpconfig = mpconfig;
-                  return  Promise.resolve(mpconfig)
-            }else{
-                let result=   { code:400,msg:'无效Token'}
+        if (token) {
+            const mpconfig = await ctx.service.mpconfig.exist({
+                col: ["appid", "id", "in_coin", "unit_coin", "token", "ex_coin", "join_coin", "unit_price", "appsecret"],
+                showCol: true,
+                where: {token}
+            });
+            if (mpconfig) {
+                this.ctx.mpconfig = mpconfig;
+                return Promise.resolve(mpconfig)
+            } else {
+                let result = {code: 400, msg: '无效Token'}
                 ctx.body = result;
-                return  Promise.reject(result)
+                return Promise.reject(result)
             }
 
 
-        }else{
-            let result = { code:400, msg:'无效参数'};
+        } else {
+            let result = {code: 400, msg: '无效参数'};
             ctx.body = result;
             // this.ctx.logger.error(  new Error(result))
         }
@@ -25,6 +31,17 @@ class ConfigService extends Service {
 
     }
 
+    //构建菜单
+    async buildMenu() {
+        let id = Sequelize.literal(`(SELECT  menu FROM mpconfig WHERE id  = ${this.ctx.mpconfig.id})`);
+        let menu = await this.ctx.model.Menu.findOne({
+            attributes: ["json"],
+            where: {id}
+        });
+
+        return await this.ctx.service.weixin.createMenu({menu: JSON.parse(menu.json)});
+
+    }
 
     async add(order) {
         // console.log(`调试:打印下Server的this`, this)

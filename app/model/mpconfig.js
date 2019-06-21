@@ -20,12 +20,12 @@ module.exports = app => {
     subscribe_msg:STRING,// 用户关注时自动回复
     comeback_msg:STRING,// 用户自动关注时回复
     help_message:STRING,//用户点教程时回复的消息
-    menu:STRING
+    menu:INTEGER //菜单方案ID
 
   }, {
     freezeTableName: true //表名将与modal名相同
   });
-  Config.sync({ alter: true })
+  // Config.sync({ alter: true })
   //
   return Config;
 };
