@@ -464,7 +464,8 @@ module.exports = class WeixinController extends BaseController {
             let status = await  this.ctx.service.orders.getOrderStatus(order_id);
             console.log(`调试:获取到的订单状态[${typeof(status)}]`, status)
             if(status !== "0"){
-                console.log(`调试:该订单状态已经更新过`,status)
+                console.log(`调试:该订单状态已经更新过`,status);
+                this.ctx.status = 300
                 this.ctx.body = {
                     code:0,
                     msg:"该订单已经更新过状态"
