@@ -139,8 +139,9 @@ module.exports = class WeixinController extends BaseController {
             let openid = this.ctx.request.body.FromUserName;
             switch (EventKey) {
                 case "SYJC": // 使用教程
-                    let content = `如何使用XX红包助手？\n 1.回复手机号 \n 2.点击菜单栏一键红包 \n 3.回复验证码即可领取`;
-                    this.reply({content})
+                    let allConfig = await  this.ctx.service.mpconfig.getAllConfig()
+                    let content = allConfig.help_message || `如何使用XX红包助手？\n 1.回复手机号 \n 2.点击菜单栏一键红包 \n 3.回复验证码即可领取`;
+                    this.reply({content});
                     break;
                 case "PSQ":  // 拼手气红包
 

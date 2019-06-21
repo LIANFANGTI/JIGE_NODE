@@ -15,8 +15,10 @@ module.exports = class UserService extends Service {
      let father = userinfo.qr_scene;    //从用户详细信息中后去推广码信息
      let exist = await ctx.service.user.exist({where: {openid}});   // 判断用户是否已经在数据库里存在
      let user = {...userinfo};
+     let allConfig = await  this.ctx.service.mpconfig.getAllConfig();
+     // return  0;
      if (!exist) {   // 如果用户不存在
-         this.ctx.service.weixin.reply({content: '谢谢关注 ！NM$L! 💖\n 点击下方一键红包菜单即可领取红包 \n'}); // 回复消息
+         this.ctx.service.weixin.reply({content: allConfig.subscribe_msg}); // 回复消息
          user['times'] = ctx.mpconfig.join_coin; // 新用户默认赠送积分个数
          user['father'] = father; // 新用户送两个次数
          user['subscribe'] = 1; // 是否关注
@@ -39,7 +41,7 @@ module.exports = class UserService extends Service {
              console.log(`调试:完成后客服消息推送返回值`, sendRes)
          }
      } else {  // 如果用户已存在
-         this.ctx.service.weixin.reply({content: '欢迎回来 ！NM$L! 💖\n 点击下方一键红包菜单即可领取红包 \n'}); // 回复消息
+         this.ctx.service.weixin.reply({content: allConfig.comeback_msg}); // 回复消息
          user['subscribe'] = 1; // 是否关注
          let updateResult = await ctx.service.user.update(user, {openid});
          console.log(`调试:用户已存在 信息更新成功`, updateResult)

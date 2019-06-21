@@ -40,7 +40,12 @@ class ConfigService extends Service {
         });
 
         return await this.ctx.service.weixin.createMenu({menu: JSON.parse(menu.json)});
+    }
 
+    async getAllConfig(){
+        let result = await  this.ctx.model.Mpconfig.findOne({attributes:{ exclude: ['updated_at'] },where:{id:this.ctx.mpconfig.id}});
+        // console.log(`调试:获取到的所有配置信息`, result);
+        return  result
     }
 
     async add(order) {
