@@ -1,5 +1,5 @@
 module.exports = app => {
-  const { STRING,FLOAT ,INTEGER } = app.Sequelize;
+  const { STRING,FLOAT ,INTEGER,LONGTEXT } = app.Sequelize;
   const Config = app.model.define("mpconfig", {
     id: { type: INTEGER, primaryKey: true, autoIncrement: true },
     token: STRING, // 接口调用TOKEN
@@ -20,6 +20,7 @@ module.exports = app => {
     subscribe_msg:STRING,// 用户关注时自动回复
     comeback_msg:STRING,// 用户自动关注时回复
     help_message:STRING,//用户点教程时回复的消息
+    menu:STRING
 
   }, {
     freezeTableName: true //表名将与modal名相同
