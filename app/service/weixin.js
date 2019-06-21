@@ -21,7 +21,7 @@ module.exports = class WeixinService extends Service {
         console.log(`调试:获取到公众号id`, id);
         console.log(`调试:从缓存中取access_token cache.get(${id}_access_token) = [${cache.get(`${id}_access_token`)}]`,)
         // return ;
-        let url = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${options.appid}&secret=${options.appsecret}`;
+        let url = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${this.ctx.mpconfig.appid}&secret=${this.ctx.mpconfig.appsecret}`;
         let access_token = '';
         // cache.del("access_token")
         if (!cache.get(`${id}_access_token`)) {
