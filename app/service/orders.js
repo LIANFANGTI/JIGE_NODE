@@ -8,10 +8,11 @@ class RechargeService extends Service {
     }
 
     async getOrderStatus(order_id){
-        return  await  this.ctx.model.Recharge.findOne({
+        let result = await  this.ctx.model.Recharge.findOne({
             attributes:["status"],
             where:{order_id}
-        }).status
+        })
+        return  result.status
 
     }
 
