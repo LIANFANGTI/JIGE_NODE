@@ -116,7 +116,7 @@ module.exports = class WeixinController extends BaseController {
 
                 }
             } else {
-                let array = [token, query.timestamp, query.nonce];
+                let array = [query.token, query.timestamp, query.nonce];
                 let key = array.sort().join("");
                 // console.log(`调试:key=[${key}]`, array)
                 let sha1 = crypto.createHash("sha1").update(key).digest("hex");
