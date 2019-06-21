@@ -51,6 +51,9 @@ module.exports = appInfo => {
       origin:'*',
       allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
     },
+    logger:{
+      outputJSON: true,
+    },
     sequelize: {
       dialect: "mysql",
       database: "eleme",

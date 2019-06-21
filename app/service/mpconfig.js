@@ -10,26 +10,16 @@ class ConfigService extends Service {
                  this.ctx.mpconfig = mpconfig;
                   return  Promise.resolve(mpconfig)
             }else{
-                ctx.body = {
-                    code:400,
-                    msg:'无效Token'
-                };
-                return  Promise.reject({
-                    code:400,
-                    msg:'无效Token'
-                })
+                let result=   { code:400,msg:'无效Token'}
+                ctx.body = result;
+                return  Promise.reject(result)
             }
 
 
         }else{
-            ctx.body = {
-                code:400,
-                msg:'无效参数'
-            };
-            return Promise.reject({
-                code:400,
-                msg:'无效参数'
-            });
+            let result = { code:400, msg:'无效参数'};
+            ctx.body = result;
+            // this.ctx.logger.error(  new Error(result))
         }
 
 

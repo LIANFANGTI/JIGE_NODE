@@ -13,6 +13,16 @@ module.exports = class WeixinController extends BaseController {
             // console.log(`调试:ctx.mpconfig`, ctx.mpconfig);
             let data = ctx.request.body;
             console.log(`\n\n==================================[${new Date()}]接收到网络请求==================================`);
+            this.ctx.logger.info("==================================接收到来自微信服务器的网络请求==================================");
+            this.ctx.logger.info("GET参数:",query);
+            this.ctx.logger.info("POST参数:",data);
+            ctx.logger.debug('debug info');
+            ctx.logger.info('some request data: %j', ctx.request.body);
+            ctx.logger.warn('WARNNING!!!!');
+
+// 错误日志记录，直接会将错误日志完整堆栈信息记录下来，并且输出到 errorLog 中
+// 为了保证异常可追踪，必须保证所有抛出的异常都是 Error 类型，因为只有 Error 类型才会带上堆栈信息，定位到问题。
+            ctx.logger.error(new Error('whoops'));
             console.log(`调试:接收到的GET参数`, query);
             console.log(`调试:接收到的POST参数`, data);
             if (ctx.request.method === "POST") {
@@ -70,6 +80,7 @@ module.exports = class WeixinController extends BaseController {
                                 break;
                         }
                     } catch (e) {
+                        ctx.logger.error(new Error(e));
                         console.error(`调试:错误`, e)
                     }
 
@@ -117,7 +128,8 @@ module.exports = class WeixinController extends BaseController {
                 }
             }
         } catch (e) {
-            console.log(`错误:`, e)
+            console.log(`错误:`, e);
+            ctx.logger.error(new Error(e));
             ctx.body = e;
         }
 
@@ -192,7 +204,8 @@ module.exports = class WeixinController extends BaseController {
                     break;
             }
         } catch (e) {
-            console.error(`错误:`, e)
+            // console.error(`错误:`, e);
+            this.ctx.logger.error(new Error(e));
             this.ctx.body = e
         }
 
@@ -247,9 +260,11 @@ module.exports = class WeixinController extends BaseController {
                 }
                 console.log(`调试:参数验证结果`, query)
             } catch (e) {
+                this.ctx.logger.error(new Error(e));
                 console.log(`调试:出错`, e)
             }
         } catch (e) {
+            this.ctx.logger.error(new Error(e));
             this.ctx.body = e
         }
 
@@ -298,8 +313,6 @@ module.exports = class WeixinController extends BaseController {
             where: {openid},
             col: ['phone', 'id', "times"],
             showCol: true
-        }).catch(res => {
-            console.log(`调试:检测用户是否存在出错`, res)
         });
         if (user.times < 9) {
             this.reply({content: '领取失败😢\n余额不足快去邀请好友 或充值吧😗'});
@@ -320,6 +333,7 @@ module.exports = class WeixinController extends BaseController {
                         phone,
                         type
                     }).then(async res => {
+                        this.ctx.logger.info("调用ELEME接口返回值",res);
                         console.log(`调试:调用Eleme接口返回值`, res);
                         if (res.code === 1) {
                             await ctx.service.user.update({times: user.times - ctx.mpconfig.unit_coin}, {openid});
@@ -343,6 +357,7 @@ module.exports = class WeixinController extends BaseController {
                     });
 
                 } catch (e) {
+                    this.ctx.logger.error(new Error(e));
                     console.log(`调试:Eleme接口调用出错`, e)
                 }
 
@@ -431,9 +446,11 @@ module.exports = class WeixinController extends BaseController {
             await this.ctx.service.mpconfig.checkToken();
             let query = this.ctx.request.query
             let data = this.ctx.request.body;
-            console.log(`\n\n==================================[${new Date()}]支付接口回调==================================`);
-            console.log(`调试:接收到的GET参数`, query);
-            console.log(`调试:接收到的POST参数`, data);
+
+            this.ctx.logger.info(`==================================支付回调==================================`,);
+            this.ctx.logger.info(`GET参数`,query);
+            this.ctx.logger.info(`POST参数`,data);
+
             let {order_id} = data;
             let {detail} = data;
             detail = detail.replace(/'/g, "");
@@ -459,6 +476,7 @@ module.exports = class WeixinController extends BaseController {
             console.log(`调试:数据库更新返回值`, result);
             this.ctx.body = "success"
         }catch (e) {
+            this.ctx.logger.error(new Error(e));
             this.ctx.body = e
         }
     }
@@ -506,6 +524,7 @@ module.exports = class WeixinController extends BaseController {
             }
             await this.ctx.render("recharge.html", data)
         } catch (e) {
+            this.ctx.logger.error(new Error(e));
             this.ctx.body = e
         }
     }
