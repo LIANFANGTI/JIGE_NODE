@@ -9,6 +9,7 @@
   "dependencies": {
     "canvas": "^2.5.0",
     "egg": "^2.15.1",
+    "egg-bizerror": "^2.2.1",
     "egg-cors": "^2.1.2",
     "egg-scripts": "^2.11.0",
     "egg-sequelize": "^4.3.1",

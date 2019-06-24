@@ -44,11 +44,16 @@ module.exports = class WeixinService extends Service {
         } else {
             console.log(`调试:缓存中存在直接拿`)
             let res = cache.get(`${id}_access_token`);
+            res = await  this.checkAccessToken(res).catch(async err=>{
+                    console.log(`调试:验证AccessToken失败 重新获取`,err);
+                    return await this.getAccessToken();
+            });
+
             let {access_token, time} = res
             // console.log(`调试:缓存中存在`, access_token);
             // console.log(`调试:存入时间`, time);
             // console.log(`调试:剩余时间`,7200 - (new Date().getTime() -  time.getTime())/ 1000);
-            res['residue'] = (7200 - (new Date().getTime() - time.getTime()) / 1000)
+            // res['residue'] = (7200 - (new Date().getTime() - time.getTime()) / 1000)
             return Promise.resolve(res)
         }
 
@@ -179,6 +184,15 @@ module.exports = class WeixinService extends Service {
             case "image":
                 data[type] = {media_id};
                 break;
+
+            case "video":
+                data[type]={
+                    media_id,
+                    thumb_media_id:media_id,
+                    title:'帮助视频',
+                    description:'使用教程'
+                }
+            break;
             case "msgmenu":
                 let list = [
                     {"id": "101", "content": "满意"},
@@ -270,20 +284,22 @@ module.exports = class WeixinService extends Service {
     }
 
     // 新增素材
-    async uploadMedia({type = 'image', media}) {
+    async uploadMedia({type = 'image', media,perm = false}) {
         const {access_token} = await this.getAccessToken();
         console.log(`调试:获取到access_token`, access_token)
         const url = `https://api.weixin.qq.com/cgi-bin/media/upload?access_token=${access_token}&type=${type}`;
+        const url2 = `https://api.weixin.qq.com/cgi-bin/material/add_material?access_token=${access_token}&type=${type}`
         let data = {
             media: {
                 value: media,
                 options: {
-                    filename: `pic_${new Date().getTime()}.png`
+                    filename: `pic_${new Date().getTime()}.${{image:'.png',video:'.mp4'}[type]}`
                 }
-            }
+            },
+            description:'{"title":"HELP_VIDEP", "introduction":"INTRODUCTION"}'
         };
 
-        return await this.ctx.service.http.upload({url, data, json: true})
+        return await this.ctx.service.http.upload({url:perm ? url2 : url, data, json: true})
     }
 
     // 向用户发送正在输入中状态
@@ -314,5 +330,43 @@ module.exports = class WeixinService extends Service {
         return true
     }
 
+    async getMaterialList() {
+        const {access_token} = await this.getAccessToken();
+        const url = `https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=${access_token}`;
+        console.log(`调试:获取素材列表api[${url}]`);
+        const data = {
+            "type":'video',
+            "offset":0,
+            "count":20
+        }
+
+       let result = await this.ctx.service.http.post({url,data});
+        console.log(`调试:获取列表返回值`,result);
+        return  result
+
+    }
+
+    async addMaterial({type = 'video',buffer}){
+        const {access_token} = await this.getAccessToken();
+        const url = `https://api.weixin.qq.com/cgi-bin/material/add_material?access_token=${access_token}&type=${type}`
+
+    }
+
+    async checkAccessToken(data){
+        const {id } =this.ctx.mpconfig;
+        const {access_token} =data;
+        const url =`https://api.weixin.qq.com/cgi-bin/getcallbackip?access_token=${access_token}`;
+        console.log(`调试:验证Token有效性`, access_token)
+        return await  this.service.http.get({url}).then(res=>{
+            if(res.errcode){
+                console.log(`调试:Token[${access_token}]无效正在清除[${id}_access_token]`);
+                cache.del(`${id}_access_token`); //清除Token
+                return Promise.reject(res);
+            }else{
+                console.log(`调试:Token验证成功 原数据返回`, data)
+                return  Promise.resolve(data)
+            }
+        })
+    }
 
 }

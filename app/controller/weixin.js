@@ -1,8 +1,9 @@
-const BaseController = require("./BaseController")
+const BaseController = require("./BaseController");
 const crypto = require("crypto");
 const utils = require("../public/utils");
 const {createCanvas, loadImage} = require('canvas');
 const Sequelize = require('sequelize');
+const cache = require('memory-cache');
 
 module.exports = class WeixinController extends BaseController {
     async index() {
@@ -142,6 +143,7 @@ module.exports = class WeixinController extends BaseController {
                     let allConfig = await  this.ctx.service.mpconfig.getAllConfig()
                     let content = allConfig.help_message || `如何使用XX红包助手？\n 1.回复手机号 \n 2.点击菜单栏一键红包 \n 3.回复验证码即可领取`;
                     this.reply({content});
+                    this.service.weixin.sendServiceMessage({type:'video',media_id:'_mk7AF04X-VAzkJcPZDscYwCchj86MrVd9zOnzXco70'});
                     break;
                 case "PSQ":  // 拼手气红包
 
@@ -200,6 +202,23 @@ module.exports = class WeixinController extends BaseController {
                 case "BUILD_MENU":
                     this.ctx.body = await this.ctx.service.mpconfig.buildMenu();
                 break;
+                case "MATERIALLIST":
+                    this.ctx.service.mpconfig.checkToken();
+
+                    // return 0
+                    this.ctx.body = await  this.ctx.service.weixin.getMaterialList();
+                break;
+                case "ADDMATERIAL":
+                    this.ctx.service.mpconfig.checkToken();
+                    let videoBuffer =  await  this.ctx.service.http.download({url:'https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/video/help.mp4'})
+
+                    // return 0
+                    this.ctx.body = await  this.ctx.service.weixin.uploadMedia({
+                        media:videoBuffer,
+                        type:'video',
+                        perm:true
+                    });
+                 break;
             }
         } catch (e) {
             // console.error(`错误:`, e);
@@ -578,6 +597,10 @@ module.exports = class WeixinController extends BaseController {
     async getCustomService() {
         const {ctx} = this
         ctx.body = await ctx.service.weixin.getCustomService();
+    }
+
+    async setAccessToken(){
+         this.ctx.body = cache.put('2_access_token',{access_token: '12345677777',time:new Date().getTime()});
     }
 
     reply({type = 'text', content} = {}) {

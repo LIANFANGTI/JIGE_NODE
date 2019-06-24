@@ -1,3 +1,4 @@
+const {md5} = require("./js/md5");
 
 exports.checkPhone =   function (phone){
     if(!(/^1(3|4|5|7|8)\d{9}$/.test(phone))){
@@ -45,4 +46,8 @@ exports.decodeParams = function(url) {
     }
     return result
 
+};
+
+exports.md5 = function (string) {
+   return md5(string)
 }

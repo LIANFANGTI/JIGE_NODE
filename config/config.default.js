@@ -1,5 +1,6 @@
 /* eslint valid-jsdoc: "off" */
 const path = require('path');
+const errors = require("./errorcode")
 "use strict";
 
 /**
@@ -65,6 +66,40 @@ module.exports = appInfo => {
         useUTC: false //for reading from database
       },
       timezone: '+08:00'
+    },
+    onerror: { // 异常流处理
+      all(err, ctx) {
+        // 在此处定义针对所有响应类型的错误处理方法
+        // 注意，定义了 config.all 之后，其他错误处理方法不会再生效
+        // try {
+        //     let data = JOSN.parse(err.message);
+        // }catch (e) {
+        //     if(errors[err.message]){
+        //       ctx.body = errors[err.message]
+        //     }else{
+        //       ctx
+        //     }
+        //
+        //
+        // }
+        console.log(`调试:[${new Date()}]这里是捕获的错误信息`, err,err.code);
+        // console.log(`调试:这里是捕获的错误上下文`, ctx);
+        ctx.body = err.msg;
+        ctx.status = err.status;
+      },
+      html(err, ctx) {
+        // html hander
+        ctx.body = '<h3>error</h3>';
+        ctx.status = 500;
+      },
+      json(err, ctx) {
+        // json hander
+        ctx.body = { message: 'error' };
+        ctx.status = 500;
+      },
+      jsonp(err, ctx) {
+        // 一般来说，不需要特殊针对 jsonp 进行错误定义，jsonp 的错误处理会自动调用 json 错误处理，并包装成 jsonp 的响应格式
+      },
     }
   };
 

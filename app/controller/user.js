@@ -1,6 +1,19 @@
 const Controller = require("egg").Controller;
 
 module.exports = class UserController extends Controller {
+  async list(){
+    const { ctx } = this;
+    const admin = await  ctx.service.mpconfig.checkAdminToken();
+    const {page,size} = ctx.request.query;
+    // console.log(`调试:从token中获取信息`, admin);
+    let users =  await  ctx.service.user.list({mp:admin.mpid,page,size});
+
+    ctx.body = {
+      code:20000,
+      data:users
+    }
+
+  }
   async init() {
     const { ctx } = this;
     let user = {

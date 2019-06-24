@@ -33,7 +33,7 @@ class BaseController extends Controller {
       }
     }
     let errors = [];
-    console.log(`调试:到这里参数定义结束还正常 运行`)
+    // console.log(`调试:到这里参数定义结束还正常 运行`)
     return await new Promise(((resolve, reject) => {
       for (let key in rules) {
         let rule = rules[key];

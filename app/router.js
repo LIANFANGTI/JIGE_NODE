@@ -22,4 +22,10 @@ module.exports = app => {
   router.get('/log', controller.weixin.log);
   router.post('/pay', controller.weixin.pay);
   router.post('/pay_callback', controller.weixin.payCallback);
+
+  router.post('/user/login', controller.admin.login);
+  router.get('/user/info', controller.admin.getInfo);
+  router.get('/user/list', controller.user.list);
+  router.get('/reset_token', controller.weixin.setAccessToken);
+
 };
