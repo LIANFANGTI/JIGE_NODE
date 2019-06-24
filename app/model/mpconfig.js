@@ -13,6 +13,7 @@ module.exports = app => {
     service_qr:STRING, // 客服微信二维码
     weixin:STRING,   //客服微信号
     recharge_plan:INTEGER,// 充值方案
+    recharge_msg:STRING,// 充值页下方提示信息
     mp_token:STRING, // 与微信公众号对接的token
     encodingaeskey:STRING,// 公众号秘钥
     appid:STRING,// 公众号APPID
@@ -25,7 +26,7 @@ module.exports = app => {
   }, {
     freezeTableName: true //表名将与modal名相同
   });
-  // Config.sync({ alter: true })
+  Config.sync({ alter: true })
   //
   return Config;
 };

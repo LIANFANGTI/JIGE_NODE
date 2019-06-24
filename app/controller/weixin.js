@@ -551,8 +551,9 @@ module.exports = class WeixinController extends BaseController {
                 attributes:["name","price","pay_price","coin","pid"],
                 where:Sequelize.literal(pidsql)
             });
+            let { recharge_msg } = await  this.service.mpconfig.getAllConfig();
             const data = {
-                name: "练方梯",
+                recharge_msg: recharge_msg || '',
                 openid,
                 token:this.ctx.mpconfig.token,
                 uid: user.id,
