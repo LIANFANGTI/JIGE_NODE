@@ -26,6 +26,11 @@ module.exports = app => {
   router.post('/user/login', controller.admin.login);
   router.get('/user/info', controller.admin.getInfo);
   router.get('/user/list', controller.user.list);
+  router.get('/recharge/list', controller.orders.list);
+  router.get('/plan/list', controller.orders.planList);
+  router.get('/recharge_plan/list/:pid/', controller.orders.rechargePlanList);
+  router.put('/recharge_plan/:id/', controller.orders.updateRechargePlanList);
+
   router.get('/reset_token', controller.weixin.setAccessToken);
 
 };

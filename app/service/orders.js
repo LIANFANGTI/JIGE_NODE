@@ -1,4 +1,5 @@
 const {Service} = require("egg")
+const Sequelize = require('sequelize');
 
 class RechargeService extends Service {
 
@@ -7,6 +8,47 @@ class RechargeService extends Service {
 
     }
 
+    async list({mp, page = 1, size = 10}) {
+        console.log(`调试:接收到size[${size}],[${typeof(size)}]`);
+        size = Number(size);
+        let count =await this.ctx.model.Recharge.findAll({
+            attributes: [[Sequelize.fn('COUNT', Sequelize.col('id')), 'total']],
+            where: Sequelize.literal(`buyer IN (SELECT id FROM users WHERE mid = ${mp} )`)
+        });
+        const total  = count[0]['dataValues']['total'];
+        // console.log(`调试:总记录数`,count[0], count[0]['dataValues']['total']);
+        let results = await this.ctx.model.Recharge.findAll({
+            attributes: {exclude: []},
+            // include:[
+            //     {
+            //         model:this.ctx.model.User,
+            //         required:true
+            //     }
+            // ],
+            where:  Sequelize.literal(`buyer IN (SELECT id FROM users WHERE mid = ${mp} )`),
+            offset: (page - 1) * size,
+            limit: size
+        });
+
+        return  {total,size,page,results};
+    }
+
+    async getPlanList({mp}){
+        return  await  this.ctx.model.Plans.findAll({
+            attributes: {exclude: []},
+            where:{owner:mp}
+        })
+    }
+
+   async getRechargePlanList({pid}){
+        return  await  this.ctx.model.RechargePlan.findAll({
+            attributes:{exclude:[]},
+            where:{pid}
+        })
+   }
+   async updateRechargePlanList({id,data}){
+        return  await  this.ctx.model.RechargePlan.update(data,{where:{id}})
+   }
     async getOrderStatus(order_id){
         let result = await  this.ctx.model.Recharge.findOne({
             attributes:["status"],

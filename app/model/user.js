@@ -16,7 +16,10 @@ module.exports = app => {
     }, {
         freezeTableName: true //表名将与modal名相同
     });
-    // User.sync({ alter: true })
+    // User.prototype.associate = function(){
+    //     User.hasMany(app.model.Recharge,{as:'recharges'})
+    // }
+    User.sync({ alter: true });
     // User.sync({force: true}).then(() => {
     // });
     return User;

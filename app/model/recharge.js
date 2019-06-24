@@ -12,11 +12,17 @@ module.exports = app => {
         more: STRING,  // 订单信息
         transaction_id: STRING, //流水号
         bank_type: STRING, // 付款方式
-        buyer: STRING, // 订单关联用户 支付宝回调中有该信息 微信没有 在订单创建时写入
+        buyer: INTEGER, // 订单关联用户 支付宝回调中有该信息 微信没有 在订单创建时写入
         status:STRING, //订单状态 0 未支付  1 已支付 2已退款
     }, {
         freezeTableName: true //表名将与modal名相同
     });
-    // Recharge.sync({force: true}).then(()=>{})
+    const User = app.model.User;
+    // Recharge.associate = function(){
+    //     Recharge.belongsTo(User,{as:'buyer',foreignKey:'user_id'});
+    // }
+    // Recharge.belongsTo(User);
+    // User.hasMany(Recharge);
+    Recharge.sync({alert: true}).then(()=>{});
     return Recharge;
 };
