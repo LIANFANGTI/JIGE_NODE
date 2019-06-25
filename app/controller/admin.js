@@ -73,9 +73,20 @@ module.exports = class AdminController extends BaseController {
         console.log(`调试:上传图片`, res);
         this.ctx.body = {
             code:20000,
-            url:`/images/${filename}`
+            url:`/images/${filename}`,
+            fill:`http://${this.ctx.request.headers.host}/images/${filename}`,
+            context:this.ctx
         }
 
+    }
+
+    async uploadToOss(){
+      let res = await  this.ctx.service.http.uploadToOss()
+      this.ctx.body = {
+          code:0,
+          msg:'上传成功',
+          result:res
+      }
     }
 }
 

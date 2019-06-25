@@ -188,7 +188,22 @@ module.exports = class WeixinController extends BaseController {
 
                     break;
                 case "LXKF": //联系客服
-                    this.reply({content: '你点击了联系客服按钮'});
+                    await this.ctx.service.mpconfig.checkToken()
+                    let {  service_qr,weixin } = await this.ctx.service.mpconfig.getAllConfig(); // 获取二维码文件地址
+                    this.reply({content: `复制搜索下方微信号 或长按识别下方二维码联系客服微信`});
+                    await  this.ctx.service.weixin.sendServiceMessage({content:`${weixin}`});
+
+                    let serviceQrBuffer =await this.ctx.service.http.download({url:service_qr});
+                    console.log(`调试:获取到的文件buffer`, serviceQrBuffer);
+
+                    let { media_id } = await this.ctx.service.weixin.uploadMedia({media:serviceQrBuffer});
+
+                    await  this.ctx.service.weixin.sendServiceMessage({type:'image',media_id});
+                    // console.log(`调试:上传到微信返回值`, res);
+
+
+
+
 
                     break;
                 case "NEWS":

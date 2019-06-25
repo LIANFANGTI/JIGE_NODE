@@ -7,6 +7,7 @@
     "declarations": true
   },
   "dependencies": {
+    "ali-oss": "^6.1.1",
     "canvas": "^2.5.0",
     "egg": "^2.15.1",
     "egg-bizerror": "^2.2.1",

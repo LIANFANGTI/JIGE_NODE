@@ -2,7 +2,10 @@
 const Service = require('egg').Service;
 const requset = require('request-promise');
 const request2 = require('request');
+const oss = require('ali-oss')
 const fs = require('fs');
+const path = require('path');
+
 
 
 module.exports = class HttpService extends Service {
@@ -58,6 +61,45 @@ module.exports = class HttpService extends Service {
 
 
         }))
+
+
+    }
+    async uploadToOss(){
+        const { ctx, service, app } = this;
+        let parts = ctx.multipart({ autoFields: true });
+        let data = ctx.request.body
+        let stream;
+         const client = new oss({
+             accessKeyId: 'LTAIRyHJ2BEtUjaR',
+             accessKeySecret: 'ZYnxle0EIypBLFX4wR6Ol4qFo24UUL',
+             bucket: 'lft-ad',
+             region: 'oss-cn-hangzhou',//替换成自己的地区，我这是深圳
+         });
+         let result;
+        while ((stream = await parts()) != null) {
+            if (!stream.filename) {
+                break;
+            }
+            // console.log(`调试:`,);
+            let { name,id } = parts.field;
+
+            let pathname = `eleme/upload/${name}/${id}${path.extname(stream.filename)}`;
+
+            result=   await   client.putStream(pathname, stream);
+            // console.log(`调试:图片上传`, r1)
+            // client.putStream(name, stream).then(function (r1) {
+            //     console.log('put success: %j',r1);
+            //     return client.get('object');
+            // }).then(function (r2) {
+            //     // console.log('get success: %j');
+            //     console.log(`调试:上传成功`,r2)
+            // }).catch(function (err) {
+            //     console.error('上传出错',err);
+            // });
+
+        }
+        return result;
+
 
 
     }

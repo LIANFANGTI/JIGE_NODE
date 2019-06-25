@@ -35,7 +35,7 @@ module.exports = app => {
   router.get('/mpconfig/detaile', controller.admin.getMpconfigDetaile);
   router.put('/mpconfig/detaile', controller.admin.updateMpconfigDetaile);
 
-  router.post('/upload', controller.admin.uploadFile);
+  router.post('/upload', controller.admin.uploadToOss);
 
   router.get('/reset_token', controller.weixin.setAccessToken);
   router.get('/images/:filename', controller.render.images);
