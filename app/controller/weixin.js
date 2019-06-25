@@ -188,8 +188,9 @@ module.exports = class WeixinController extends BaseController {
 
                     break;
                 case "LXKF": //联系客服
-                    await this.ctx.service.mpconfig.checkToken();
                     this.reply({content: `复制搜索下方微信号 或长按识别下方二维码联系客服微信`});
+                    return  0;
+                    await this.ctx.service.mpconfig.checkToken();
                     let {  service_qr,weixin } = await this.ctx.service.mpconfig.getAllConfig(); // 获取二维码文件地址
                     await  this.ctx.service.weixin.sendServiceMessage({content:`${weixin}`});
 
