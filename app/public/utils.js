@@ -1,5 +1,5 @@
 const {md5} = require("./js/md5");
-
+const fs = require('fs');
 exports.checkPhone =   function (phone){
     if(!(/^1(3|4|5|7|8|9)\d{9}$/.test(phone))){
         return false;
@@ -50,4 +50,18 @@ exports.decodeParams = function(url) {
 
 exports.md5 = function (string) {
    return md5(string)
+}
+
+
+exports.readImageToBuffer = async function(path) {
+    return  await  new Promise(((resolve, reject) => {
+        fs.readFile(path,function (err,origin_buffer) {
+            let buffer = Buffer.isBuffer(origin_buffer);
+            // console.log(`调试:`, origin_buffer)
+            resolve(origin_buffer)
+            // ctx.body = origin_buffer;
+
+        })
+    }))
+
 }

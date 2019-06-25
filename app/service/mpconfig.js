@@ -4,6 +4,14 @@ const utils = require("../public/utils");
 const db = new Sequelize('mysql://eleme:lianfangti*@example.com:3306/eleme');
 
 class ConfigService extends Service {
+    async detaile({id}){
+            return  await this.ctx.model.Mpconfig.findOne({
+                attributes:{exclude: []},
+                where:{id}
+            })
+
+    }
+
     async Login({username, password}) {
 
         let admin = await this.ctx.model.Admins.findOne({

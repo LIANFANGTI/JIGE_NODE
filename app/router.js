@@ -28,9 +28,16 @@ module.exports = app => {
   router.get('/user/list', controller.user.list);
   router.get('/recharge/list', controller.orders.list);
   router.get('/plan/list', controller.orders.planList);
+
   router.get('/recharge_plan/list/:pid/', controller.orders.rechargePlanList);
   router.put('/recharge_plan/:id/', controller.orders.updateRechargePlanList);
 
+  router.get('/mpconfig/detaile', controller.admin.getMpconfigDetaile);
+  router.put('/mpconfig/detaile', controller.admin.updateMpconfigDetaile);
+
+  router.post('/upload', controller.admin.uploadFile);
+
   router.get('/reset_token', controller.weixin.setAccessToken);
+  router.get('/images/:filename', controller.render.images);
 
 };
