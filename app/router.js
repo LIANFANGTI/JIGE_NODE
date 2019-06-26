@@ -40,5 +40,6 @@ module.exports = app => {
   router.get('/reset_token', controller.weixin.setAccessToken);
   router.get('/images/:filename', controller.render.images);
   router.get('/mpconfig/menu', controller.admin.getMenus);
+  router.get('/home/paneldata', controller.home.index);
 
 };

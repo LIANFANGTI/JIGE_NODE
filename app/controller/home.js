@@ -1,11 +1,56 @@
 'use strict';
+const Sequelize = require('sequelize');
 
 const Controller = require('egg').Controller;
 
 class HomeController extends Controller {
   async index() {
     const { ctx } = this;
-    ctx.body = JSON.stringify({ code: 0, msg: 'Hello  Egg' });
+    try {
+     let admin = await  this.ctx.service.mpconfig.checkAdminToken();
+     let config = await  this.ctx.model.Mpconfig.findOne({
+       attributes:["token","id"],
+       where:{id:admin.mpid}
+     })
+      // console.log(`调试:获取到用户信息`, config)
+      let res = await  this.ctx.service.mpconfig.checkToken(config.token);
+
+
+    }catch (e) {
+      console.log(`调试:`, e)
+      this.ctx.body =e
+    }
+    let userCount =await this.ctx.model.User.findAll({
+      // attributes:[Sequelize.literal("COUNT(1) as count")],
+      attributes: [[Sequelize.fn('COUNT', Sequelize.col('id')), 'count']],
+      where:Sequelize.literal(`TO_DAYS(created_at) = TO_DAYS(NOW())`)
+    });
+
+    let getLog =await this.ctx.model.Log.findAll({
+      // attributes:[Sequelize.literal("COUNT(1) as count")],
+      attributes: [[Sequelize.fn('COUNT', Sequelize.col('id')), 'count']],
+      where:Sequelize.literal(`TO_DAYS(created_at) = TO_DAYS(NOW())`)
+    });
+
+    let rechargeCount = await  this.ctx.model.Recharge.findAll({
+      // attributes:[Sequelize.literal("SUM(pay_price) as `sum`")],
+      attributes: [[Sequelize.fn('SUM', Sequelize.col('pay_price')), 'sum']],
+      where:Sequelize.literal(`TO_DAYS(created_at) = TO_DAYS(NOW())`)
+    });
+    let blance = await  this.ctx.service.mpconfig.getAllConfig();
+    // console.log(`调试:查询结果`, rechargeCount)
+    let data ={
+      newuser:userCount[0].get('count'),
+      recharge:Math.floor(rechargeCount[0].get('sum') * 100) / 100,
+      getcount:getLog[0].get('count'),
+      blance:blance.blance
+
+    };
+    ctx.body = {
+      code:20000,
+      data
+    }
+    // ctx.body = JSON.stringify({ code: 0, msg: 'Hello  Egg' });
   }
 }
 
