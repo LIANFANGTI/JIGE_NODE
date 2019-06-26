@@ -22,8 +22,7 @@ module.exports = class ElemeService extends Service {
                 504: "领取失败，系统繁忙",
             };
             if(res.code === 50){
-                let content =
-                    `正在为手机号[${data.phone}]下发验证码，请稍等... \n温馨提示: 如果这不是您的手机号,您可以重新发送手机号绑定`;
+                let content = `正在为手机号[${data.phone}]下发验证码，请稍等... \n温馨提示: 如果这不是您的手机号,您可以重新发送手机号绑定`;
                 await ctx.service.weixin.sendServiceMessage({content});
                 if(res.result.message.indexOf("成功") !== -1){
                     errors[50] = `发送短信验证码成功,请您回复6位数验证码领取红包`

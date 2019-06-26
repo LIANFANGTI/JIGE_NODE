@@ -152,7 +152,7 @@ module.exports = class WeixinController extends BaseController {
                     let allConfig = await  this.ctx.service.mpconfig.getAllConfig()
                     let content = allConfig.help_message || `如何使用XX红包助手？\n 1.回复手机号 \n 2.点击菜单栏一键红包 \n 3.回复验证码即可领取`;
                     this.reply({content});
-                    this.service.weixin.sendServiceMessage({type:'video',media_id:'_mk7AF04X-VAzkJcPZDscYwCchj86MrVd9zOnzXco70'});
+                    // this.service.weixin.sendServiceMessage({type:'video',media_id:'_mk7AF04X-VAzkJcPZDscYwCchj86MrVd9zOnzXco70'});
                     break;
                 case "PSQ":  // 拼手气红包
 
