@@ -26,6 +26,7 @@ module.exports = app => {
     subscribe_msg:STRING,// 用户关注时自动回复
     comeback_msg:STRING,// 用户自动关注时回复
     help_message:STRING,//用户点教程时回复的消息
+    auto_msg:STRING,// 无匹配关键字时自动回复
     menu:INTEGER //菜单方案ID
 
   }, {

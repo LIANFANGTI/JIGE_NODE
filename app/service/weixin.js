@@ -392,6 +392,11 @@ module.exports = class WeixinService extends Service {
        });
         // console.log(`调试:所属规则`, replyRules)
         // console.log(`调试:查询到的回复`, replys);
+        console.log(`调试:搜索规则`, replyRules);
+        if(!replyRules){
+            let config  = await this.ctx.service.mpconfig.getAllConfig();
+            return  [{type:1,content:config.auto_msg}];
+        }
        if(replyRules.rule === 0){   //随机回复一条
            let random = utils.RandomNum(0,replys.length,"[)");
            console.log(`调试:随机回复一条`,random);
