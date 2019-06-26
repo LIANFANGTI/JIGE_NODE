@@ -9,8 +9,10 @@ module.exports = class WeixinController extends BaseController {
     async index() {
         const {ctx} = this;
         let query = ctx.request.query;
+        // console.log(`调试:`, res)
         try {
             let mpconfig = await ctx.service.mpconfig.checkToken(query.token);
+            // return  0;
             // console.log(`调试:ctx.mpconfig`, ctx.mpconfig);
             let data = ctx.request.body;
             console.log(`\n\n==================================[${new Date()}]接收到网络请求==================================`);
@@ -165,23 +167,27 @@ module.exports = class WeixinController extends BaseController {
                     break;
                 case "TGM":  // 推广码
                     this.reply({content: '获取中 请稍后...'});
-                    let u = await this.ctx.service.user.findOne({col: ["id", "openid"], where: {openid}});
-                    console.log(`调试:用户信息`, u.id);
-                    const url = `http://127.0.0.1:7003/draw?type=image&id=${u.id}&token=${this.ctx.mpconfig.token}`;
-                    let buffer = await this.ctx.service.http.download({url});
-                    console.log(`调试:数据下载成功`, buffer);
-                    this.ctx.service.weixin.uploadMedia({type: 'image', media: buffer}).then(async res => {
-                        console.log(`调试:上传到微信服务器返回值`, res);
-                        let {media_id} = res;
-                        console.log(`调试:返回的媒体ID`, media_id, typeof (res));
-                        await this.ctx.service.weixin.sendServiceMessage({content: `推广码获取成功 \n请点击查看原图 长按发送给朋友\n成功邀请一位朋友您将获得${this.ctx.mpconfig.ex_coin}积分`});
-                        await this.ctx.service.weixin.sendServiceMessage({media_id, type: 'image'});
-                    })
-
+                    this.ctx.runInBackground(async ()=>{
+                        let u = await this.ctx.service.user.findOne({col: ["id", "openid"], where: {openid}});
+                        console.log(`调试:用户信息`, u.id);
+                        const url = `http://127.0.0.1:7003/draw?type=image&id=${u.id}&token=${this.ctx.mpconfig.token}`;
+                        let buffer = await this.ctx.service.http.download({url});
+                        console.log(`调试:数据下载成功`, buffer);
+                        this.ctx.service.weixin.uploadMedia({type: 'image', media: buffer}).then(async res => {
+                            console.log(`调试:上传到微信服务器返回值`, res);
+                            let {media_id} = res;
+                            console.log(`调试:返回的媒体ID`, media_id, typeof (res));
+                            await this.ctx.service.weixin.sendServiceMessage({content: `推广码获取成功 \n请点击查看原图 长按发送给朋友\n成功邀请一位朋友您将获得${this.ctx.mpconfig.ex_coin}积分`});
+                            await this.ctx.service.weixin.sendServiceMessage({media_id, type: 'image'});
+                        })
+                    });
                     break;
                 case "MRQD": // 每日签到
-                    this.reply({content: '你点击了每日签到按钮'});
-                    break;
+                    this.reply({content: '签到中请稍后...'});
+                    this.ctx.runInBackground(async()=>{
+                       await this.ctx.service.user.signin({openid});
+                    });
+                break;
                 case "ZHCZ": // 账户充值
                     this.reply();
                     this.ctx.service.weixin.typing();

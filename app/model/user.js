@@ -12,7 +12,10 @@ module.exports = app => {
         headimgurl: STRING,
         mid:INTEGER,
         subscribe: BOOLEAN,
-        created_at: DATE
+        created_at: DATE,
+        last_sign:DATE,//最近签到时间
+        conn_sign:INTEGER,//连续签到时间
+
     }, {
         freezeTableName: true //表名将与modal名相同
     });

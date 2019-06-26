@@ -3,6 +3,58 @@ const Sequelize = require('sequelize');
 
 module.exports = class UserService extends Service {
 
+    //用户签到
+    async signin({openid}){
+         const user = await  this.ctx.model.User.findOne({
+             attributes:["last_sign","conn_sign","id","times"],
+             where:{openid}
+         });
+         if(!user.last_sign || new Date(user.last_sign)){
+
+         }
+
+         let now = new Date(); //当前时间
+         let nowStr = `${now.getFullYear()}${now.getMonth()}${now.getDate()}`;
+         let last_sign = new Date(user.last_sign) //最后签到时间
+         let lastSignStr =`${last_sign.getFullYear()}${last_sign.getMonth()}${last_sign.getDate()}`;
+         let maxInterval = 24 * 60 * 60; // 最大间隔秒数
+         let nowInterval =(now.getTime() - last_sign.getTime()) / 1000 //当前间隔时间
+         const config =await this.ctx.service.mpconfig.getAllConfig();
+         console.log(`调试:获取配置`, config)
+        if(!config.sign){
+            await  this.ctx.service.weixin.sendServiceMessage({content:`签到功能暂未开放 敬请期待哦`});
+            return  0;
+        }
+        if(lastSignStr == nowStr){
+             console.log(`调试:今日已签到[${nowStr}][${lastSignStr}]`);
+             await  this.ctx.service.weixin.sendServiceMessage({content:`您今日已签到成功 不用重复签到哦`});
+             return ;
+         }
+        let addCoin= 0 ;
+        if(nowInterval < maxInterval){ // 是连续签到
+             console.log(`调试:签到成功`);
+            addCoin = config.sign_coin  + (user.conn_sign + 1)
+            this.ctx.model.User.update({
+                  last_sign:now,
+                  times:Sequelize.literal(`times + ${addCoin}`),
+                  conn_sign: Sequelize.literal(`conn_sign + 1`)
+              },{where:{openid}});
+            await  this.ctx.service.weixin.sendServiceMessage({content:`签到成功\n积分余额:+${addCoin}\n当前积分:${user.times + addCoin}\n您已连续签到${(user.conn_sign + 1)}天\n`})
+         } else { //不是连续签到
+             console.log(`调试:不是连续签到`);
+            addCoin = config.sign_coin  ;
+            this.ctx.model.User.update({
+                 last_sign:now,
+                 times:Sequelize.literal(`times + ${addCoin}`),
+                 conn_sign: 0
+             },{where:{openid}});
+            await  this.ctx.service.weixin.sendServiceMessage({content:`签到成功\n积分余额:+${addCoin}\n当前积分:${user.times + addCoin}\n连续签到可获取额外积分哦`})
+        }
+
+        // console.log(`调试:签到的用户信息[${user.id}]` ,nowStr,new Date(user.last_sign).getDate());
+
+    }
+
     //用户取关
     async unsubscribe({openid}) {
         const {ctx} = this;

@@ -245,7 +245,7 @@ module.exports = class WeixinService extends Service {
         openid = openid || this.ctx.request.body.FromUserName;
         const articles = {
             "title": "充值中心",
-            "description": "0.5元帮您领到最大红包实时充值实时到账",
+            "description": "超值限时优惠套餐",
             "url": `http://eleme.lianfangti.cn/recharge?openid=${openid}&token=${this.ctx.mpconfig.token}`,
             "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/200x200-lk.png"
         }

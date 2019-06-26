@@ -65,7 +65,7 @@ class ConfigService extends Service {
 
     async checkToken(token) {
         const {ctx} = this;
-        token = token || ctx.request.query.token
+        token = token || ctx.request.query.token;
         if (token) {
             const mpconfig = await ctx.service.mpconfig.exist({
                 col: ["appid", "id", "in_coin", "unit_coin", "token", "ex_coin", "join_coin", "unit_price", "appsecret"],
@@ -85,6 +85,7 @@ class ConfigService extends Service {
         } else {
             let result = {code: 400, msg: '无效参数'};
             ctx.body = result;
+            return Promise.reject(result)
             // this.ctx.logger.error(  new Error(result))
         }
 
