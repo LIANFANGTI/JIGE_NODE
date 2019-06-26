@@ -50,7 +50,7 @@ exports.decodeParams = function(url) {
 
 exports.md5 = function (string) {
    return md5(string)
-}
+};
 
 
 exports.readImageToBuffer = async function(path) {
@@ -64,4 +64,43 @@ exports.readImageToBuffer = async function(path) {
         })
     }))
 
-}
+};
+exports.RandomNum = function (Min,Max,range="[]") {
+    switch (range) {
+        case "[]":
+            var Range = Max - Min;
+            var Rand = Math.random();
+            var num = Min + Math.round(Rand * Range);
+        break;
+        case "[)":
+            var Range = Max - Min;
+            var Rand = Math.random();
+            var num = Min + Math.floor(Rand * Range); //舍去
+        break;
+        case "(]":
+            var Range = Max - Min;
+            var Rand = Math.random();
+            if(Math.round(Rand * Range)==0){
+                return Min + 1;
+            }
+            var num = Min + Math.round(Rand * Range);
+        break;
+        case "()":
+            let index =0;
+            var Range = Max - Min;
+            var Rand = Math.random();
+            if(Math.round(Rand * Range)==0){
+                return Min + 1;
+            }else if(Math.round(Rand * Max)==Max)
+            {
+                index++;
+                return Max - 1;
+            }else{
+                var num = Min + Math.round(Rand * Range) - 1;
+                return num;
+            }
+        break;
+    }
+
+    return num;
+};

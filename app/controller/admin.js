@@ -79,6 +79,15 @@ module.exports = class AdminController extends BaseController {
         }
 
     }
+    async getMenus() {
+        let {mpid} = await  this.ctx.service.mpconfig.checkAdminToken();
+        console.log(`调试:mpid`, mpid)
+        let result = await this.ctx.service.mpconfig.getMenus({mpid});
+        this.ctx.body = {
+            code:20000,
+            data:result
+        }
+    }
 
     async uploadToOss(){
       let res = await  this.ctx.service.http.uploadToOss()

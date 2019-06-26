@@ -23,6 +23,6 @@ module.exports = app => {
     // }
     // Recharge.belongsTo(User);
     // User.hasMany(Recharge);
-    Recharge.sync({alert: true}).then(()=>{});
+    // Recharge.sync({alert: true}).then(()=>{});
     return Recharge;
 };

@@ -3,6 +3,9 @@ const Service = require('egg').Service;
 const requset = require('request');
 const qr = require('qr-image');
 const cache = require('memory-cache');
+const Sequelize = require('sequelize');
+const utils = require("../public/utils");
+
 const options = {
     'token': 'p4d0lfS9LR0aaHh0',           //填写你设定的Token
     'encodingaeskey': 'NfJU7O3k83Mr7KTP3gdHKIAyHKvRSBoAkWEO3cCvGjc',  //填写加密用的EncodingAESKey
@@ -369,4 +372,37 @@ module.exports = class WeixinService extends Service {
         })
     }
 
+    //自动回复
+    async autoReply({keyword}) {
+        const mid = this.ctx.mpconfig.id;
+        // let rules = await  this.ctx.model.ReplyRule.findOne({
+        //     attributes:{exclude: []},
+        //     where:{owner:mid}
+        // })
+        const sql = `rule_id = (SELECT rule_id FROM keywords WHERE rule_id in (SELECT id FROM reply_rule WHERE owner = ${mid}) AND keyword LIKE '%${keyword}%')`
+        let replys = await this.ctx.model.Replys.findAll({
+            attributes: {exclude: []},
+            where: Sequelize.literal(sql)
+        });
+
+       let sql2 = `id = (SELECT rule_id FROM keywords WHERE rule_id IN (SELECT id FROM reply_rule WHERE OWNER = ${mid}) AND keyword LIKE '%${keyword}%')`
+       let replyRules = await  this.ctx.model.ReplyRule.findOne({
+           attributes: {exclude: []},
+           where:Sequelize.literal(sql2)
+       });
+        // console.log(`调试:所属规则`, replyRules)
+        // console.log(`调试:查询到的回复`, replys);
+       if(replyRules.rule === 0){   //随机回复一条
+           let random = utils.RandomNum(0,replys.length,"[)");
+           console.log(`调试:随机回复一条`,random);
+           return  [replys[random]];
+       }else{
+           console.log(`调试:全部回复`);
+           return replys;        //全部回复
+       }
+
+
+        // SELECT * FROM replys  WHERE rule_id =  (SELECT rule_id FROM keywords WHERE rule_id in (SELECT id FROM reply_rule WHERE owner = 2) AND keyword LIKE '%教程%')
+
+    }
 }

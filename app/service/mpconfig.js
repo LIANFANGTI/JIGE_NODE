@@ -102,6 +102,13 @@ class ConfigService extends Service {
         return await this.ctx.service.weixin.createMenu({menu: JSON.parse(menu.json)});
     }
 
+     async getMenus({mpid}){
+        return await  this.ctx.model.Menu.findOne({
+            attributes: {exclude: []},
+            where:Sequelize.literal(`id IN (SELECT menu FROM mpconfig WHERE id = ${mpid})`)
+        })
+    }
+
     async getAllConfig() {
         let result = await this.ctx.model.Mpconfig.findOne({
             attributes: {exclude: ['updated_at']},

@@ -14,7 +14,7 @@ module.exports = app => {
   }, {
     freezeTableName: true //表名将与modal名相同
   });
-  Admins.sync({ alter: true });
+  // Admins.sync({ alter: true });
   return Admins;
 };
 

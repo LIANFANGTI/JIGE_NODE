@@ -99,14 +99,23 @@ module.exports = class WeixinController extends BaseController {
                         }
 
                     } else if (utils.checkVerificationCode(content)) {  //判断是否为验证码
-                        console.log(`调试:输入的为验证码`, content)
+                        console.log(`调试:输入的为验证码`, content);
                         this.reply();
                         let res = await this.getEleme({type: 20, validate_code: content});
                         console.log(`调试:提交验证码返回值`, res)
 
                     } else {
                         console.log(`调试:收到的不是手机号`, content);
-                        this.reply({content: '恩恩好的呢'});
+                        this.reply({});
+                        this.ctx.runInBackground(async()=>{
+                            let replys = await  this.ctx.service.weixin.autoReply({keyword:content});
+                            // console.log(`调试:自动回复`, reply);
+                            for(let reply of replys){
+                                this.ctx.service.weixin.sendServiceMessage({content:reply.content})
+                            }
+                        });
+
+                        // this.reply({content: '恩恩好的呢'});
                     }
 
                 }
@@ -190,6 +199,7 @@ module.exports = class WeixinController extends BaseController {
                 case "LXKF": //联系客服
                     this.reply({content: `复制搜索下方微信号 或长按识别下方二维码联系客服微信`});
                     // return  0;
+
                     this.ctx.runInBackground(async ()=>{
                         await this.ctx.service.mpconfig.checkToken();
                         let {  service_qr,weixin } = await this.ctx.service.mpconfig.getAllConfig(); // 获取二维码文件地址

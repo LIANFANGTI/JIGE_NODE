@@ -19,7 +19,7 @@ module.exports = app => {
     // User.prototype.associate = function(){
     //     User.hasMany(app.model.Recharge,{as:'recharges'})
     // }
-    User.sync({ alter: true });
+    // User.sync({ alter: true });
     // User.sync({force: true}).then(() => {
     // });
     return User;

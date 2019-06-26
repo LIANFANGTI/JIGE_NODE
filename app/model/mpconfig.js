@@ -31,7 +31,7 @@ module.exports = app => {
   }, {
     freezeTableName: true //表名将与modal名相同
   });
-  Config.sync({ alter: true });
-  //
+  // Config.sync({ alter: true });
+
   return Config;
 };
