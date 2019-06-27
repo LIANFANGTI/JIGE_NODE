@@ -3,6 +3,54 @@ const Sequelize = require('sequelize');
 
 module.exports = class UserService extends Service {
 
+    // 领取口令红包
+    async getCodeCoin({keyword,openid}){
+        let coin =await this.ctx.model.CodeCoin.findOne({
+            attributes:["coin","limit","log","id"],
+            where:Sequelize.literal(`keyword =  '${keyword}'`)
+        });
+        let user = await  this.ctx.model.User.findOne({
+            attributes:['id'],
+            where:{openid}
+        });
+        // console.log(`调试:当前用户`, user)
+
+        let getlog = await  this.ctx.model.CodeCoinLog.findOne({
+            attributes:['id'],
+            where:{
+                uid:user.id,
+                cid:coin.id
+            }
+        });
+        console.log(`调试:剩余红包个数`,coin.limit - coin.log)
+        if((coin.limit - coin.log)< 1){
+            this.ctx.service.weixin.sendServiceMessage({content:' 啊哦~\n 你来晚一步 红包已经被抢光了😂'});
+            return 0;
+        }
+        if(getlog){
+            this.ctx.service.weixin.sendServiceMessage({content:'你已经领取过了哦'});
+        }else{
+            // 更新用户表
+             await this.ctx.model.User.update(
+                 {times:Sequelize.literal(`times + ${coin.coin}`)},
+                 { where:{ openid }});
+             //更新红包表
+             await this.ctx.model.CodeCoin.update({
+                log:Sequelize.literal(`log + 1`)
+             },{where:{id:coin.id}});
+             //领取记录表 插入记录
+             await this.ctx.model.CodeCoinLog.create({
+                uid:user.id,
+                cid:coin.id
+            })
+            this.ctx.service.weixin.sendServiceMessage({content:`大吉大利 今晚吃鸡~ \n恭喜你获得${coin.coin}个积分\n 已发放到你的余额 请注意查收 么么哒~`});
+        }
+        console.log(`调试:是否存在领取记录`, getlog)
+
+
+    }
+
+
     //用户签到
     async signin({openid}){
          const user = await  this.ctx.model.User.findOne({
@@ -118,6 +166,7 @@ module.exports = class UserService extends Service {
             attributes: {exclude: []},
             where: {mid: mp},
             offset: (page - 1) * size,
+            order:[ ['created_at', 'DESC']],
             limit: size
         });
 

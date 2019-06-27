@@ -19,7 +19,7 @@ const options = {
 module.exports = class WeixinService extends Service {
     // 获取access_token
     async getAccessToken() {
-        console.log(`调试:获取TOKEN的地方打印mpconfig`, this.ctx.mpconfig);
+        // console.log(`调试:获取TOKEN的地方打印mpconfig`, this.ctx.mpconfig);
         const {id } =this.ctx.mpconfig;
         console.log(`调试:获取到公众号id`, id);
         console.log(`调试:从缓存中取access_token cache.get(${id}_access_token) = [${cache.get(`${id}_access_token`)}]`,)

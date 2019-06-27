@@ -116,6 +116,9 @@ module.exports = class WeixinController extends BaseController {
                                 this.ctx.service.weixin.sendServiceMessage({content:reply.content})
                             }
                         });
+                        this.ctx.runInBackground(async()=>{
+                            let result = await  this.ctx.service.user.getCodeCoin({keyword:content,openid});
+                        })
 
                         // this.reply({content: '恩恩好的呢'});
                     }

@@ -26,9 +26,19 @@ class RechargeService extends Service {
             //     }
             // ],
             where:  Sequelize.literal(`buyer IN (SELECT id FROM users WHERE mid = ${mp} )`),
+            order:[ ['created_at', 'DESC']],
             offset: (page - 1) * size,
             limit: size
         });
+        for(let i in results){
+            let buyer = results[i]['buyer'];
+            let user =await this.ctx.model.User.findOne({
+                attributes:["id","nickname"],
+                where:{id:Number(buyer)}
+            })
+            // console.log(`调试:`, user)
+            results[i].set("buyer",user.nickname)
+        }
 
         return  {total,size,page,results};
     }
