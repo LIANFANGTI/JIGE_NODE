@@ -152,6 +152,54 @@ module.exports = class UserService extends Service {
 
 
     }
+    async list2({mp,page =1 ,size =10}){
+        let condition = this.ctx.request.query;
+        const fuzzy = condition.word || '';
+        const fuzzyCloumn = ['nickname','phone']; // 模糊匹配字段
+        const cloumn = ["city","subscribe","sex","father_name"]; //精确匹配字段
+        delete  condition.word;
+        delete condition.page;
+        delete  condition.size;
+        let str ='WHERE';
+        for(let key in condition){
+            // let flag = false;
+            if(cloumn.includes(key)){
+                if(condition[key] !== ''){
+                    str+= ` ${key} like '%${condition[key]}%' AND`
+                }
+            }
+
+        }
+        str += "(";
+        for(let col of fuzzyCloumn){
+            str+= ` ${col} like '%${fuzzy}%' OR`
+        }
+        str += " 0 )";
+        // str+= ' 1';
+        console.log(`调试:查询条件`, str);
+        const WHERE = str;
+        const LIMIT = ` LIMIT ${(page - 1) * size},${size}`;
+
+        const ORDERBY = condition.sortby !== ''?  `ORDER BY ${condition.sortby} ${condition.order}`:``;
+
+        // const count_sql = `SELECT COUNT(1) as total FROM users WHERE father IN (SELECT id AS fid FROM users ${WHERE} ) AND mid =${mp}`;
+        const total_sql = `SELECT id,mid,openid,subscribe,father_name,nickname,phone,fid,ex_count,recharge_count,get_count,city,sex,times,created_at FROM  users 
+                     LEFT  JOIN (SELECT id AS fid,nickname AS father_name FROM users) fu ON  users.father = fu.fid
+                     LEFT  JOIN (SELECT father as et_fid,COUNT(1) ex_count FROM users GROUP BY father  )  AS et  ON users.id = et.et_fid
+                     LEFT  JOIN (SELECT sum(pay_price) recharge_count,buyer FROM recharge GROUP BY buyer) AS rt ON users.id = rt.buyer
+                     LEFT  JOIN (SELECT count(1) get_count, uid FROM log GROUP BY uid ) AS lt ON  users.id = lt.uid ${WHERE} AND mid =${mp}`;
+        const sql = `${total_sql} ${ORDERBY} ${LIMIT} `;
+        // console.log(`调试:`, this.config.sequelize);
+        const mysql =new Sequelize(this.config.sequelize);
+        let results =await  mysql.query(sql,{ type: mysql.QueryTypes.SELECT});
+        let total =await  mysql.query(total_sql,{ type: mysql.QueryTypes.SELECT});
+        total = total.length ;
+        console.log(`调试:查询结果`, total);
+        // return  result[0];
+        return  {total,size,page,results}
+
+
+    }
 
     async list({mp, page = 1, size = 10}) {
         console.log(`调试:接收到size[${size}],[${typeof(size)}]`);
