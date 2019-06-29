@@ -145,7 +145,8 @@ module.exports = class UserService extends Service {
             user['father'] = father; // 新用户送两个次数
             user['subscribe'] = 1; // 是否关注
             user['mid'] = this.ctx.mpconfig.id; // 所属 公众号
-            await ctx.service.user.add(user);
+           let res =  await ctx.service.user.add(user);
+           console.log(`调试:新增用户回调`, res);
             if (father !== 0) {
                 console.log(`调试:邀请者不为空`, father);
                 let fer = await ctx.service.user.exist({
@@ -154,9 +155,9 @@ module.exports = class UserService extends Service {
                     showCol: true
                 });
                 console.log(`调试:邀请者 详细信息`, fer);
-                // this.ctx.service.user.giveCoin({openid:fer.openid,coin:this.ctx.mpconfig.ex_coin,})
-                let updatefer = await ctx.service.user.update({times: fer.times + this.ctx.mpconfig.ex_coin}, {id: father});
                 let content = `邀请成功！🎉\n您成功邀请了${user.nickname}\n您的积分:+${this.ctx.mpconfig.ex_coin}\n当前余额:${fer.times + this.ctx.mpconfig.ex_coin}`
+                // this.ctx.service.user.giveCoin({openid:fer.openid,coin:this.ctx.mpconfig.ex_coin,type:2,remark:'邀请用户',message:content,giver:})
+                let updatefer = await ctx.service.user.update({times: fer.times + this.ctx.mpconfig.ex_coin}, {id: father});
                 this.ctx.service.weixin.sendServiceMessage({content, openid: fer.openid});
                 console.log(`调试:更新邀请者积分`, updatefer);
                 content = `受邀成功! \n 您的积分: +${ctx.mpconfig.in_coin}\n 邀请者[${fer.nickname}]积分: + ${this.ctx.mpconfig.ex_coin}`;
