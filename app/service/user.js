@@ -2,6 +2,24 @@ const {Service} = require("egg");
 const Sequelize = require('sequelize');
 
 module.exports = class UserService extends Service {
+   //赠送金币
+    async giveCoin({coin,message,remark,type = 0,openid,giver}){
+        // 更新用户表
+        await this.ctx.model.User.update(
+            {times:Sequelize.literal(`times + ${coin}`)},
+            { where:{ openid }});
+        await this.ctx.model.GiveLog.create({
+            coin,
+            message,
+            openid,
+            remark,
+            type,
+            giver
+        })
+        return true;
+
+    }
+
 
     // 领取口令红包
     async getCodeCoin({keyword,openid}){
@@ -31,9 +49,10 @@ module.exports = class UserService extends Service {
             this.ctx.service.weixin.sendServiceMessage({content:'你已经领取过了哦'});
         }else{
             // 更新用户表
-             await this.ctx.model.User.update(
-                 {times:Sequelize.literal(`times + ${coin.coin}`)},
-                 { where:{ openid }});
+            await this.giveCoin({coin:coin.coin,message:keyword,remark:'口令红包',openid,type:1,giver:coin.id})
+             // await this.ctx.model.User.update(
+             //     {times:Sequelize.literal(`times + ${coin.coin}`)},
+             //     { where:{ openid }});
              //更新红包表
              await this.ctx.model.CodeCoin.update({
                 log:Sequelize.literal(`log + 1`)
@@ -135,6 +154,7 @@ module.exports = class UserService extends Service {
                     showCol: true
                 });
                 console.log(`调试:邀请者 详细信息`, fer);
+                // this.ctx.service.user.giveCoin({openid:fer.openid,coin:this.ctx.mpconfig.ex_coin,})
                 let updatefer = await ctx.service.user.update({times: fer.times + this.ctx.mpconfig.ex_coin}, {id: father});
                 let content = `邀请成功！🎉\n您成功邀请了${user.nickname}\n您的积分:+${this.ctx.mpconfig.ex_coin}\n当前余额:${fer.times + this.ctx.mpconfig.ex_coin}`
                 this.ctx.service.weixin.sendServiceMessage({content, openid: fer.openid});

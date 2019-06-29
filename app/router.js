@@ -7,6 +7,9 @@ module.exports = app => {
   const { router, controller } = app;
   router.get('/index', controller.user.init);
   router.get('/weixin', controller.weixin.index);
+  router.post('/weixin/sendmessage', controller.weixin.sendServiceMessage);
+
+
   router.get('/menu', controller.weixin.menu);
   router.post('/menu', controller.weixin.createMenu);
   router.post('/weixin', controller.weixin.index);
@@ -41,5 +44,14 @@ module.exports = app => {
   router.get('/images/:filename', controller.render.images);
   router.get('/mpconfig/menu', controller.admin.getMenus);
   router.get('/home/paneldata', controller.home.index);
+
+
+  router.get('/count/user', controller.home.getNewUserLineCount);
+  router.get('/count/recharge', controller.home.getRechargeLineCount);
+  router.get('/count/log', controller.home.getLogLineCount);
+
+
+
+
 
 };

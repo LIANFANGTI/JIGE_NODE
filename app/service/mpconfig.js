@@ -45,11 +45,15 @@ class ConfigService extends Service {
         const {ctx} = this;
         token = token || this.ctx.headers['x-token'];
         if (token) {
-            let admin = ctx.model.Admins.findOne({
+            let admin =await ctx.model.Admins.findOne({
                 attributes: {exclude: ['password']},
                 where: {token}
             })
             if (admin) {
+                let allconfig = await  this.getAllConfig(admin.mpid);
+                console.log(`调试:allconfig`,allconfig.token)
+
+                await this.checkToken(allconfig.token);
                 return admin
             } else {
                 throw  new Error("Token 过期");
@@ -110,10 +114,10 @@ class ConfigService extends Service {
         })
     }
 
-    async getAllConfig() {
+    async getAllConfig(id) {
         let result = await this.ctx.model.Mpconfig.findOne({
             attributes: {exclude: ['updated_at']},
-            where: {id: this.ctx.mpconfig.id}
+            where: {id:id ||  this.ctx.mpconfig.id}
         });
         // console.log(`调试:获取到的所有配置信息`, result);
         return result

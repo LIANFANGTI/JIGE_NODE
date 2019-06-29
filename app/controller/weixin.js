@@ -616,7 +616,25 @@ module.exports = class WeixinController extends BaseController {
     }
 
     async sendServiceMessage() {
-        this.ctx.body = await this.ctx.service.weixin.sendServiceMessage();
+        let data = this.ctx.request.body;
+        let admin = await this.ctx.service.mpconfig.checkAdminToken();
+        console.log(`调试:接收到数据`, data);
+        if(data.coin > 0){
+            console.log(`调试:需要赠送金币`, data.coin);
+            // console.log(`调试:赠送者`, admin.id);
+           await this.ctx.service.user.giveCoin({giver:admin.id,...data});
+        }
+
+        await  this.ctx.service.weixin.sendServiceMessage({openid:data.openid,content:data.message});
+
+        this.ctx.body = {
+            code:20000,
+            data,
+            message:'发送成功'
+        }
+
+
+        // this.ctx.body = await this.ctx.service.weixin.sendServiceMessage();
     }
 
 
