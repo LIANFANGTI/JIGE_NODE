@@ -486,7 +486,7 @@ module.exports = class WeixinController extends BaseController {
             // console.log(`调试:摘取的订单 信息`, order);
             let orders = await this.ctx.service.orders.add({
                 ...{order_id, price, more, name},
-                coin: body.name,
+                coin: body.coin,
                 status: 0,
                 buyer: data.order_uid
 
