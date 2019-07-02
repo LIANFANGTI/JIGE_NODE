@@ -248,7 +248,7 @@ module.exports = class WeixinService extends Service {
             "description": "超值限时优惠套餐",
             "url": `http://eleme.lianfangti.cn/recharge?openid=${openid}&token=${this.ctx.mpconfig.token}`,
             "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/200x200-lk.png"
-        }
+        };
         return await this.sendServiceMessage({type: 'news', articles});
     }
 
