@@ -373,6 +373,7 @@ module.exports = class WeixinController extends BaseController {
 
     //领红包
     async getEleme({type = 20, validate_code}) {
+        this.reply();
         const articles = {
             "title": "饿了么大礼包",
             "description": "限时免费红包！！！",
