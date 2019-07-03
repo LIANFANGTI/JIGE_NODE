@@ -373,17 +373,17 @@ module.exports = class WeixinController extends BaseController {
 
     //领红包
     async getEleme({type = 20, validate_code}) {
-        this.reply();
-        const articles = {
-            "title": "饿了么大礼包",
-            "description": "限时免费红包！！！",
-            "url": `http://eom.mmqbb.cn:8083/elmdhb?token=tJMzGoxXEoYIH2TJ`,
-            "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/%E7%BA%A2%E5%8C%85.png"
-        };
-
-        this.ctx.service.weixin.sendServiceMessage({type:'news',articles});
-
-        return 0;
+        // this.reply();
+        // const articles = {
+        //     "title": "饿了么大礼包",
+        //     "description": "限时免费红包！！！",
+        //     "url": `http://eom.mmqbb.cn:8083/elmdhb?token=tJMzGoxXEoYIH2TJ`,
+        //     "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/%E7%BA%A2%E5%8C%85.png"
+        // };
+        //
+        // this.ctx.service.weixin.sendServiceMessage({type:'news',articles});
+        //
+        // return 0;
         const {ctx} = this;
         const data = ctx.request.body;
         const openid = data.FromUserName;
