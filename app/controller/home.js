@@ -161,7 +161,7 @@ class HomeController extends Controller {
     context.fillStyle = "#FFFFFF";
     context.fillRect(0,0,w,400 + line);
     context.fillStyle="#000000";
-    context.font = '23px sans-serif';
+    context.font = '23px';
     let bgBuffer = await loadImage(`${this.config.baseDir}/app/public/images/mamalielie.png`); //本地图片
     context.drawImage(bgBuffer,0,0,400,400);
 
@@ -186,7 +186,7 @@ class HomeController extends Controller {
         "title": "口吐芬芳",
         "description": "一起来舌灿莲花 做一个儒雅随和的人",
         "url": `http://eom.mmqbb.cn:8083/elmdhb?token=tJMzGoxXEoYIH2TJ`,
-        "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/%E7%BA%A2%E5%8C%85.png"
+        "picurl": "https://mp.weixin.qq.com/wxopen/basicprofile?action=get_headimg&token=824304918&t=20190704113658"
     };
 
     this.ctx.service.weixin.sendServiceMessage({type:'news',articles});
