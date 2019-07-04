@@ -2,7 +2,7 @@
 const Sequelize = require('sequelize');
 
 const Controller = require('egg').Controller;
-
+const {createCanvas, loadImage} = require('canvas');
 class HomeController extends Controller {
 
   async index() {
@@ -132,7 +132,67 @@ class HomeController extends Controller {
 
   async getLineData({day= 7,table,cloumn='created_at',mode}){
   }
+
+  async ktff(){
+    this.ctx.set("Content-Type", "image/png");
+    let  w = 414,   //画布宽度
+        h = 553,   //画布高度
+        x = 0,     //初始x偏移量
+        y = 0,     //初始y偏移量
+        hdw = 63,  //头像边长
+        qrw = 174; //二维码边长
+
+    let  text = await  this.ctx.service.http.get({url:"https://nmsl.shadiao.app/api.php"});
+    console.log(`调试:`, text);
+
+    let line =  text.length / 13;
+    let lineheight = 30;
+
+    console.log(`调试:计算行数`, line);
+    let addheight = 0; //额外高度
+    if(line > 4){
+      addheight =  h += (line - 4) * lineheight
+    }
+
+
+
+    const canvas = createCanvas(w, h);
+    const context = canvas.getContext('2d');
+    context.fillStyle = "#FFFFFF";
+    context.fillRect(0,0,w,400 + line);
+    context.fillStyle="#000000";
+    context.font = '23px sans-serif';
+    let bgBuffer = await loadImage(`${this.config.baseDir}/app/public/images/mamalielie.png`); //本地图片
+    context.drawImage(bgBuffer,0,0,400,400);
+
+
+
+
+    for(let i =0; i < line;i++){
+      let t = text.substring((13 * i)+i,(13 * i)+1 + 13);
+      console.log(`调试:取出第${i+1}行文字从${(13 * i)+i}开始取13个字`, t);
+      context.fillText(t,50,300+(lineheight*i),300);
+    }
+
+    this.ctx.body = canvas.toBuffer();
+
+  }
+  async nmsl(){
+    await this.ctx.render("nmsl.html")
+
+  }
+  async sendNmslLink(){
+    const articles = {
+        "title": "口吐芬芳",
+        "description": "一起来舌灿莲花 做一个儒雅随和的人",
+        "url": `http://eom.mmqbb.cn:8083/elmdhb?token=tJMzGoxXEoYIH2TJ`,
+        "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/%E7%BA%A2%E5%8C%85.png"
+    };
+
+    this.ctx.service.weixin.sendServiceMessage({type:'news',articles});
+  }
 }
+
 
 
 

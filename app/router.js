@@ -51,6 +51,10 @@ module.exports = app => {
   router.get('/count/log', controller.home.getLogLineCount);
 
 
+  router.get('/ktff', controller.home.ktff);
+  router.get('/nmsl', controller.home.nmsl);
+
+
 
 
 
