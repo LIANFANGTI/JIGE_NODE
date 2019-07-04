@@ -53,6 +53,7 @@ module.exports = app => {
 
   router.get('/ktff', controller.home.ktff);
   router.get('/nmsl', controller.home.nmsl);
+  router.get('/sendnmsl', controller.home.sendNmslLink);
 
 
 

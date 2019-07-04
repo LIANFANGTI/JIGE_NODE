@@ -169,8 +169,10 @@ class HomeController extends Controller {
 
 
     for(let i =0; i < line;i++){
-      let t = text.substring((13 * i)+i,(13 * i)+1 + 13);
-      console.log(`调试:取出第${i+1}行文字从${(13 * i)+i}开始取13个字`, t);
+      let s= (13 * i)+i;
+      let e= (13 * i)+i + 13;
+      let t = text.substring(s,e);
+      console.log(`调试:取出第${i+1}行文字从${s}到${e}取${e-s}个字`, t);
       context.fillText(t,50,300+(lineheight*i),300);
     }
 
@@ -183,14 +185,16 @@ class HomeController extends Controller {
 
   }
   async sendNmslLink(){
+    console.log(`调试:发送`);
     const articles = {
-        "title": "口吐芬芳",
-        "description": "一起来舌灿莲花 做一个儒雅随和的人",
-        "url": `http://eom.mmqbb.cn:8083/elmdhb?token=tJMzGoxXEoYIH2TJ`,
-        "picurl": "https://mp.weixin.qq.com/wxopen/basicprofile?action=get_headimg&token=824304918&t=20190704113658"
+        "title": "说话之道",
+        "description": "一起来口吐芬芳 舌灿莲花 做一个儒雅随和的人",
+        "url": `http://test.eleme.lianfangti.cn/nmsl`,
+        "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/nmsllogo.png"
     };
+    await this.ctx.service.mpconfig.checkToken();
 
-    this.ctx.service.weixin.sendServiceMessage({type:'news',articles});
+      this.ctx.body = await  this.ctx.service.weixin.sendServiceMessage({type:'news',articles,openid:'oUcAW5v08hJpsH49EUTIPJA_gCDo'});
   }
 }
 
