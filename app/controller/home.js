@@ -144,7 +144,7 @@ class HomeController extends Controller {
 
     let  text = await  this.ctx.service.http.get({url:"https://nmsl.shadiao.app/api.php"});
     console.log(`调试:`, text);
-
+    // text= "HELLO"
     let line =  text.length / 13;
     let lineheight = 30;
 
@@ -161,7 +161,7 @@ class HomeController extends Controller {
     context.fillStyle = "#FFFFFF";
     context.fillRect(0,0,w,400 + line);
     context.fillStyle="#000000";
-    context.font = '23px';
+    context.font = '23px Arial';
     let bgBuffer = await loadImage(`${this.config.baseDir}/app/public/images/mamalielie.png`); //本地图片
     context.drawImage(bgBuffer,0,0,400,400);
 
@@ -178,6 +178,7 @@ class HomeController extends Controller {
 
   }
   async nmsl(){
+    console.log(`调试:你访问了啊！`)
     await this.ctx.render("nmsl.html")
 
   }
