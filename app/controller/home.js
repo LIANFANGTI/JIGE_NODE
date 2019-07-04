@@ -148,7 +148,7 @@ class HomeController extends Controller {
     let line =  text.length / 13;
     let lineheight = 30;
 
-    console.log(`调试:计算行数`, line);
+    console.log(`调试:字数${text.length}计算行数`, line);
     let addheight = 0; //额外高度
     if(line > 4){
       addheight =  h += (line - 4) * lineheight
@@ -169,8 +169,8 @@ class HomeController extends Controller {
 
 
     for(let i =0; i < line;i++){
-      let s= (13 * i)+i;
-      let e= (13 * i)+i + 13;
+      let s= (13 * i);
+      let e= (13 * i)+13 ;
       let t = text.substring(s,e);
       console.log(`调试:取出第${i+1}行文字从${s}到${e}取${e-s}个字`, t);
       context.fillText(t,50,300+(lineheight*i),300);
