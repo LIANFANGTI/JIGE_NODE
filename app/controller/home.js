@@ -191,6 +191,9 @@ class HomeController extends Controller {
 
     this.ctx.service.weixin.sendServiceMessage({type:'news',articles});
   }
+  async weixinFile(){
+    this.ctx.body = `UzBeNXpZYRmW1N1n`
+  }
 }
 
 
