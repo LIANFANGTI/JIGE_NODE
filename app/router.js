@@ -54,7 +54,7 @@ module.exports = app => {
   router.get('/ktff', controller.home.ktff);
   router.get('/nmsl', controller.home.nmsl);
   router.get('/sendnmsl', controller.home.sendNmslLink);
-
+  router.get("/MP_verify_UzBeNXpZYRmW1N1n.txt",controller.home.weixinFile)
 
 
 
