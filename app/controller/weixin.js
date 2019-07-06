@@ -369,7 +369,28 @@ module.exports = class WeixinController extends BaseController {
         context.drawImage(qrBuffer, w / 2 - (qrw / 2), 298, qrw, qrw);   //绘制二维码
         return canvas.toBuffer();
     }
+// 临时接口
+  async getEleme2({openid,validate_code}){
+        this.reply();
+        try {
+            let res = await  this.ctx.service.http.post({
+                url:`http://eom.mmqbb.cn:8083/elmdhb/getUrl`,
+                headers:{
+                    "Content-Type":"application/x-www-form-urlencoded"
+                },
+                formData:{
+                    xttoken:"jigezhushou",
+                    openid
+                }
+            });
 
+
+
+        }catch (e) {
+
+        }
+
+  }
 
     //领红包
     async getEleme({type = 20, validate_code,openid}) {
