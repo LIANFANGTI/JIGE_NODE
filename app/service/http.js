@@ -20,15 +20,17 @@ module.exports = class HttpService extends Service {
     }
 
     async post(options) {
+        console.log(`调试:你调用了POST请求`)
         return await requset({
             ...options,
             body: options.data || options.body,
             method: 'POST',
             json: options.json !== undefined ? options.json : true
         }).then(res => {
-            // console.log(`调试:POST请求返回值`, res);
+            console.log(`调试:POST请求返回值`, res);
             return Promise.resolve(res)
         }).catch(err=>{
+            console.log(`POST请求出错`, err);
             return Promise.reject({from:'POST请求出错',errors:err})
         })
     }

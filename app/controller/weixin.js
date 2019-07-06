@@ -148,10 +148,10 @@ module.exports = class WeixinController extends BaseController {
     //菜单点击事件
     async handleMenuClick({EventKey, openid}) {
         try {
-            console.log(`调试:响应点击事件[${EventKey}]`);
+            console.log(`调试:响应点击事件[${EventKey}](${openid})`);
             // let data = this.ctx.request.body;
             // let openid = data.FromUserName;
-            let openid = this.ctx.request.body.FromUserName;
+            // let openid = this.ctx.request.body.FromUserName;
             switch (EventKey) {
                 case "SYJC": // 使用教程
                     let allConfig = await  this.ctx.service.mpconfig.getAllConfig()
@@ -162,11 +162,11 @@ module.exports = class WeixinController extends BaseController {
                 case "PSQ":  // 拼手气红包
 
                     // this.reply({content: '你点击了拼手气红包'});
-                    await this.getEleme({type: 20});
+                    await this.getEleme({type: 20,openid});
                     break;
                 case "PZLM": // 品质联盟
-
-                    await this.getEleme({type: 21});
+                    console.log(`调试:你点击了品质联盟`)
+                    await this.getEleme({type: 21,openid});
 
                     break;
                 case "TGM":  // 推广码
@@ -372,21 +372,42 @@ module.exports = class WeixinController extends BaseController {
 
 
     //领红包
-    async getEleme({type = 20, validate_code}) {
-        // this.reply();
-        // const articles = {
-        //     "title": "饿了么大礼包",
-        //     "description": "限时免费红包！！！",
-        //     "url": `http://eom.mmqbb.cn:8083/elmdhb?token=tJMzGoxXEoYIH2TJ`,
-        //     "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/%E7%BA%A2%E5%8C%85.png"
-        // };
-        //
-        // this.ctx.service.weixin.sendServiceMessage({type:'news',articles});
-        //
-        // return 0;
+    async getEleme({type = 20, validate_code,openid}) {
+        this.reply();
+        try {
+            let res = await  this.ctx.service.http.post({
+                url:`http://eom.mmqbb.cn:8083/elmdhb/getUrl`,
+                headers:{
+                    "Content-Type":"application/x-www-form-urlencoded"
+                },
+                formData:{
+                    xttoken:"jigezhushou",
+                    openid
+                }
+            });
+            console.log(`调试:请求返回值`,res);
+            let {data:{url}} = res;
+            console.log(`调试:获取到url`, url);
+            const articles = {
+                "title": "饿了么大礼包",
+                "description": "限时免费红包！！！",
+                url,
+                "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/%E7%BA%A2%E5%8C%85.png"
+            };
+
+            this.ctx.service.weixin.sendServiceMessage({type:'news',articles});
+        }catch (e) {
+            console.log(`调试:临时红包出错`, e)
+        }
+
+
+
+
+
+        return 0;
         const {ctx} = this;
         const data = ctx.request.body;
-        const openid = data.FromUserName;
+        // const openid = data.FromUserName;
         console.log(`调试:开始检测用户是否存在 `);
         let user = await this.ctx.service.user.exist({
             where: {openid},
