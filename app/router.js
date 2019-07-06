@@ -57,6 +57,7 @@ module.exports = app => {
   router.get("/MP_verify_UzBeNXpZYRmW1N1n.txt",controller.home.weixinFile);
 
   router.get("/weixin/auth",controller.weixin.weixinAuth)
+  router.get("/jige/access_token",controller.jige.getAccessToken)
 
 
 

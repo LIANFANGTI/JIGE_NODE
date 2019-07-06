@@ -14,7 +14,15 @@ class JigeController extends Controller {
     this.ctx.body = buffer
   }
   async getAccessToken(){
-    let a=1
+    try {
+      let res = await  this.ctx.service.mpconfig.checkToken();
+      let { code } = this.ctx.request.query;
+      this.ctx.body = this.ctx.service.jige.getAccessToken({code});
+    }catch (e) {
+      this.ctx.body = e
+    }
+
+
   }
 }
 

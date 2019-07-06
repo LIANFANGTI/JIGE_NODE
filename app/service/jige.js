@@ -1,19 +1,13 @@
 const Service = require("egg").Service;
-
+const cache = require('memory-cache');
 module.exports = class JigeService extends Service {
   async index() {
     return await this.ctx.model.Page.findAndCountAll({});
   }
-  async getAccessToken() {
-    // console.log(`调试:获取TOKEN的地方打印mpconfig`, this.ctx.mpconfig);
+  async getAccessToken({code}) {
     const {id } =this.ctx.mpconfig;
-    console.log(`调试:获取到公众号id`, id);
-    console.log(`调试:从缓存中取access_token cache.get(${id}_jige_access_token) = [${cache.get(`${id}_jige_access_token`)}]`,)
-    // return ;
-    // let url = `https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${this.ctx.mpconfig.appid}&secret=${this.ctx.mpconfig.appsecret}`;
     let url = `https://api.weixin.qq.com/sns/oauth2/access_token?appid=${this.ctx.mpconfig.appid}&secret=${this.ctx.mpconfig.appsecret}&code=${code}&grant_type=authorization_code`;
     let access_token = '';
-    // cache.del("access_token")
     if (!cache.get(`${id}_jige_access_token`)) {
       console.log(`调试:缓存中不存在 重新获取`);
       access_token = await this.ctx.service.http.get({url}).then(res => {

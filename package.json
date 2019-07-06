@@ -45,7 +45,7 @@
     "start": "egg-scripts start  --daemon --title=jige_test --ignore-stderr",
     "stop": "egg-scripts stop --title=jige_test",
     "dev": "egg-bin dev",
-    "debug": "egg-bin debug",
+    "debug": "egg-bin debug ",
     "test": "npm run lint -- --fix && npm run test-local",
     "test-local": "egg-bin test",
     "cov": "egg-bin cov",

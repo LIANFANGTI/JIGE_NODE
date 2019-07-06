@@ -663,7 +663,7 @@ module.exports = class WeixinController extends BaseController {
     //获取access_token
     async getAccessToken() {
         const {ctx} = this;
-        ctx.body = await ctx.service.weixin.getAccessToken();
+        ctx.body = await ctx.service.jige.getAccessToken();
     }
 
     //添加客服
