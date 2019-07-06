@@ -8,7 +8,7 @@ const cache = require('memory-cache');
 module.exports = class WeixinController extends BaseController {
     //微信授权
     async weixinAuth(){
-        let {body,query} = this.ctx.request
+        let {body,query} = this.ctx.request;
         this.ctx.body= {
             query,
             body
