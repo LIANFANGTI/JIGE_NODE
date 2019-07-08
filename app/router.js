@@ -60,7 +60,16 @@ module.exports = app => {
 
   router.get("/jige/access_token",controller.jige.getAccessToken);
   router.get("/jige/userinfo",controller.jige.getUserInfo);
-  router.get("/jige/login",controller.jige.getLoginUrl)
+  router.get("/jige/login",controller.jige.getLoginUrl);
+  router.get("/jige/extensionuser",controller.jige.getExtensionUser);
+  router.get("/jige/recharge",controller.jige.getRechargeList);
+  router.get("/jige/rechargerecord",controller.jige.getRechargeRecord);
+  router.get("/jige/ranking",controller.jige.getRankingList);
+  router.get("/jige/checksignin",controller.jige.checkSignin);
+  router.post("/jige/signin",controller.jige.signin);
+
+  router.post("/jige/pay",controller.jige.pay);
+
 
 
 

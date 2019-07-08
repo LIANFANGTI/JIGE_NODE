@@ -69,7 +69,8 @@ class ConfigService extends Service {
 
     async checkToken(token) {
         const {ctx} = this;
-        token = token || ctx.request.query.token;
+        // console.log(`调试:`,ctx.headers);
+        token = token ||( ctx.request.query.token || ctx.headers.token);
         if (token) {
             const mpconfig = await ctx.service.mpconfig.exist({
                 col: ["appid", "id", "in_coin", "unit_coin", "token", "ex_coin", "join_coin", "unit_price", "appsecret"],
