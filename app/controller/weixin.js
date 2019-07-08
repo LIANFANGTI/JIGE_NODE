@@ -6,6 +6,16 @@ const Sequelize = require('sequelize');
 const cache = require('memory-cache');
 
 module.exports = class WeixinController extends BaseController {
+    //微信授权
+    async weixinAuth(){
+        let {body,query} = this.ctx.request;
+        this.ctx.body= {
+            query,
+            body
+        }
+    }
+
+
     async index() {
         const {ctx} = this;
         let query = ctx.request.query;
@@ -695,7 +705,7 @@ module.exports = class WeixinController extends BaseController {
     //获取access_token
     async getAccessToken() {
         const {ctx} = this;
-        ctx.body = await ctx.service.weixin.getAccessToken();
+        ctx.body = await ctx.service.jige.getAccessToken();
     }
 
     //添加客服

@@ -53,10 +53,22 @@ module.exports = app => {
 
   router.get('/ktff', controller.home.ktff);
   router.get('/nmsl', controller.home.nmsl);
-  router.get('/MP_verify_UzBeNXpZYRmW1N1n.txt', controller.home.weixinFile);
+  router.get('/sendnmsl', controller.home.sendNmslLink);
+  router.get("/MP_verify_UzBeNXpZYRmW1N1n.txt",controller.home.weixinFile);
 
+  router.get("/weixin/auth",controller.weixin.weixinAuth)
 
+  router.get("/jige/access_token",controller.jige.getAccessToken);
+  router.get("/jige/userinfo",controller.jige.getUserInfo);
+  router.get("/jige/login",controller.jige.getLoginUrl);
+  router.get("/jige/extensionuser",controller.jige.getExtensionUser);
+  router.get("/jige/recharge",controller.jige.getRechargeList);
+  router.get("/jige/rechargerecord",controller.jige.getRechargeRecord);
+  router.get("/jige/ranking",controller.jige.getRankingList);
+  router.get("/jige/checksignin",controller.jige.checkSignin);
+  router.post("/jige/signin",controller.jige.signin);
 
+  router.post("/jige/pay",controller.jige.pay);
 
 
 

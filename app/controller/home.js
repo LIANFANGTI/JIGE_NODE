@@ -144,11 +144,11 @@ class HomeController extends Controller {
 
     let  text = await  this.ctx.service.http.get({url:"https://nmsl.shadiao.app/api.php"});
     console.log(`调试:`, text);
-
+    // text= "HELLO"
     let line =  text.length / 13;
     let lineheight = 30;
 
-    console.log(`调试:计算行数`, line);
+    console.log(`调试:字数${text.length}计算行数`, line);
     let addheight = 0; //额外高度
     if(line > 4){
       addheight =  h += (line - 4) * lineheight
@@ -161,7 +161,7 @@ class HomeController extends Controller {
     context.fillStyle = "#FFFFFF";
     context.fillRect(0,0,w,400 + line);
     context.fillStyle="#000000";
-    context.font = '23px';
+    context.font = '23px Arial';
     let bgBuffer = await loadImage(`${this.config.baseDir}/app/public/images/mamalielie.png`); //本地图片
     context.drawImage(bgBuffer,0,0,400,400);
 
@@ -169,8 +169,10 @@ class HomeController extends Controller {
 
 
     for(let i =0; i < line;i++){
-      let t = text.substring((13 * i)+i,(13 * i)+1 + 13);
-      console.log(`调试:取出第${i+1}行文字从${(13 * i)+i}开始取13个字`, t);
+      let s= (13 * i);
+      let e= (13 * i)+13 ;
+      let t = text.substring(s,e);
+      console.log(`调试:取出第${i+1}行文字从${s}到${e}取${e-s}个字`, t);
       context.fillText(t,50,300+(lineheight*i),300);
     }
 
@@ -178,18 +180,25 @@ class HomeController extends Controller {
 
   }
   async nmsl(){
+    console.log(`调试:你访问了啊！`)
     await this.ctx.render("nmsl.html")
 
   }
   async sendNmslLink(){
+    console.log(`调试:发送`);
     const articles = {
-        "title": "口吐芬芳",
-        "description": "一起来舌灿莲花 做一个儒雅随和的人",
-        "url": `http://eom.mmqbb.cn:8083/elmdhb?token=tJMzGoxXEoYIH2TJ`,
-        "picurl": "https://mp.weixin.qq.com/wxopen/basicprofile?action=get_headimg&token=824304918&t=20190704113658"
+        "title": "说话之道",
+        "description": "一起来口吐芬芳 舌灿莲花 做一个儒雅随和的人",
+        "url": `http://test.eleme.lianfangti.cn/nmsl`,
+        "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/nmsllogo.png"
     };
+    await this.ctx.service.mpconfig.checkToken();
 
-    this.ctx.service.weixin.sendServiceMessage({type:'news',articles});
+      this.ctx.body = await  this.ctx.service.weixin.sendServiceMessage({type:'news',articles,openid:'oUcAW5v08hJpsH49EUTIPJA_gCDo'});
+  }
+
+  async weixinFile(){
+      this.ctx.body = `UzBeNXpZYRmW1N1n`
   }
   async weixinFile(){
     this.ctx.body = `UzBeNXpZYRmW1N1n`
