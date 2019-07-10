@@ -1,6 +1,9 @@
 'use strict';
 const BaseController = require("./BaseController");
 
+const Drawer = require("../public/js/drawer.js");
+
+
 const fs = require('fs');
 const utils = require("../public/utils");
 const Sequelize = require('sequelize');
@@ -57,7 +60,8 @@ class JigeController extends BaseController {
         try {
             let {token} = await this.ctx.service.mpconfig.checkToken();
             const {appid} = this.ctx.mpconfig;
-            const redirect_uri = encodeURI(`http://jige.lianfangti.cn`);
+            // const redirect_uri = encodeURI(`http://jige.lianfangti.cn`);
+            const redirect_uri = encodeURI(`https://lft.easy.echosite.cn`);
             const response_type = `code`;
             const scope = `snsapi_userinfo`;
             const state = token;
@@ -69,7 +73,7 @@ class JigeController extends BaseController {
                     url
                 }
             }
-        }catch (e) {
+        } catch (e) {
             console.error(`错误:登录失败`, e);
             this.ctx.body = e
         }
@@ -107,11 +111,11 @@ class JigeController extends BaseController {
     async getExtensionUser() {
         try {
             await this.ctx.service.mpconfig.checkToken();
-            let {id, page, size,type} = this.ctx.request.query;
+            let {id, page, size, type} = this.ctx.request.query;
             size = size * 1;
-            const typeMap={
+            const typeMap = {
                 week: `YEARWEEK( date_format(  created_at,'%Y-%m-%d' ) ) = YEARWEEK( now() ) `,
-                month:`DATE_FORMAT( created_at, '%Y%m' ) = DATE_FORMAT( CURDATE( ) ,'%Y%m' ) `,
+                month: `DATE_FORMAT( created_at, '%Y%m' ) = DATE_FORMAT( CURDATE( ) ,'%Y%m' ) `,
                 all: `true `
             };
             let count = await this.ctx.model.User.findAll({
@@ -176,7 +180,7 @@ class JigeController extends BaseController {
                 notify_url: `http://eleme.lianfangti.cn/pay_callback?token=${this.ctx.mpconfig.token}`,
                 cancel_url: `http://jige.lianfangti.cn/pages/recharge/recharge`,
                 return_url: 'http://jige.lianfangti.cn',
-                more:recahrgePlanDetaile.name,
+                more: recahrgePlanDetaile.name,
                 expire: 1300,
             };
             let {order_id, price, more, name} = data;
@@ -207,7 +211,7 @@ class JigeController extends BaseController {
     }
 
     //充值记录
-    async getRechargeRecord(){
+    async getRechargeRecord() {
         try {
             await this.ctx.service.mpconfig.checkToken();
             let {id, page, size} = this.ctx.request.query;
@@ -216,7 +220,7 @@ class JigeController extends BaseController {
                 attributes: [[Sequelize.fn('COUNT', 1), 'total']],
                 where: {
                     buyer: id,
-                    status:1
+                    status: 1
                 }
 
             });
@@ -224,7 +228,7 @@ class JigeController extends BaseController {
                 attributes: {exclude: []},
                 where: {
                     buyer: id,
-                    status:1
+                    status: 1
 
                 },
                 offset: (page - 1) * size,
@@ -247,10 +251,10 @@ class JigeController extends BaseController {
     }
 
     // 排行榜
-    async getRankingList(){
-        const typeMap={
+    async getRankingList() {
+        const typeMap = {
             week: `AND YEARWEEK( date_format(  created_at,'%Y-%m-%d' ) ) = YEARWEEK( now() ) `,
-            month:`AND DATE_FORMAT( created_at, '%Y%m' ) = DATE_FORMAT( CURDATE( ) ,'%Y%m' ) `,
+            month: `AND DATE_FORMAT( created_at, '%Y%m' ) = DATE_FORMAT( CURDATE( ) ,'%Y%m' ) `,
             all: `AND true `
         };
         let type = this.ctx.request.query.type || 'all';
@@ -261,34 +265,94 @@ class JigeController extends BaseController {
                     ORDER BY  ex.ex_count DESC 
                     LIMIT 0,100
                     `;
-        const mysql =new Sequelize(this.config.sequelize);
-        let data =await  mysql.query(sql,{ type: mysql.QueryTypes.SELECT});
-        this.ctx.body={
-            code:0,
+        const mysql = new Sequelize(this.config.sequelize);
+        let data = await mysql.query(sql, {type: mysql.QueryTypes.SELECT});
+        this.ctx.body = {
+            code: 0,
             data
         }
 
     }
 
     //检查签到
-    async checkSignin(){
-         try {
-            this.ctx.body =await  this.ctx.service.jige.checkSignin();
-         }catch (e) {
-             console.log(`调试:监听到错误`, e)
+    async checkSignin() {
+        try {
+            this.ctx.body = await this.ctx.service.jige.checkSignin();
+        } catch (e) {
+            console.log(`调试:监听到错误`, e)
             this.ctx.body = e
-         }
+        }
     }
 
     //签到
-    async signin(){
+    async signin() {
         console.log(`调试:开始签到`);
-         try {
-             this.ctx.body =await  this.ctx.service.jige.signin();
-         }catch (e) {
-             console.log(`调试:获取到错误`, e)
-             this.ctx.body = e
-         }
+        try {
+            this.ctx.body = await this.ctx.service.jige.signin();
+        } catch (e) {
+            console.log(`调试:获取到错误`, e)
+            this.ctx.body = e
+        }
+    }
+
+    async drawExtensionCode() {
+        console.log(`调试:`,);
+        try {
+            let user = await this.ctx.service.jige.checkXToken();
+            let data = await this.ctx.service.jige.drawExtensionCode({id: user.id});
+            this.ctx.set("Content-Type", "image/png");
+            this.ctx.body = {
+                data,
+                code: 0
+            };
+        } catch (e) {
+            console.error(`错误:绘制出错`, e)
+            this.ctx.body = {
+                code: 500,
+                error: e
+            }
+        }
+    }
+
+    async nmsl() {
+        try {
+            let text = await this.ctx.service.http.get({url: "https://nmsl.shadiao.app/api.php"});
+            let len = text.length; //字数
+            let size = 9; //一行显示的字数
+            let line = len % size === 0 ? ~~(len / size) : ~~(len / size) + 1; //行数计算
+            let eles = []; // 文本元素数组
+            let baseY=150;
+            console.log(`调试:字数${len},行数${line}`, len / size);
+            for (let i = 0; i < line; i++) {
+                let str= text.substr(i*size,size);
+                eles.push({
+                    type:'text',
+                    content: str,
+                    size:20,
+                    x:15,
+                    y:baseY + (20*i)
+                })
+            }
+            console.log(`调试:切割后的数组`, eles);
+            let draw = new Drawer(200, 200 + (line -3)*20);
+            // await draw.setBackgroundImage(`${this.config.baseDir}/app/public/images/mamalielie.png`);
+            draw.setBackgroundColor("white");
+            await draw.drawImage({image:`${this.config.baseDir}/app/public/images/mamalielie.png`,x:0,y:0,w:200,h:200});
+           await draw.drawElements(eles);
+            // draw.setBackgroundColor("red");
+            // this.ctx.set("Content-Type", "image/png");
+            // this.ctx.body = draw.getBuffer();
+            // return 0;
+            this.ctx.body = {
+                code: 0,
+                data: {
+                    src: draw.getDataURL(),
+                    text: text
+                }
+            }
+        } catch (e) {
+            console.error(`错误:`, e)
+        }
     }
 
 }

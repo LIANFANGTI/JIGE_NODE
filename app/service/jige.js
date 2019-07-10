@@ -1,6 +1,10 @@
 const Service = require("egg").Service;
 const cache = require('memory-cache');
 const Sequelize = require('sequelize');
+const {createCanvas, loadImage} = require('canvas');
+const Drawer = require("../public/js/drawer.js");
+
+const utils = require("../public/utils");
 
 module.exports = class JigeService extends Service {
   async index() {
@@ -33,7 +37,7 @@ module.exports = class JigeService extends Service {
 
   }
 
-  async checkXToken(){
+  async checkXToken({checkToken=false}={}){
     let xToken = this.ctx.headers["x-token"];
     if(!xToken){
       console.log(`调试:没有XToken`, this.ctx.headers);
@@ -59,6 +63,7 @@ module.exports = class JigeService extends Service {
       })
     }
     let mpconfig = await  this.ctx.service.mpconfig.getAllConfig(userInfo.mid);
+    this.ctx.mpconfig =mpconfig;
     let context = {...userInfo.dataValues,mpconfig:{...mpconfig.dataValues}};
     return  context
   }
@@ -85,6 +90,10 @@ module.exports = class JigeService extends Service {
     }
   }
 
+  /**
+   * 签到
+   * @returns {Promise<Promise<Promise<never>|{msg, code, data}>|{msg: string, code: number, data: {addCoin: (*|number), conn_sign: *}}>}
+   */
   async signin(){
     console.log(`调试:开始调用`)
     const user = await this.checkXToken();
@@ -155,6 +164,38 @@ module.exports = class JigeService extends Service {
     }
 
     // console.log(`调试:签到的用户信息[${user.id}]` ,nowStr,new Date(user.last_sign).getDate());
+
+  }
+
+
+  /**
+   * 推广码绘制
+   * @param id
+   * @returns {Promise<void>}
+   */
+  async drawExtensionCode({id}) {
+    let drawer = new Drawer(414,736);
+    // let image =;
+    await  drawer.setBackgroundImage(`${this.config.baseDir}/app/public/images/hongbao_v2.png`);
+    // context.font = '23px Arial';
+    let qrCodeBuffer = await this.ctx.service.weixin.qrcode({scene_id: id || 1, type: 'image'});
+    // drawer.context.fillText("NM SL",150,150);
+    await  drawer.drawElements([
+      {
+        type:'text',
+        content:utils.encode(id),
+        color:"white",
+        x:-55,
+        y:16
+      },
+      {
+        type:'image',
+        content:`${this.config.baseDir}/app/public/images/qrcode.png`,
+        y:513,
+        w:175
+      }
+    ])
+    return  drawer.getDataURL();
 
   }
 

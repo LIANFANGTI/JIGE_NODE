@@ -1,4 +1,8 @@
+
 const Controller = require("egg").Controller;
+
+
+
 class BaseController extends Controller {
   /*** @author  lianfangti@qq.com 2019年06月18日 14:36:07
    * * @TODO    TODO SOME THING*
@@ -93,4 +97,4 @@ class BaseController extends Controller {
     }))
   }
 }
-module.exports =  BaseController
+module.exports =  BaseController;

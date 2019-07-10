@@ -66,6 +66,10 @@ module.exports = app => {
   router.get("/jige/rechargerecord",controller.jige.getRechargeRecord);
   router.get("/jige/ranking",controller.jige.getRankingList);
   router.get("/jige/checksignin",controller.jige.checkSignin);
+  router.get("/jige/extensioncode",controller.jige.drawExtensionCode);
+  router.get('/jige/nmsl', controller.jige.nmsl);
+
+
   router.post("/jige/signin",controller.jige.signin);
 
   router.post("/jige/pay",controller.jige.pay);

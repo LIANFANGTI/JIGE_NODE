@@ -104,3 +104,10 @@ exports.RandomNum = function (Min,Max,range="[]") {
 
     return num;
 };
+exports.decode =(str)=>{
+    return Buffer.from(str,'base64').toString();
+};
+exports.encode = (str)=>{
+    return Buffer.from(str+``).toString('base64')
+};
+
