@@ -45,7 +45,8 @@ module.exports = class ElemeService extends Service {
         });
     }
     async getHongbaoUrl({openid}){
-        const callbackurl = `http://eleme.lianfangti.cn/callback?openid=${openid}`;
+
+        const callbackurl = `http://eleme.lianfangti.cn/callback?openid=${openid}&jtoken=wx21bd29efec1e0b44`;
         try {
             let  formData = {
                 xttoken:"jigezhushou",

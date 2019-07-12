@@ -73,11 +73,11 @@ module.exports = class WeixinController extends BaseController {
                                     father: fid,
                                     times: fUser.times + this.ctx.mpconfig.ex_coin
                                 }, {id: fid});
-                                let content = `邀请成功！🎉\n您成功邀请了${iUser.nickname}\n您的积分:+${this.ctx.mpconfig.ex_coin}\n当前余额:${fUser.times + this.ctx.mpconfig.ex_coin}`;
+                                let content = `邀请成功！🎉\n您成功邀请了${iUser.nickname}\n您的粮票:+${this.ctx.mpconfig.ex_coin}\n当前余额:${fUser.times + this.ctx.mpconfig.ex_coin}`;
                                 this.ctx.service.weixin.sendServiceMessage({content,openid:fUser.openid});
 
                                 if (res1 && res2) {
-                                    this.reply({content: `邀请码填写成功 \n您的积分:+${this.ctx.mpconfig.in_coin},\n邀请者[${fUser.nickname}]积分:+${this.ctx.mpconfig.ex_coin}`});
+                                    this.reply({content: `邀请码填写成功 \n您的粮票:+${this.ctx.mpconfig.in_coin},\n邀请者[${fUser.nickname}]粮票:+${this.ctx.mpconfig.ex_coin}`});
                                 } else {
                                     this.reply();
                                 }
@@ -191,7 +191,7 @@ module.exports = class WeixinController extends BaseController {
                             console.log(`调试:上传到微信服务器返回值`, res);
                             let {media_id} = res;
                             console.log(`调试:返回的媒体ID`, media_id, typeof (res));
-                            await this.ctx.service.weixin.sendServiceMessage({content: `推广码获取成功 \n请点击查看原图 长按发送给朋友\n成功邀请一位朋友您将获得${this.ctx.mpconfig.ex_coin}积分`});
+                            await this.ctx.service.weixin.sendServiceMessage({content: `推广码获取成功 \n请点击查看原图 长按发送给朋友\n成功邀请一位朋友您将获得${this.ctx.mpconfig.ex_coin}粮票`});
                             await this.ctx.service.weixin.sendServiceMessage({media_id, type: 'image'});
                         })
                     });
@@ -213,7 +213,7 @@ module.exports = class WeixinController extends BaseController {
 
                     let user = await this.ctx.service.user.findOne({col: ["id", "times"], where: {openid}});
                     console.log(`调试:余额查询返回用户对象`, user);
-                    this.reply({content: `查询成功 \n剩余积分:${user.times}\n您可通过邀请 充值 或 每日签到来获取积分！`});
+                    this.reply({content: `查询成功 \n剩余粮票:${user.times}\n您可通过邀请 充值 或 每日签到来获取粮票！`});
 
                     break;
                 case "LXKF": //联系客服
@@ -465,7 +465,7 @@ module.exports = class WeixinController extends BaseController {
                                 times: user.times - this.ctx.mpconfig.unit_coin,
                                 ...res.result
                             }
-                            res.msg = `领取成功！！😄\n请在饿了么中查看\n红包类型:${type === 20 ? '拼手气' : '品质联盟'}\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n积分使用: -${ctx.mpconfig.unit_coin}\n剩余积分:${user.times - ctx.mpconfig.unit_coin} \n绑定账号: ${user.phone} `
+                            res.msg = `领取成功！！😄\n请在饿了么中查看\n红包类型:${type === 20 ? '拼手气' : '品质联盟'}\n红包金额:满${res.result.sum_condition}减${res.result.amount}\n粮票使用: -${ctx.mpconfig.unit_coin}\n剩余粮票:${user.times - ctx.mpconfig.unit_coin} \n绑定账号: ${user.phone} `
 
                             ctx.service.logs.add(log) //领红包日志表中插入数据
                         }
@@ -603,7 +603,7 @@ module.exports = class WeixinController extends BaseController {
             await this.ctx.service.user.update({times: Sequelize.literal(`times + ${order.coin}`)}, {id: order.buyer});
             let user = await this.ctx.service.user.findOne({col: ['id', "openid", 'times'], where: {id: order.buyer}});
 
-            let content = `充值成功!😄\n订单编号:${order.order_id}\n充值积分:${order.coin}\n当前余额:${user.times}\n`;
+            let content = `充值成功!😄\n订单编号:${order.order_id}\n充值粮票:${order.coin}\n当前余额:${user.times}\n`;
             await this.ctx.service.weixin.sendServiceMessage({content, openid: user.openid});
             console.log(`调试:数据库更新返回值`, result);
             this.ctx.body = "success"
@@ -650,12 +650,12 @@ module.exports = class WeixinController extends BaseController {
                 token:this.ctx.mpconfig.token,
                 uid: user.id,
                 items: items || [
-                    {name: '10积分', price: 0.6, coin: 10},
-                    {name: '50积分', price: 2.8, coin: 50},
-                    {name: '100积分', price: 5.00, coin: 100},
-                    {name: '150积分', price: 6.5, coin: 150},
-                    {name: '200积分', price: 9.00, coin: 91},
-                    {name: '10测试积分', price: 0.01, coin: 10}
+                    {name: '10粮票', price: 0.6, coin: 10},
+                    {name: '50粮票', price: 2.8, coin: 50},
+                    {name: '100粮票', price: 5.00, coin: 100},
+                    {name: '150粮票', price: 6.5, coin: 150},
+                    {name: '200粮票', price: 9.00, coin: 91},
+                    {name: '10测试粮票', price: 0.01, coin: 10}
                 ]
             }
             await this.ctx.render("recharge.html", data)

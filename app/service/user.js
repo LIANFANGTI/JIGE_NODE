@@ -62,7 +62,7 @@ module.exports = class UserService extends Service {
                 uid:user.id,
                 cid:coin.id
             })
-            this.ctx.service.weixin.sendServiceMessage({content:`大吉大利 今晚吃鸡~ \n恭喜你获得${coin.coin}个积分\n 已发放到你的余额 请注意查收 么么哒~`});
+            this.ctx.service.weixin.sendServiceMessage({content:`大吉大利 今晚吃鸡~ \n恭喜你获得${coin.coin}个粮票\n 已发放到你的余额 请注意查收 么么哒~`});
         }
         console.log(`调试:是否存在领取记录`, getlog)
 
@@ -106,7 +106,7 @@ module.exports = class UserService extends Service {
                   times:Sequelize.literal(`times + ${addCoin}`),
                   conn_sign: Sequelize.literal(`conn_sign + 1`)
               },{where:{openid}});
-            await  this.ctx.service.weixin.sendServiceMessage({content:`签到成功\n积分余额:+${addCoin}\n当前积分:${user.times + addCoin}\n您已连续签到${(user.conn_sign + 1)}天\n`})
+            await  this.ctx.service.weixin.sendServiceMessage({content:`签到成功\n粮票余额:+${addCoin}\n当前粮票:${user.times + addCoin}\n您已连续签到${(user.conn_sign + 1)}天\n`})
          } else { //不是连续签到
              console.log(`调试:不是连续签到`);
             addCoin = config.sign_coin  ;
@@ -115,7 +115,7 @@ module.exports = class UserService extends Service {
                  times:Sequelize.literal(`times + ${addCoin}`),
                  conn_sign: 0
              },{where:{openid}});
-            await  this.ctx.service.weixin.sendServiceMessage({content:`签到成功\n积分余额:+${addCoin}\n当前积分:${user.times + addCoin}\n连续签到可获取额外积分哦`})
+            await  this.ctx.service.weixin.sendServiceMessage({content:`签到成功\n粮票余额:+${addCoin}\n当前粮票:${user.times + addCoin}\n连续签到可获取额外粮票哦`})
         }
 
         // console.log(`调试:签到的用户信息[${user.id}]` ,nowStr,new Date(user.last_sign).getDate());
@@ -141,7 +141,7 @@ module.exports = class UserService extends Service {
         // return  0;
         if (!exist) {   // 如果用户不存在
             this.ctx.service.weixin.reply({content: allConfig.subscribe_msg}); // 回复消息
-            user['times'] = ctx.mpconfig.join_coin; // 新用户默认赠送积分个数
+            user['times'] = ctx.mpconfig.join_coin; // 新用户默认赠送粮票个数
             user['father'] = father; // 新用户送两个次数
             user['subscribe'] = 1; // 是否关注
             user['mid'] = this.ctx.mpconfig.id; // 所属 公众号
@@ -155,12 +155,12 @@ module.exports = class UserService extends Service {
                     showCol: true
                 });
                 console.log(`调试:邀请者 详细信息`, fer);
-                let content = `邀请成功！🎉\n您成功邀请了${user.nickname}\n您的积分:+${this.ctx.mpconfig.ex_coin}\n当前余额:${fer.times + this.ctx.mpconfig.ex_coin}`
+                let content = `邀请成功！🎉\n您成功邀请了${user.nickname}\n您的粮票:+${this.ctx.mpconfig.ex_coin}\n当前余额:${fer.times + this.ctx.mpconfig.ex_coin}`
                 // this.ctx.service.user.giveCoin({openid:fer.openid,coin:this.ctx.mpconfig.ex_coin,type:2,remark:'邀请用户',message:content,giver:})
                 let updatefer = await ctx.service.user.update({times: fer.times + this.ctx.mpconfig.ex_coin}, {id: father});
                 this.ctx.service.weixin.sendServiceMessage({content, openid: fer.openid});
-                console.log(`调试:更新邀请者积分`, updatefer);
-                content = `受邀成功! \n 您的积分: +${ctx.mpconfig.in_coin}\n 邀请者[${fer.nickname}]积分: + ${this.ctx.mpconfig.ex_coin}`;
+                console.log(`调试:更新邀请者粮票`, updatefer);
+                content = `受邀成功! \n 您的粮票: +${ctx.mpconfig.in_coin}\n 邀请者[${fer.nickname}]粮票: + ${this.ctx.mpconfig.ex_coin}`;
                 let sendRes = await ctx.service.weixin.sendServiceMessage({content});
                 console.log(`调试:完成后客服消息推送返回值`, sendRes)
             }

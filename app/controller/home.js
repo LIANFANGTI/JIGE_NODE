@@ -207,22 +207,31 @@ class HomeController extends Controller {
   async callback(){
     let {body,query} = this.ctx.request;
 
-    console.log(new Date(),`调试:接收到红包领取回调`, {body,query});
+   console.log(new Date(),`调试:接收到红包领取回调`, {body,query});
    let { openid,jtoken } = query;
-   // await  this.ctx.service.mpconfig.
-   let user = await  this.ctx.model.Uselaor.findOne({
-     attributes:["id"],
-     where:{openid}
-   });
-   console.log(`调试:查询到用户信息`, user)
-    let res = await this.ctx.model.Log.create({
-      uid:user.id,
-      type:'饿了么大礼包'
-    })
-    this.ctx.body={
-      code:0,
-      data:{body,query,res}
-    }
+   try {
+       await  this.ctx.service.mpconfig.checkToken(jtoken);
+       let user = await  this.ctx.model.User.findOne({
+           attributes:["id","times"],
+           where:{openid}
+       });
+
+       let update = await  this.ctx.model.User.update({
+           times:Sequelize.literal(`times - ${this.ctx.mpconfig.unit_coin}`)
+       },{where:{id:user.id}});
+       console.log(`调试:查询到用户信息`, user);
+       let res = await this.ctx.model.Log.create({
+           uid:user.id,
+           type:'饿了么大礼包'
+       })
+       this.ctx.body={
+           code:0,
+           data:{body,query,res,update}
+       }
+       this.ctx.service.weixin.sendServiceMessage({content:`您已成功领取饿了么大礼包\n粮票使用:-${this.ctx.mpconfig.unit_coin}\n粮票余额:${user.times - this.ctx.mpconfig.unit_coin}`,openid})
+   }catch (e) {
+       this.ctx.body =e
+   }
   }
 }
 
