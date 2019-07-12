@@ -406,12 +406,25 @@ module.exports = class WeixinController extends BaseController {
     async getEleme({type = 20, validate_code,openid}) {
         this.reply();
         try {
+            let user = await this.ctx.service.user.exist({
+                where: {openid},
+                col: ['phone', 'id', "times"],
+                showCol: true
+            });
+            if (user.times < 9) {
+                this.reply({content: '领取失败😢\n余额不足快去邀请好友 或充值吧😗'});
+                return;
+            }
+            if(!user.phone){
+                this.ctx.service.weixin.sendServiceMessage({content:'请先回复手机号绑定'});
+                return ;
+            }
             let { url } = await  this.ctx.service.eleme.getHongbaoUrl({openid});
             console.log(`调试:获取红包URL成功`, url);
             const articles = {
                 "title": "饿了么大礼包",
                 "description": "",
-                url,
+                url:`${url}&phone=${user.phone}`,
                 "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/%E7%BA%A2%E5%8C%85.png"
             };
 
