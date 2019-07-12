@@ -68,11 +68,15 @@ module.exports = app => {
   router.get("/jige/checksignin",controller.jige.checkSignin);
   router.get("/jige/extensioncode",controller.jige.drawExtensionCode);
   router.get('/jige/nmsl', controller.jige.nmsl);
+  router.get('/jige/pullnmsl', controller.jige.pullNmsl);
 
 
   router.post("/jige/signin",controller.jige.signin);
 
   router.post("/jige/pay",controller.jige.pay);
+
+
+  router.post("/eleme/callback",controller.home.callback);
 
 
 

@@ -60,8 +60,8 @@ class JigeController extends BaseController {
         try {
             let {token} = await this.ctx.service.mpconfig.checkToken();
             const {appid} = this.ctx.mpconfig;
-            const redirect_uri = encodeURI(`http://jige.lianfangti.cn`);
-            // const redirect_uri = encodeURI(`https://lft.easy.echosite.cn`);
+            // const redirect_uri = encodeURI(`http://jige.lianfangti.cn`);
+            const redirect_uri = encodeURI(`https://lft.easy.echosite.cn`);
             const response_type = `code`;
             const scope = `snsapi_userinfo`;
             const state = token;
@@ -313,10 +313,70 @@ class JigeController extends BaseController {
             }
         }
     }
+   async pullNmsl(){
+       let urls={
+           // "ktff":"https://nmsl.shadiao.app/api.php",
+           "ktff":"http://www.nmsl8.club/index/nmsl/index.html",
+           "sclh":"https://nmsl.shadiao.app/api.php?level=min",
+           // "twqh":"https://chp.shadiao.app/api.php",
+           "chp":"https://chp.shadiao.app/api.php",
+       };
+       let type =this.ctx.request.query.type || 'ktff';
+       let text = await this.ctx.service.http.get({url: urls[type],headers:{
+               "X-Requested-With":"XMLHttpRequest"
+           }});
+       if(text.list){
+           text=text.list;
+       }
+       let nmsl =  await this.ctx.model.Nmsl.findOne({
+           attributes:["id"],
+           where:{
+               word:text
+           }
+       });
+       let result ;
+       if(!nmsl){
+           result =  await this.ctx.model.Nmsl.create({
+               word:text,
+               type
+           })
+       }else{
+          result= "重复";
+           console.log(`调试:已存在不插入`)
+       }
+       this.ctx.body ={
+           code: result ==="重复"? 101:0,
+           data:{
+               text,
+               status:result
+           }
+       }
+   }
 
     async nmsl() {
         try {
-            let text = await this.ctx.service.http.get({url: "https://nmsl.shadiao.app/api.php"});
+            let urls={
+                "ktff":"https://nmsl.shadiao.app/api.php",
+                "sclh":"https://nmsl.shadiao.app/api.php?level=min",
+                "twqh":"https://chp.shadiao.app/?from_nmsl",
+                "chp":"https://chp.shadiao.app/api.php",
+            };
+            let type =this.ctx.request.query.type || 'ktff';
+            let text = await this.ctx.service.http.get({url: urls[type]});
+            let nmsl =  await this.ctx.model.Nmsl.findOne({
+                attributes:["id"],
+                where:{
+                    word:text
+                }
+            });
+            if(!nmsl){
+                await this.ctx.model.Nmsl.create({
+                    word:text,
+                    type
+                })
+            }else{
+                console.log(`调试:已存在不插入`)
+            }
             let len = text.length; //字数
             let size = 9; //一行显示的字数
             let line = len % size === 0 ? ~~(len / size) : ~~(len / size) + 1; //行数计算
@@ -353,6 +413,13 @@ class JigeController extends BaseController {
         } catch (e) {
             console.error(`错误:`, e)
         }
+    }
+
+    async getMiaoMiaoToken(){
+        let {oepnid } = this.ctx.request.query;
+        let { url} =await  this.ctx.service.eleme.getHongbaoUrl({openid});
+        console.log(`调试:获取到url`, url)
+
     }
 
 }

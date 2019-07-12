@@ -44,4 +44,33 @@ module.exports = class ElemeService extends Service {
             return Promise.reject(err);
         });
     }
+    async getHongbaoUrl({openid}){
+        const callbackurl = `http://eleme.lianfangti.cn/callback?openid=${openid}`;
+        try {
+            let  formData = {
+                xttoken:"jigezhushou",
+                callbackUrl:encodeURI(callbackurl),
+                method:'POST',
+                openid
+            };
+            console.log(`调试:获取红包链接发送的参数`, formData);
+            let res = await  this.ctx.service.http.post({
+                url:`http://eom.mmqbb.cn:8083/elmdhb/getUrl`,
+                headers:{
+                    "Content-Type":"application/x-www-form-urlencoded"
+                },
+                formData
+            });
+            console.log(`调试:请求返回值`,res);
+            let {data:{url}} = res;
+            console.log(`调试:获取到url`, url);
+            if(!url){
+                return  Promise.reject({code:300,error:res});
+            }
+            return res.data;
+
+        }catch (e) {
+            console.log(`调试:临时红包出错`, e)
+        }
+    }
 }

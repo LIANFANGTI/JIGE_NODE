@@ -187,9 +187,9 @@ class HomeController extends Controller {
   async sendNmslLink(){
     console.log(`调试:发送`);
     const articles = {
-        "title": "说话之道",
+        "title": "口吐芬芳2.0内测版",
         "description": "一起来口吐芬芳 舌灿莲花 做一个儒雅随和的人",
-        "url": `http://test.eleme.lianfangti.cn/nmsl`,
+        "url": `http://jige.lianfangti.cn/#/pages/nmsl/nmsl`,
         "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/nmsllogo.png"
     };
     await this.ctx.service.mpconfig.checkToken();
@@ -202,6 +202,27 @@ class HomeController extends Controller {
   }
   async weixinFile(){
     this.ctx.body = `UzBeNXpZYRmW1N1n`
+  }
+
+  async callback(){
+    let {body,query} = this.ctx.request;
+
+    console.log(new Date(),`调试:接收到红包领取回调`, {body,query});
+   let { openid,jtoken } = query;
+   // await  this.ctx.service.mpconfig.
+   let user = await  this.ctx.model.Uselaor.findOne({
+     attributes:["id"],
+     where:{openid}
+   });
+   console.log(`调试:查询到用户信息`, user)
+    let res = await this.ctx.model.Log.create({
+      uid:user.id,
+      type:'饿了么大礼包'
+    })
+    this.ctx.body={
+      code:0,
+      data:{body,query,res}
+    }
   }
 }
 

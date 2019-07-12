@@ -406,29 +406,19 @@ module.exports = class WeixinController extends BaseController {
     async getEleme({type = 20, validate_code,openid}) {
         this.reply();
         try {
-            let res = await  this.ctx.service.http.post({
-                url:`http://eom.mmqbb.cn:8083/elmdhb/getUrl`,
-                headers:{
-                    "Content-Type":"application/x-www-form-urlencoded"
-                },
-                formData:{
-                    xttoken:"jigezhushou",
-                    openid
-                }
-            });
-            console.log(`调试:请求返回值`,res);
-            let {data:{url}} = res;
-            console.log(`调试:获取到url`, url);
+            let { url } = await  this.ctx.service.eleme.getHongbaoUrl({openid});
+            console.log(`调试:获取红包URL成功`, url);
             const articles = {
                 "title": "饿了么大礼包",
-                "description": "限时免费红包！！！",
+                "description": "",
                 url,
                 "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/%E7%BA%A2%E5%8C%85.png"
             };
 
             this.ctx.service.weixin.sendServiceMessage({type:'news',articles});
         }catch (e) {
-            console.log(`调试:临时红包出错`, e)
+            console.log(`调试:临时红包出错`, e);
+            this.ctx.body = e
         }
 
 
