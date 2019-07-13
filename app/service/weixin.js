@@ -116,7 +116,7 @@ module.exports = class WeixinService extends Service {
         return await this.ctx.service.http.get({url})
     }
 
-    async createMenu({menu}) {
+    async createMenu({menu}={}) {
         let {access_token} = await this.getAccessToken();
         const url = `https://api.weixin.qq.com/cgi-bin/menu/create?access_token=${access_token}`;
         /*
@@ -134,6 +134,7 @@ module.exports = class WeixinService extends Service {
                 {
                     "name": "一键红包",
                     "sub_button": [
+                        {"type": "click", "name": "饿了么大礼包", "key": "DLB"},
                         {"type": "click", "name": "拼手气", "key": "PSQ"},
                         {"type": "click", "name": "品质联盟", "key": "PZLM"}
                     ]

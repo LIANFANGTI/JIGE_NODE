@@ -11,7 +11,7 @@ module.exports = class ElemeService extends Service {
         return await this.ctx.service.http.post({url, data}).then( async res => {
             console.log(`返回值[正常]:\n`, res,"\n\n");
             let errors = {
-                0: "库存不足",
+                0: "库存不足 可以用大礼包哦",
                 1: "成功",
                 2: "余额不足",
                 50: "发送验证码状态 ",

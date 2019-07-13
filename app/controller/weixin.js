@@ -168,17 +168,20 @@ module.exports = class WeixinController extends BaseController {
                     let content = allConfig.help_message || `如何使用XX红包助手？\n 1.回复手机号 \n 2.点击菜单栏一键红包 \n 3.回复验证码即可领取`;
                     this.reply({content});
                     // this.service.weixin.sendServiceMessage({type:'video',media_id:'_mk7AF04X-VAzkJcPZDscYwCchj86MrVd9zOnzXco70'});
-                    break;
+                break;
                 case "PSQ":  // 拼手气红包
 
                     // this.reply({content: '你点击了拼手气红包'});
                     await this.getEleme({type: 20,openid});
-                    break;
+                break;
                 case "PZLM": // 品质联盟
                     console.log(`调试:你点击了品质联盟`)
                     await this.getEleme({type: 21,openid});
 
-                    break;
+                break;
+                case "DLB":
+                    await this.getEleme({type: 23,openid});
+                break;
                 case "TGM":  // 推广码
                     this.reply({content: '获取中 请稍后...'});
                     this.ctx.runInBackground(async ()=>{
@@ -293,6 +296,7 @@ module.exports = class WeixinController extends BaseController {
             await this.ctx.service.mpconfig.checkToken();
             this.ctx.body = await this.ctx.service.weixin.createMenu();
         }catch (e) {
+            console.error(`错误:创建菜单出错`, e)
             this.ctx.logger.error(new Error(e));
             this.ctx.body =e
         }
@@ -405,34 +409,38 @@ module.exports = class WeixinController extends BaseController {
     //领红包
     async getEleme({type = 20, validate_code,openid}) {
         this.reply();
-        // try {
-        //     let user = await this.ctx.service.user.exist({
-        //         where: {openid},
-        //         col: ['phone', 'id', "times"],
-        //         showCol: true
-        //     });
-        //     if (user.times < 9) {
-        //         this.reply({content: '领取失败😢\n余额不足快去邀请好友 或充值吧😗'});
-        //         return;
-        //     }
-        //     if(!user.phone){
-        //         this.ctx.service.weixin.sendServiceMessage({content:'请先回复手机号绑定'});
-        //         return ;
-        //     }
-        //     let { url } = await  this.ctx.service.eleme.getHongbaoUrl({openid});
-        //     console.log(`调试:获取红包URL成功`, url);
-        //     const articles = {
-        //         "title": "饿了么大礼包",
-        //         "description": "",
-        //         url:`${url}&phone=${user.phone}`,
-        //         "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/%E7%BA%A2%E5%8C%85.png"
-        //     };
-        //
-        //     this.ctx.service.weixin.sendServiceMessage({type:'news',articles});
-        // }catch (e) {
-        //     console.log(`调试:临时红包出错`, e);
-        //     this.ctx.body = e
-        // }
+        if(type === 23){
+            try {
+                let user = await this.ctx.service.user.exist({
+                    where: {openid},
+                    col: ['phone', 'id', "times"],
+                    showCol: true
+                });
+                if (user.times < 9) {
+                    this.reply({content: '领取失败😢\n余额不足快去邀请好友 或充值吧😗'});
+                    return;
+                }
+                if(!user.phone){
+                    this.ctx.service.weixin.sendServiceMessage({content:'请先回复手机号绑定'});
+                    return ;
+                }
+                let { url } = await  this.ctx.service.eleme.getHongbaoUrl({openid});
+                console.log(`调试:获取红包URL成功`, url);
+                const articles = {
+                    "title": "饿了么大礼包",
+                    "description": "",
+                    url:`${url}&phone=${user.phone}`,
+                    "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/%E7%BA%A2%E5%8C%85.png"
+                };
+
+                this.ctx.service.weixin.sendServiceMessage({type:'news',articles});
+            }catch (e) {
+                console.log(`调试:临时红包出错`, e);
+                this.ctx.body = e
+            }
+            return 0;
+        }
+
 
 
 
