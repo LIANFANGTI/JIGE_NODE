@@ -204,7 +204,7 @@ module.exports = class UserService extends Service {
         const ORDERBY = condition.sortby !== ''?  `ORDER BY ${condition.sortby} ${condition.order}`:``;
 
         // const count_sql = `SELECT COUNT(1) as total FROM users WHERE father IN (SELECT id AS fid FROM users ${WHERE} ) AND mid =${mp}`;
-        const total_sql = `SELECT id,mid,openid,subscribe,father_name,nickname,phone,fid,ex_count,recharge_count,get_count,city,sex,times,created_at FROM  users 
+        const total_sql = `SELECT id,mid,openid,subscribe,father_name,nickname,phone,fid,ex_count,recharge_count,get_count,city,sex,times,week_ex,month_ex,all_ex,created_at FROM  users 
                      LEFT  JOIN (SELECT id AS fid,nickname AS father_name FROM users) fu ON  users.father = fu.fid
                      LEFT  JOIN (SELECT father as et_fid,COUNT(1) ex_count FROM users GROUP BY father  )  AS et  ON users.id = et.et_fid
                      LEFT  JOIN (SELECT sum(pay_price) recharge_count,buyer FROM recharge GROUP BY buyer) AS rt ON users.id = rt.buyer

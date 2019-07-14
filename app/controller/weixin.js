@@ -205,6 +205,7 @@ module.exports = class WeixinController extends BaseController {
                        await this.ctx.service.user.signin({openid});
                     });
                 break;
+
                 case "ZHCZ": // 账户充值
                     this.reply();
                     this.ctx.service.weixin.typing();
