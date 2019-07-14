@@ -60,8 +60,8 @@ class JigeController extends BaseController {
         try {
             let {token} = await this.ctx.service.mpconfig.checkToken();
             const {appid} = this.ctx.mpconfig;
-            // const redirect_uri = encodeURI(`http://jige.lianfangti.cn`);
-            const redirect_uri = encodeURI(`https://lft.easy.echosite.cn`);
+            const redirect_uri = encodeURI(`http://jige.lianfangti.cn`);
+            // const redirect_uri = encodeURI(`https://lft.easy.echosite.cn`);
             const response_type = `code`;
             const scope = `snsapi_userinfo`;
             const state = token;
@@ -258,18 +258,79 @@ class JigeController extends BaseController {
             all: `AND true `
         };
         let type = this.ctx.request.query.type || 'all';
-        const sql = `SELECT id,nickname,ex_count,headimgurl FROM users JOIN (SELECT father,COUNT(1) as ex_count FROM users  GROUP BY  father ) AS ex  
+        console.log(`调试:type的值`,type);
+        const mysql = new Sequelize(this.config.sequelize);
+
+        const sql = `SELECT id,nickname,ex_count ,headimgurl FROM users JOIN (SELECT father,COUNT(1) as ex_count FROM users  GROUP BY  father ) AS ex  
                     ON users.id = ex.father 
                     WHERE mid =2
                     ${typeMap[type]}
                     ORDER BY  ex.ex_count DESC 
-                    LIMIT 0,100
-                    `;
-        const mysql = new Sequelize(this.config.sequelize);
+                    LIMIT 0,100`;
+
+        const sql2 =`SELECT
+                    id,nickname,${type}_ex,headimgurl  FROM users  WHERE ${type}_ex >0
+                                        `;
+        let fakeuser = await  mysql.query(sql2,{type: mysql.QueryTypes.SELECT});
+        console.log(`调试:查询出掺假用户数`, fakeuser);
         let data = await mysql.query(sql, {type: mysql.QueryTypes.SELECT});
+        // let alldata= [...data,...fakeuser];
+
+        let  ranking = await  this.ctx.model.Ranking.findAll({
+            attributes:["name","id","gift"],
+            where:{
+                type
+            }
+        });
+        let user = await this.ctx.service.jige.checkXToken();
+        console.log(`调试:当前用户`, user);
+        const typeMap2 = {
+            week: `YEARWEEK( date_format(  created_at,'%Y-%m-%d' ) ) = YEARWEEK( now() ) `,
+            month: `DATE_FORMAT( created_at, '%Y%m' ) = DATE_FORMAT( CURDATE( ) ,'%Y%m' ) `,
+            all: `true `
+        };
+        let ex_count = await this.ctx.model.User.findAll({
+            attributes: [[Sequelize.fn('COUNT', 1), 'total']],
+            where: {
+                father: user.id,
+                $and: Sequelize.literal(typeMap2[type])
+
+            }
+
+        });
+
+        for(let i in fakeuser){
+            let flag = false,index;
+            for(let j in data){
+                if(fakeuser[i].id === data[j].id){
+                    flag =true;
+                    index = j;
+                    break;
+                }
+            }
+            if(flag){
+                data[index]['ex_count']+= fakeuser[i][`${type}_ex`]
+            }else{
+                fakeuser[i]['ex_count']=fakeuser[i][`${type}_ex`];
+                data.push(fakeuser[i])
+            }
+
+        }
+
+        data.sort((item1,item2)=>{
+            return item2["ex_count"] - item1["ex_count"];
+        });
         this.ctx.body = {
             code: 0,
-            data
+
+            data:{
+                list:data,
+                fakeuser,
+                ranking,
+                ex_count:(ex_count[0].get("total") + (user[`${type}_ex`] *  1)),
+                fake_count:user[`${type}_ex`],
+                user,
+            }
         }
 
     }

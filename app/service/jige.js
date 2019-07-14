@@ -50,7 +50,7 @@ module.exports = class JigeService extends Service {
     }
 
     let userInfo =await this.ctx.model.User.findOne({
-      attributes:["id","openid","nickname","mid","last_sign","conn_sign"],
+      attributes:["id","openid","nickname","mid","last_sign","conn_sign",'week_ex','month_ex','all_ex'],
       where:{
         openid:xToken
       }
