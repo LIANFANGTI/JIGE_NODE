@@ -8,7 +8,7 @@ module.exports = app => {
     remark:STRING,//赠送备注
     coin: INTEGER,  // 赠送金币
     giver:INTEGER, //赠送者id
-    type: INTEGER // 类型  0 为 用户列表里赠送  1 为 口令红包赠送
+    type: INTEGER // 类型  0 为 后台赠送  1 为 口令红包赠送  2为签到赠送
   }, {
     freezeTableName: true //表名将与modal名相同
   });

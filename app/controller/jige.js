@@ -22,6 +22,7 @@ class JigeController extends BaseController {
         this.ctx.body = buffer
     }
 
+    //获取AccessToken
     async getAccessToken() {
         try {
             console.log(`调试:进来了`, this.ctx.request.query);
@@ -37,6 +38,7 @@ class JigeController extends BaseController {
         }
     }
 
+    //获取用户信息
     async getUserInfo() {
         await this.ctx.service.mpconfig.checkToken();
         let {access_token, openid} = this.ctx.request.query;
@@ -56,6 +58,8 @@ class JigeController extends BaseController {
         }
     }
 
+
+    //获取登录链接
     async getLoginUrl() {
         try {
             let {token} = await this.ctx.service.mpconfig.checkToken();
@@ -351,7 +355,7 @@ class JigeController extends BaseController {
         try {
             this.ctx.body = await this.ctx.service.jige.signin();
         } catch (e) {
-            console.log(`调试:获取到错误`, e)
+            console.log(`调试:获取到错误`, e);
             this.ctx.body = e
         }
     }

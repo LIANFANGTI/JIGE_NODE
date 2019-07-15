@@ -129,9 +129,17 @@ module.exports = class JigeService extends Service {
     if(nowInterval <= maxInterval){ // 是连续签到
       console.log(`调试:签到成功`);
       addCoin = config.sign_coin  + (user.conn_sign + 1);
+      // {coin,message,remark,type = 0,openid,giver}
+      await this.ctx.service.user.giveCoin({
+        coin:addCoin,
+        message:'签到成功',
+        remark:'每日签到',
+        type:2,
+        openid,
+        giver:0
+      });
       await  this.ctx.model.User.update({
         last_sign:now,
-        times:Sequelize.literal(`times + ${addCoin}`),
         conn_sign: Sequelize.literal(`conn_sign + 1`)
       },{where:{openid}});
       // await  this.ctx.service.weixin.sendServiceMessage({content:`签到成功\n积分余额:+${addCoin}\n当前积分:${user.times + addCoin}\n您已连续签到${(user.conn_sign + 1)}天\n`})
@@ -148,7 +156,6 @@ module.exports = class JigeService extends Service {
       addCoin = config.sign_coin  ;
       await this.ctx.model.User.update({
         last_sign:now,
-        times:Sequelize.literal(`times + ${addCoin}`),
         conn_sign: 0
       },{where:{openid}});
       return {
