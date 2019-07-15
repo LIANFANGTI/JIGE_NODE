@@ -14,6 +14,26 @@ module.exports = class UserController extends Controller {
     }
 
   }
+
+
+  async updateUser(){
+    const { ctx } = this;
+    let { user } = ctx.request.body;
+    let {id} = ctx.params;
+    console.log(`调试:收到user`, user,id);
+    let res= await  this.ctx.model.User.update(user,{
+      where:{
+        id
+      }
+    })
+  this.ctx.body={
+        code:20000,
+    res,
+        msg:'ok'
+  }
+
+
+  }
   async list2(){
     const { ctx } = this;
     const admin = await  ctx.service.mpconfig.checkAdminToken();

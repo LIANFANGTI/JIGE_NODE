@@ -29,6 +29,7 @@ module.exports = app => {
   router.post('/user/login', controller.admin.login);
   router.get('/user/info', controller.admin.getInfo);
   router.get('/user/list', controller.user.list2);
+  router.put('/user/:id/', controller.user.updateUser);
   router.get('/recharge/list', controller.orders.list);
   router.get('/plan/list', controller.orders.planList);
 
