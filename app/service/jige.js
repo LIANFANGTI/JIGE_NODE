@@ -28,8 +28,17 @@ module.exports = class JigeService extends Service {
       attributes:{exclude: []},
       where:{openid}
     });
+  //是否领取过 加客服口令
+    let added = await  this.ctx.model.CodeCoinLog.findAll({
+      attributes:["id"],
+      where:{
+        cid:14,
+        uid:userInfo.id
+      }
+    })
+    // userInfo.added = 111;
     // console.log(`调试:获取到系统里用户信息`, userInfo);
-    return userInfo;
+    return {...userInfo.dataValues,added:added.length ? true:false};
 
   }
   // token刷新
