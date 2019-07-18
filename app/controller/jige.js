@@ -420,28 +420,38 @@ class JigeController extends BaseController {
 
     async nmsl() {
         try {
-            let urls={
-                "ktff":"https://nmsl.shadiao.app/api.php",
-                "sclh":"https://nmsl.shadiao.app/api.php?level=min",
-                "twqh":"https://chp.shadiao.app/?from_nmsl",
-                "chp":"https://chp.shadiao.app/api.php",
-            };
+            // let urls={
+            //     "ktff":"https://nmsl.shadiao.app/api.php",
+            //     "sclh":"https://nmsl.shadiao.app/api.php?level=min",
+            //     "twqh":"https://chp.shadiao.app/?from_nmsl",
+            //     "chp":"https://chp.shadiao.app/api.php",
+            // };
+            const mysql = new Sequelize(this.config.sequelize);
             let type =this.ctx.request.query.type || 'ktff';
-            let text = await this.ctx.service.http.get({url: urls[type]});
-            let nmsl =  await this.ctx.model.Nmsl.findOne({
-                attributes:["id"],
-                where:{
-                    word:text
-                }
-            });
-            if(!nmsl){
-                await this.ctx.model.Nmsl.create({
-                    word:text,
-                    type
-                })
-            }else{
-                console.log(`调试:已存在不插入`)
-            }
+            let sql = `select * from nmsl  WHERE type='${type}' order by rand() LIMIT 1;`;
+            let nmsl = await  mysql.query(sql,{type: mysql.QueryTypes.SELECT});
+            let text=  nmsl[0].word;
+            console.log(`调试:获取到的随机数据`, text);
+
+            // return  0;
+
+
+            // let text = await this.ctx.service.http.get({url: urls[type]});
+            // let nmsl =  await this.ctx.model.Nmsl.findOne({
+            //     attributes:["id"],
+            //     where:{
+            //         word:text
+            //     }
+            // });
+            // if(!nmsl){
+            //     await this.ctx.model.Nmsl.create({
+            //         word:text,
+            //         type
+            //     })
+            // }else{
+            //     console.log(`调试:已存在不插入`)
+            // }
+
             let len = text.length; //字数
             let size = 9; //一行显示的字数
             let line = len % size === 0 ? ~~(len / size) : ~~(len / size) + 1; //行数计算
