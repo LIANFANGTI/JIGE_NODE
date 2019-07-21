@@ -163,6 +163,10 @@ module.exports = class JigeService extends Service {
     } else { //不是连续签到
       console.log(`调试:不是连续签到`);
       addCoin = config.sign_coin  ;
+      await  this.ctx.model.User.update({
+        last_sign:now,
+        conn_sign: Sequelize.literal(`conn_sign + 1`)
+      },{where:{openid}});
       await this.ctx.service.user.giveCoin({
         coin:addCoin,
         message:'签到成功',
