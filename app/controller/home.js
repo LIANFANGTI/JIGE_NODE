@@ -187,14 +187,19 @@ class HomeController extends Controller {
   async sendNmslLink(){
     console.log(`调试:发送`);
     const articles = {
-        "title": "口吐芬芳2.0内测版",
+        "title": "口吐芬芳2.1内测版",
         "description": "一起来口吐芬芳 舌灿莲花 做一个儒雅随和的人",
-        "url": `http://jige.lianfangti.cn/#/pages/nmsl/nmsl`,
+        "url": `http://jige.lianfangti.cn/pages/nmsl/nmsl`,
         "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/nmsllogo.png"
     };
-    await this.ctx.service.mpconfig.checkToken();
+    try {
+        await this.ctx.service.mpconfig.checkToken();
 
-      this.ctx.body = await  this.ctx.service.weixin.sendServiceMessage({type:'news',articles,openid:'oUcAW5v08hJpsH49EUTIPJA_gCDo'});
+        this.ctx.body = await  this.ctx.service.weixin.sendServiceMessage({type:'news',articles,openid:'oUcAW5v08hJpsH49EUTIPJA_gCDo'});
+    }catch (e) {
+        console.error(`错误:`, e)
+        this.ctx.body =e
+    }
   }
 
   async weixinFile(){

@@ -163,15 +163,23 @@ module.exports = class JigeService extends Service {
     } else { //不是连续签到
       console.log(`调试:不是连续签到`);
       addCoin = config.sign_coin  ;
-      await this.ctx.model.User.update({
-        last_sign:now,
-        conn_sign: 0
-      },{where:{openid}});
+      await this.ctx.service.user.giveCoin({
+        coin:addCoin,
+        message:'签到成功',
+        remark:'每日签到',
+        type:2,
+        openid,
+        giver:0
+      });
+      // await this.ctx.model.User.update({
+      //   last_sign:now,
+      //   conn_sign: 0
+      // },{where:{openid}});
       return {
         code:0,
         data:{
           addCoin,
-          conn_sign:user.conn_sign+1
+          conn_sign:1
         },
         msg:'签到成功'
 
