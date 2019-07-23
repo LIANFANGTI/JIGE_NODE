@@ -257,7 +257,7 @@ class JigeController extends BaseController {
     // 排行榜
     async getRankingList() {
         const typeMap = {
-            week: `AND YEARWEEK( date_format(  created_at,'%Y-%m-%d' ) ) = YEARWEEK( now() ) `,
+            week: `AND YEARWEEK( date_format(  created_at,'%Y-%m-%d' ) ,1) = YEARWEEK( now(),1 ) `,
             month: `AND DATE_FORMAT( created_at, '%Y%m' ) = DATE_FORMAT( CURDATE( ) ,'%Y%m' ) `,
             all: `AND true `
         };
@@ -265,10 +265,10 @@ class JigeController extends BaseController {
         console.log(`调试:type的值`,type);
         const mysql = new Sequelize(this.config.sequelize);
 
-        const sql = `SELECT id,nickname,ex_count ,headimgurl FROM users JOIN (SELECT father,COUNT(1) as ex_count FROM users  GROUP BY  father ) AS ex  
+        const sql = `SELECT id,nickname,ex_count ,headimgurl FROM users JOIN (SELECT father,COUNT(1) as ex_count FROM  users WHERE mid =2  ${typeMap[type]}  GROUP BY  father ) AS ex  
                     ON users.id = ex.father 
                     WHERE mid =2
-                    ${typeMap[type]}
+                   
                     ORDER BY  ex.ex_count DESC 
                     LIMIT 0,100`;
 
@@ -324,6 +324,7 @@ class JigeController extends BaseController {
         data.sort((item1,item2)=>{
             return item2["ex_count"] - item1["ex_count"];
         });
+        delete  user.mpconfig;
         this.ctx.body = {
             code: 0,
 
