@@ -25,16 +25,19 @@ module.exports= class Drawer{
     }
    async drawImage({image,x,y,w,h}){
        if(typeof image === 'string'){
-           console.log(`调试:是地址`);
            image =await loadImage(image).catch(err=>{
                console.error(`错误:图片加载失败`, err)
            });
+           console.log(`调试:是地址`,image);
            // console.log(`调试:加载的图片Buffer`, image)
        }else{
-           console.log(`调试:no path`)
+           image = await  loadImage(image).catch(err=>{
+               console.error(`错误:图片加载失败2`, err)
+           });
+           console.log(`调试:no path1`,image);
        }
        this.context.drawImage(image,x,y,w,h);
-       console.log(`调试:图片绘制完成`,image)
+       console.log(`调试:图片绘制完成`,image);
        return  true;
 
 

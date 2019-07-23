@@ -218,7 +218,7 @@ module.exports = class JigeService extends Service {
       },
       {
         type:'image',
-        content:`${this.config.baseDir}/app/public/images/qrcode.png`,
+        content:qrCodeBuffer,
         y:513,
         w:175
       }
