@@ -11,27 +11,66 @@ const path = require('path');
 module.exports = class HttpService extends Service {
 
     async get(options) {
+        let startTime= new Date().getTime();
+        let urlarr= options.url.split("?");
+        let log = {
+            url:urlarr[0],
+            query:urlarr[1],
+            method: 'POST',
+            data: JSON.stringify(options.data || options.body ||  options.formData),
+        };
         return await requset({
             ...options,
             method: 'GET',
+            resolveWithFullResponse:true,
             json: true
 
+        }).then(res=>{
+            let finishTime = new Date().getTime();
+            log["take_time"] = finishTime  - startTime;
+            log["body"] = JSON.stringify(res.body);
+            log["status"] = res.statusCode;
+            this.ctx.model.RequestLog.create(log);
+            return Promise.resolve(res.body)
+        }).catch(err=>{
+            return Promise.reject(err)
         })
     }
 
     async post(options) {
-        console.log(`调试:你调用了POST请求`)
+        console.log(`调试:你调用了POST请求`);
+        let startTime= new Date().getTime();
+        let urlarr= options.url.split("?");
+        let log = {
+            url:urlarr[0],
+            query:urlarr[1],
+            method: 'POST',
+            data: JSON.stringify(options.data || options.body ||  options.formData),
+        };
         return await requset({
             ...options,
             body: options.data || options.body,
+            resolveWithFullResponse:true,
             method: 'POST',
             json: options.json !== undefined ? options.json : true
         }).then(res => {
-            console.log(`调试:POST请求返回值`, res);
-            return Promise.resolve(res)
-        }).catch(err=>{
-            console.log(`POST请求出错`, err);
-            return Promise.reject({from:'POST请求出错',errors:err})
+            let finishTime = new Date().getTime();
+
+            log["take_time"] = finishTime  - startTime;
+            log["body"] = JSON.stringify(res.body);
+            log["status"] = res.statusCode;
+            this.ctx.model.RequestLog.create(log);
+            console.log(`调试:POST请求返回值`, log);
+
+            return Promise.resolve(res.body)
+        }).catch(res=>{
+            let finishTime = new Date().getTime();
+            log["take_time"] = finishTime  - startTime;
+            log["body"] = JSON.stringify(res.message || res);
+            log["status"] = res.statusCode;
+            console.log(`POST请求出错`, log);
+            this.ctx.model.RequestLog.create(log);
+            return Promise.reject({from:'POST请求出错',errors:res.message || res})
         })
     }
 

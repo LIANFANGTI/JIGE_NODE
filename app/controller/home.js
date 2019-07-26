@@ -55,25 +55,118 @@ class HomeController extends Controller {
   }
 
 
+  //获取领取记录
+  async getLogList(){
+      this.mysql = new Sequelize(this.config.sequelize);
+      let query = this.ctx.request.query;
+      let {size,page,condition} = query;
+      condition = JSON.parse(condition);
+      let {word,type,range = 'all'} = condition;
+      console.log(`调试:查询参数`, word,range);
+      let dateRange = {
+          all:'true',
+          day:'ABS( DateDiff( log.created_at, curdate( ) ) ) <1 ',
+          week:'ABS( DateDiff( log.created_at, curdate( ) ) ) <7',
+          month:'ABS( DateDiff( log.created_at, curdate( ) ) ) <30',
+
+      }
+      const countSQL = `SELECT count(1) as total FROM log JOIN users ON log.uid = users.id   WHERE (nickname like '%${word}%' OR phone like '%${word}%') AND type  like '%${type}%' AND  ${dateRange[range]} `;
+      const sql =` SELECT users.nickname,users.phone,log.type,log.sum_condition,log.amount,log.created_at FROM log JOIN users ON log.uid = users.id 
+                        WHERE (nickname like '%${word}%' OR phone like '%${word}%') AND type  like '%${type}%' AND  ${dateRange[range]}   
+                        ORDER BY log.created_at desc limit ${size * (page - 1)},${size}`;
+      let result = await this.mysql.query(sql,{ type: this.mysql.QueryTypes.SELECT});
+      let total =  await this.mysql.query(countSQL,{ type: this.mysql.QueryTypes.SELECT});
+      console.log(`调试:总条数统计`, total)
+      this.ctx.body = {
+          code:20000,
+          data:{
+              total:total[0]['total'],
+
+              results:result
+          }
+      }
+  }
+
+    //积分赠送记录
+    async getGiveLogList(){
+        this.mysql = new Sequelize(this.config.sequelize);
+        let query = this.ctx.request.query;
+        let {size,page,condition} = query;
+        condition = JSON.parse(condition);
+        let {word,type,range = 'all'} = condition;
+        console.log(`调试:查询参数`, word,range);
+        let dateRange = {
+            all:'true',
+            day:'ABS( DateDiff( log.created_at, curdate( ) ) ) <1 ',
+            week:'ABS( DateDiff( log.created_at, curdate( ) ) ) <7',
+            month:'ABS( DateDiff( log.created_at, curdate( ) ) ) <30',
+
+        }
+        const countSQL = `SELECT count(1) as total FROM give_log as log JOIN users ON log.openid = users.openid   WHERE (nickname like '%${word}%' OR phone like '%${word}%') AND type  = ${type ==='all' ? `type` : type } AND  ${dateRange[range]} `;
+        const sql =` SELECT users.nickname,users.phone,log.type,log.message,log.coin,log.remark,log.created_at FROM give_log as log JOIN users ON log.openid = users.openid 
+                        WHERE (nickname like '%${word}%' OR phone like '%${word}%') AND type  = ${type ==='all' ? `type` : type } AND  ${dateRange[range]}   
+                        ORDER BY log.created_at desc limit ${size * (page - 1)},${size}`;
+        let result = await this.mysql.query(sql,{ type: this.mysql.QueryTypes.SELECT});
+        let total =  await this.mysql.query(countSQL,{ type: this.mysql.QueryTypes.SELECT});
+        console.log(`调试:总条数统计`, total)
+        this.ctx.body = {
+            code:20000,
+            data:{
+                total:total[0]['total'],
+
+                results:result
+            }
+        }
+    }
+    //网络请求记录日志
+    async getRequestLogList(){
+        this.mysql = new Sequelize(this.config.sequelize);
+        let query = this.ctx.request.query;
+        let {size,page,condition} = query;
+
+        condition = JSON.parse(condition);
+        let {word,method='all',range = 'all'} = condition;
+        console.log(`调试:查询参数`, word,range);
+        let dateRange = {
+            all:'true',
+            day:'ABS( DateDiff( log.created_at, curdate( ) ) ) <1 ',
+            week:'ABS( DateDiff( log.created_at, curdate( ) ) ) <7',
+            month:'ABS( DateDiff( log.created_at, curdate( ) ) ) <30',
+
+        }
+        const countSQL = `SELECT count(1) as total FROM request_log as log
+                          WHERE (url like '%${word}%' OR body like '%${word}%' OR  data like '%${word}%' OR  query like '%${word}%' ) AND method  = ${method ==='all' ? `method` : method } AND  ${dateRange[range]} `;
+
+        const sql =`SELECT url,method,status,query,data,body,take_time,created_at FROM request_log as log
+                    WHERE (url like '%${word}%' OR body like '%${word}%' OR  data like '%${word}%' OR  query like '%${word}%' ) AND method  = ${method ==='all' ? `method` : method } AND  ${dateRange[range]} 
+                    ORDER BY log.created_at desc limit ${size * (page - 1)},${size}`;
+        let result = await this.mysql.query(sql,{ type: this.mysql.QueryTypes.SELECT});
+        let total =  await this.mysql.query(countSQL,{ type: this.mysql.QueryTypes.SELECT});
+        console.log(`调试:总条数统计`, total);
+        this.ctx.body = {
+            code:20000,
+            data:{
+                total:total[0]['total'],
+
+                results:result
+            }
+        }
+    }
+
   //每日新用户统计
   async getNewUserLineCount(){
     this.mysql = new Sequelize(this.config.sequelize);
-    const sql =`SELECT
-                  DATE_FORMAT( created_at, '%Y-%m-%d' ) AS time,
-                  DATE_FORMAT( created_at, '%w' ) AS weekday,
-                  ABS( DateDiff( created_at, curdate( ) ) ) diffday,
-                  count( * ) AS count 
-                  FROM
-                  users 
-                  WHERE
-                  ABS( DateDiff( created_at, curdate( ) ) ) <= 7 
-                  GROUP BY
-                  time`;
+      const sql =`SELECT days,IFNULL(count,0) count FROM 
+                (SELECT @cdate := date_add(@cdate,interval -1 day) days from (SELECT @cdate := CURDATE()+1 from recharge limit 7) t1 ) as t
+                LEFT JOIN 
+                (SELECT  DATE_FORMAT( created_at, '%Y-%m-%d' )  AS time,COUNT(1) as count   FROM users  GROUP BY time   ORDER BY count DESC) d
+                ON d.time = t.days   ORDER BY days
+                 `;
     let result = await this.mysql.query(sql,{ type: this.mysql.QueryTypes.SELECT});
-    result = result.map(item=>{
-       item['weekday'] = ["周日","周一","周二","周三","周四","周五","周六"][item.weekday]
-        return item;
-    })
+    // result = result.map(item=>{
+    //    item['weekday'] = ["周日","周一","周二","周三","周四","周五","周六"][item.weekday]
+    //     return item;
+    // })
     this.ctx.body = {
       code:20000,
       data:result
@@ -82,22 +175,17 @@ class HomeController extends Controller {
   //每日充值统计
   async getRechargeLineCount(){
     this.mysql = new Sequelize(this.config.sequelize);
-    const sql =`SELECT
-                  DATE_FORMAT( created_at, '%Y-%m-%d' ) AS time,
-                  DATE_FORMAT( created_at, '%w' ) AS weekday,
-                  ABS( DateDiff( created_at, curdate( ) ) ) diffday,
-                  SUM(pay_price) AS price 
-                  FROM
-                  recharge
-                  WHERE
-                  ABS( DateDiff( created_at, curdate( ) ) ) <7 
-                  GROUP BY
-                  time`;
+    const sql =`SELECT days,IFNULL(count,0) count FROM 
+                (SELECT @cdate := date_add(@cdate,interval -1 day) days from (SELECT @cdate := CURDATE()+1 from recharge limit 7) t1 ) as t
+                LEFT JOIN 
+                (SELECT  DATE_FORMAT( created_at, '%Y-%m-%d' )  AS time,SUM(pay_price) as count   FROM recharge  GROUP BY time   ORDER BY count DESC) d
+                ON d.time = t.days   ORDER BY days
+                 `;
     let result = await this.mysql.query(sql,{ type: this.mysql.QueryTypes.SELECT});
-    result = result.map(item=>{
-      item['weekday'] = ["周日","周一","周二","周三","周四","周五","周六"][item.weekday]
-      return item;
-    })
+    // result = result.map(item=>{
+    //   // item['weekday'] = ["周日","周一","周二","周三","周四","周五","周六"][item.weekday];
+    //   return item;
+    // });
     this.ctx.body = {
       code:20000,
       data:result
@@ -106,23 +194,28 @@ class HomeController extends Controller {
   //每日领取统计
   async getLogLineCount(){
     this.mysql = new Sequelize(this.config.sequelize);
-    const sql =`SELECT
-                DATE_FORMAT( created_at, '%Y-%m-%d' ) AS time,
-                DATE_FORMAT( created_at, '%w' ) AS weekday,
-                ABS( DateDiff( created_at, curdate( ) ) ) diffday,
-                COUNT(1) AS count 
-                FROM
-                log
-                WHERE
-                ABS( DateDiff( created_at, curdate( ) ) ) <= 7 
-                GROUP BY
-                time
-                `;
+      const sql =`SELECT * FROM 
+                (SELECT @cdate := date_add(@cdate,interval -1 day) days from (SELECT @cdate := CURDATE()+1 from recharge limit 7) t1 ) as t
+                LEFT JOIN 
+                (SELECT  DATE_FORMAT( created_at, '%Y-%m-%d' )  AS time,COUNT(1) as count   FROM log  GROUP BY time   ORDER BY count DESC) d
+                ON d.time = t.days   ORDER BY days
+                 `;
     let result = await this.mysql.query(sql,{ type: this.mysql.QueryTypes.SELECT});
-    result = result.map(item=>{
-      item['weekday'] = ["周日","周一","周二","周三","周四","周五","周六"][item.weekday]
-      return item;
-    })
+    // result = result.map(item=>{
+    //   item['weekday'] = ["周日","周一","周二","周三","周四","周五","周六"][item.weekday]
+    //   return item;
+    // })
+    this.ctx.body = {
+      code:20000,
+      data:result
+    }
+  }
+
+  //地区人数统计
+  async getAreaCount(){
+    this.mysql = new Sequelize(this.config.sequelize);
+      const sql =` SELECT city,COUNT(1) count  FROM users WHERE NOT city = '' GROUP BY city ORDER BY  count DESC  LIMIT 0,10`;
+    let result = await this.mysql.query(sql,{ type: this.mysql.QueryTypes.SELECT});
     this.ctx.body = {
       code:20000,
       data:result
@@ -237,6 +330,24 @@ class HomeController extends Controller {
    }catch (e) {
        this.ctx.body =e
    }
+  }
+
+
+  //获取自动回复规则列表
+  async getAutoReplayRuleList(){
+      this.mysql = new Sequelize(this.config.sequelize);
+      let {size=15,page=1,condition} = this.ctx.request.query;
+      const countSQL = `SELECT count(1) as total FROM reply_rule `;
+      const sql =` SELECT * FROM reply_rule ORDER BY created_at desc limit ${size * (page - 1)},${size}`;
+      let result = await this.mysql.query(sql,{ type: this.mysql.QueryTypes.SELECT});
+      let total =  await this.mysql.query(countSQL,{ type: this.mysql.QueryTypes.SELECT});
+      this.ctx.body = {
+          code:20000,
+          data:{
+              total:total[0]['total'],
+              results:result
+          }
+      }
   }
 }
 

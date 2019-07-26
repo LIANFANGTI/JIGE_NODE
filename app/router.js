@@ -49,7 +49,10 @@ module.exports = app => {
 
   router.get('/count/user', controller.home.getNewUserLineCount);
   router.get('/count/recharge', controller.home.getRechargeLineCount);
+  router.get('/count/area', controller.home.getAreaCount);
   router.get('/count/log', controller.home.getLogLineCount);
+  router.get('/log/list', controller.home.getLogList);
+  router.get('/givelog/list', controller.home.getGiveLogList);
 
 
   router.get('/ktff', controller.home.ktff);
@@ -72,12 +75,22 @@ module.exports = app => {
   router.get('/jige/pullnmsl', controller.jige.pullNmsl);
 
 
+  router.get('/autoreply/list', controller.home.getAutoReplayRuleList);
+
+
+
+  router.get('/requestlog/list', controller.home.getRequestLogList);
+
+
   router.post("/jige/signin",controller.jige.signin);
 
   router.post("/jige/pay",controller.jige.pay);
 
 
   router.post("/eleme/callback",controller.home.callback);
+
+
+
 
 
 
