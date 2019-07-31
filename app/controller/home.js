@@ -157,7 +157,7 @@ class HomeController extends Controller {
   async getNewUserLineCount(){
     this.mysql = new Sequelize(this.config.sequelize);
       const sql =`SELECT days,IFNULL(count,0) count FROM 
-                (SELECT @cdate := date_add(@cdate,interval -1 day) days from (SELECT @cdate := CURDATE()+1 from recharge limit 7) t1 ) as t
+                (SELECT DATE_ADD( (@cdate := DATE_ADD(@cdate,INTERVAL  - 1 day)),INTERVAL 1 day) days from (SELECT @cdate := CURDATE() from recharge limit 7) t1 ) as t
                 LEFT JOIN 
                 (SELECT  DATE_FORMAT( created_at, '%Y-%m-%d' )  AS time,COUNT(1) as count   FROM users  GROUP BY time   ORDER BY count DESC) d
                 ON d.time = t.days   ORDER BY days
@@ -176,7 +176,7 @@ class HomeController extends Controller {
   async getRechargeLineCount(){
     this.mysql = new Sequelize(this.config.sequelize);
     const sql =`SELECT days,IFNULL(count,0) count FROM 
-                (SELECT @cdate := date_add(@cdate,interval -1 day) days from (SELECT @cdate := CURDATE()+1 from recharge limit 7) t1 ) as t
+                (SELECT DATE_ADD( (@cdate := DATE_ADD(@cdate,INTERVAL  - 1 day)),INTERVAL 1 day) days from (SELECT @cdate := CURDATE() from recharge limit 7) t1 ) as t
                 LEFT JOIN 
                 (SELECT  DATE_FORMAT( created_at, '%Y-%m-%d' )  AS time,SUM(pay_price) as count   FROM recharge  GROUP BY time   ORDER BY count DESC) d
                 ON d.time = t.days   ORDER BY days
@@ -195,7 +195,7 @@ class HomeController extends Controller {
   async getLogLineCount(){
     this.mysql = new Sequelize(this.config.sequelize);
       const sql =`SELECT * FROM 
-                (SELECT @cdate := date_add(@cdate,interval -1 day) days from (SELECT @cdate := CURDATE()+1 from recharge limit 7) t1 ) as t
+                (SELECT DATE_ADD( (@cdate := DATE_ADD(@cdate,INTERVAL  - 1 day)),INTERVAL 1 day) days from (SELECT @cdate := CURDATE() from recharge limit 7) t1 ) as t
                 LEFT JOIN 
                 (SELECT  DATE_FORMAT( created_at, '%Y-%m-%d' )  AS time,COUNT(1) as count   FROM log  GROUP BY time   ORDER BY count DESC) d
                 ON d.time = t.days   ORDER BY days
