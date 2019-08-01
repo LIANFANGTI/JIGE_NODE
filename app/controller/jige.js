@@ -64,8 +64,8 @@ class JigeController extends BaseController {
         try {
             let {token} = await this.ctx.service.mpconfig.checkToken();
             const {appid} = this.ctx.mpconfig;
-            // const redirect_uri = encodeURI(`http://jige.lianfangti.cn`);
-            const redirect_uri = encodeURI(`https://lft.easy.echosite.cn`);
+            const redirect_uri = encodeURI(`http://jige.lianfangti.cn`);
+            // const redirect_uri = encodeURI(`https://lft.easy.echosite.cn`);
             const response_type = `code`;
             const scope = `snsapi_userinfo`;
             const state = token;
@@ -262,6 +262,7 @@ class JigeController extends BaseController {
             all: `AND true `
         };
         let type = this.ctx.request.query.type || 'all';
+        let mode = this.ctx.request.query.mode || 'user';
         console.log(`调试:type的值`,type);
         const mysql = new Sequelize(this.config.sequelize);
 
@@ -286,22 +287,31 @@ class JigeController extends BaseController {
                 type
             }
         });
-        let user = await this.ctx.service.jige.checkXToken();
-        console.log(`调试:当前用户`, user);
-        const typeMap2 = {
-            week: `YEARWEEK( date_format(  created_at,'%Y-%m-%d' ) ) = YEARWEEK( now() ) `,
-            month: `DATE_FORMAT( created_at, '%Y%m' ) = DATE_FORMAT( CURDATE( ) ,'%Y%m' ) `,
-            all: `true `
-        };
-        let ex_count = await this.ctx.model.User.findAll({
-            attributes: [[Sequelize.fn('COUNT', 1), 'total']],
-            where: {
-                father: user.id,
-                $and: Sequelize.literal(typeMap2[type])
+        if(mode==="user"){
+            let user = await this.ctx.service.jige.checkXToken();
+            console.log(`调试:当前用户`, user);
+            const typeMap2 = {
+                week: `YEARWEEK( date_format(  created_at,'%Y-%m-%d' ) ) = YEARWEEK( now() ) `,
+                month: `DATE_FORMAT( created_at, '%Y%m' ) = DATE_FORMAT( CURDATE( ) ,'%Y%m' ) `,
+                all: `true `
+            };
+            let ex_count = await this.ctx.model.User.findAll({
+                attributes: [[Sequelize.fn('COUNT', 1), 'total']],
+                where: {
+                    father: user.id,
+                    $and: Sequelize.literal(typeMap2[type])
 
-            }
+                }
 
-        });
+            });
+            delete  user.mpconfig;
+
+        }else{
+            console.log(`调试:后台获取模式`)
+            let  ex_count = 0;
+            let user = {}
+        }
+
 
         for(let i in fakeuser){
             let flag = false,index;
@@ -324,7 +334,6 @@ class JigeController extends BaseController {
         data.sort((item1,item2)=>{
             return item2["ex_count"] - item1["ex_count"];
         });
-        delete  user.mpconfig;
         this.ctx.body = {
             code: 0,
 
@@ -332,9 +341,9 @@ class JigeController extends BaseController {
                 list:data,
                 fakeuser,
                 ranking,
-                ex_count:(ex_count[0].get("total") + (user[`${type}_ex`] *  1)),
-                fake_count:user[`${type}_ex`],
-                user,
+                ex_count:mode === 'user' ? (ex_count[0].get("total") + (user[`${type}_ex`] *  1)) : 0,
+                fake_count:mode === 'user' ? user[`${type}_ex`]: 0,
+                user:mode === 'user'? user: {},
             }
         }
 

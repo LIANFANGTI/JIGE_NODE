@@ -28,6 +28,7 @@ module.exports = app => {
 
   router.post('/user/login', controller.admin.login);
   router.get('/user/info', controller.admin.getInfo);
+  router.get('/user/node', controller.admin.getUserNode);
   router.get('/user/list', controller.user.list2);
   router.put('/user/:id/', controller.user.updateUser);
   router.get('/recharge/list', controller.orders.list);
@@ -88,6 +89,8 @@ module.exports = app => {
 
 
   router.post("/eleme/callback",controller.home.callback);
+
+
 
 
 

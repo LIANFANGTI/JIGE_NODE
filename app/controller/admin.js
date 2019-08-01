@@ -97,5 +97,22 @@ module.exports = class AdminController extends BaseController {
           result:res
       }
     }
+
+
+    async getUserNode(){
+        let query = this.ctx.request.query;
+        let { father }  = query;
+        let data= await  this.ctx.model.User.findAll({
+            attributes:["id","father","nickname","headimgurl"],
+            where:{
+                father
+            }
+        })
+        this.ctx.body = {
+            code:20000,
+            data
+        }
+    }
+
 }
 
