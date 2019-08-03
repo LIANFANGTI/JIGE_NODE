@@ -111,3 +111,13 @@ exports.encode = (str)=>{
     return Buffer.from(str+``).toString('base64')
 };
 
+exports.getWeekStartDate = ()=> {
+    var now = new Date();
+    var nowTime = now.getTime() ;
+    var day = now.getDay();
+    var oneDayTime = 24*60*60*1000 ;
+    var MondayTime = nowTime - (day-1)*oneDayTime ;
+    return new Date(MondayTime);
+}
+
+

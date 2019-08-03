@@ -70,10 +70,19 @@ module.exports = app => {
   router.get("/jige/recharge",controller.jige.getRechargeList);
   router.get("/jige/rechargerecord",controller.jige.getRechargeRecord);
   router.get("/jige/ranking",controller.jige.getRankingList);
+  router.get("/jige/rank",controller.jige.getRankingList2);
   router.get("/jige/checksignin",controller.jige.checkSignin);
   router.get("/jige/extensioncode",controller.jige.drawExtensionCode);
   router.get('/jige/nmsl', controller.jige.nmsl);
   router.get('/jige/pullnmsl', controller.jige.pullNmsl);
+  router.get('/jige/pullnmsl', controller.jige.pullNmsl);
+
+
+  router.get('/rank/stage', controller.rank.getStage);
+  router.put('/rank', controller.rank.setFakeUser);
+  router.put('/rank/stage/:id/', controller.rank.setStage);
+
+
 
 
   router.get('/autoreply/list', controller.home.getAutoReplayRuleList);

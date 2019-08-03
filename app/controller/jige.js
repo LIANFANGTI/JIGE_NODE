@@ -64,9 +64,8 @@ class JigeController extends BaseController {
         try {
             let {token} = await this.ctx.service.mpconfig.checkToken();
             const {appid} = this.ctx.mpconfig;
-            const redirect_uri = encodeURI(`http://jige.lianfangti.cn`);
-
-            // const redirect_uri = encodeURI(`https://lft.easy.echosite.cn`);
+            // const redirect_uri = encodeURI(`http://jige.lianfangt.cn`);
+            const redirect_uri = encodeURI(`https://lft.easy.echosite.cn`);
             const response_type = `code`;
             const scope = `snsapi_userinfo`;
             const state = token;
@@ -258,7 +257,7 @@ class JigeController extends BaseController {
     // 排行榜
     async getRankingList() {
         const typeMap = {
-            week: `AND YEARWEEK( date_format(  created_at,'%Y-%m-%d' ) ,1) = YEARWEEK( now(),1 ) - 1`,
+            week: `AND YEARWEEK( date_format(  created_at,'%Y-%m-%d' ) ,1) = YEARWEEK( now(),1 ) - 0`,
             month: `AND DATE_FORMAT( created_at, '%Y%m' ) = DATE_FORMAT( CURDATE( ) ,'%Y%m' ) `,
             all: `AND true `
         };
@@ -288,15 +287,17 @@ class JigeController extends BaseController {
                 type
             }
         });
+        let ex_count,user;
         if(mode==="user"){
-            let user = await this.ctx.service.jige.checkXToken();
-            console.log(`调试:当前用户`, user);
+            console.log(`调试：当前模式`, mode);
+            user = await this.ctx.service.jige.checkXToken();
+            // console.log(`调试:当前用户`, user);
             const typeMap2 = {
                 week: `YEARWEEK( date_format(  created_at,'%Y-%m-%d' ) ) = YEARWEEK( now() ) `,
                 month: `DATE_FORMAT( created_at, '%Y%m' ) = DATE_FORMAT( CURDATE( ) ,'%Y%m' ) `,
                 all: `true `
             };
-            let ex_count = await this.ctx.model.User.findAll({
+            ex_count = await this.ctx.model.User.findAll({
                 attributes: [[Sequelize.fn('COUNT', 1), 'total']],
                 where: {
                     father: user.id,
@@ -308,9 +309,9 @@ class JigeController extends BaseController {
             delete  user.mpconfig;
 
         }else{
-            console.log(`调试:后台获取模式`)
-            let  ex_count = 0;
-            let user = {}
+            console.log(`调试:后台获取模式`);
+            ex_count = 0;
+             user = {}
         }
 
 
@@ -336,7 +337,198 @@ class JigeController extends BaseController {
             return item2["ex_count"] - item1["ex_count"];
         });
         this.ctx.body = {
-            code: 0,
+            code:mode === 'user' ?0:20000,
+
+            data:{
+                list:data,
+                fakeuser,
+                ranking,
+                ex_count:mode === 'user' ? (ex_count[0].get("total") + (user[`${type}_ex`] *  1)) : 0,
+                fake_count:mode === 'user' ? user[`${type}_ex`]: 0,
+                user:mode === 'user'? user: {},
+            }
+        }
+
+    }
+
+
+    // 排行榜2.0
+    async getRankingList2() {
+
+        const mysql = new Sequelize(this.config.sequelize);
+        let type = this.ctx.request.query.type || 'week';  // 查询类型
+        let mode = this.ctx.request.query.mode || 'user';  // 查询模式 用户端调用 和  管理后台调用
+        let weekStart = utils.getWeekStartDate();  //获取本周周一
+        let  curStageMap ={
+            week: weekStart.Format("WyyyyMMdd"),
+            month:new Date().Format("yyyyMM"),
+            all:'all'
+        };
+        const typeMap = {
+            week: `AND YEARWEEK( date_format(  created_at,'%Y-%m-%d' ) ,1) = YEARWEEK( now(),1 ) `,
+            month: `AND DATE_FORMAT( created_at, '%Y%m' ) = DATE_FORMAT( CURDATE( ) ,'%Y%m' ) `,
+            all: `AND true `
+        };
+        let rewardMap ={
+            week:[
+                    {name:'第一名奖励',coin: 100 },
+                    {name:'第二名奖励',coin: 90 },
+                    {name:'第三名奖励',coin: 80 },
+                    {name:'第四名奖励',coin: 70 },
+                    {name:'第五名奖励',coin: 60 },
+                    {name:'第六名奖励',coin: 50 },
+                    {name:'第七名奖励',coin: 40 },
+                    {name:'第八名奖励',coin: 30 },
+                    {name:'第九名奖励',coin: 20 },
+                    {name:'第十名奖励',coin: 10 }
+                 ],
+            month:[
+                    {name:'月榜第一',coin: 0 },
+                    {name:'月榜第二',coin: 0 },
+                    {name:'月榜第三',coin: 0 },
+                    {name:'月榜第四',coin: 0 },
+                    {name:'月榜第五',coin: 0 },
+                    {name:'月榜第六',coin: 0 },
+                    {name:'月榜第七',coin: 0 },
+                    {name:'月榜第八',coin: 0 },
+                    {name:'月榜第九',coin: 0 },
+                    {name:'月榜第十',coin: 0 }
+                ],
+            all:[]
+         }
+        let curStage = curStageMap[type];
+        // console.log(`调试:`, curStage)
+
+        try {
+            let  existStage = await this.ctx.model.Stage.findOne({
+                where:{name:curStage}
+            });
+
+            let currentStage = existStage? existStage : await  this.ctx.model.Stage.create({
+                name:curStage,
+                type,
+                reward:rewardMap[type]
+            });
+
+            const sql = `SELECT id,nickname,ex_count ,headimgurl FROM users JOIN (SELECT father,COUNT(1) as ex_count FROM  users WHERE mid =2  ${typeMap[type]}  GROUP BY  father ) AS ex  
+                    ON users.id = ex.father 
+                    WHERE mid =2
+                    ORDER BY  ex.ex_count DESC 
+                    LIMIT 0,100`;
+            let data = await mysql.query(sql, {type: mysql.QueryTypes.SELECT});
+
+            let  insertSql = `INSERT INTO  rank (uid,sid,value) VALUES`;
+            let val = ``;
+            for(let user of data){
+               val +=`(${user.id},${currentStage.id},'${user.ex_count}'),`
+            }
+            val=val.substring(0,val.length-1);
+            console.log(`调试:val`, val);
+            insertSql = `${insertSql} ${val} ON DUPLICATE KEY UPDATE value=VALUES(value)`;
+
+            let insertResult = await  await mysql.query(insertSql, {type: mysql.QueryTypes.INSERT});
+
+            let  querySql= `SELECT sid,uid,nickname,value,headimgurl,fake FROM rank JOIN users ON rank.uid = users.id WHERE rank.sid=${currentStage.id} ORDER BY value + fake DESC`;
+
+            let  rankingResult =  await mysql.query(querySql, {type: mysql.QueryTypes.SELECT});
+
+
+            let reward = JSON.parse(currentStage.reward);
+
+            for(let i in reward ){
+                if(!rankingResult[i]){
+                    break;
+                }
+                rankingResult[i]['reward']=reward[i];
+
+            }
+            let results ={
+                reward,
+                data,
+                currentStage,
+                rank:rankingResult
+            }
+            let ex_count,user;
+            if(mode==="user"){
+                console.log(`调试：当前模式`, mode);
+                user = await this.ctx.service.jige.checkXToken();
+                // console.log(`调试:当前用户`, user);
+                const typeMap2 = {
+                    week: `YEARWEEK( date_format(  created_at,'%Y-%m-%d' ) ) = YEARWEEK( now() ) `,
+                    month: `DATE_FORMAT( created_at, '%Y%m' ) = DATE_FORMAT( CURDATE( ) ,'%Y%m' ) `,
+                    all: `true `
+                };
+                ex_count = await this.ctx.model.User.findAll({
+                    attributes: [[Sequelize.fn('COUNT', 1), 'total']],
+                    where: {
+                        father: user.id,
+                        $and: Sequelize.literal(typeMap2[type])
+
+                    }
+
+                });
+                delete  user.mpconfig;
+                results = {...results,user,ex_count:ex_count[0].get('total')}
+            }
+
+            this.ctx.body = {
+                code:mode==="user" ? 0 :20000,
+                data:results
+            };
+
+        }catch (e) {
+            this.ctx.body = e;
+
+            console.error(`错误:`, e)
+        }
+
+
+
+        return 0;
+
+
+
+
+
+
+        console.log(`调试:查询出掺假用户数`, fakeuser);
+        // let alldata= [...data,...fakeuser];
+
+        let  ranking = await  this.ctx.model.Ranking.findAll({
+            attributes:["name","id","gift"],
+            where:{
+                type
+            }
+        });
+        let ex_count,user;
+        if(mode==="user"){
+            console.log(`调试：当前模式`, mode);
+            user = await this.ctx.service.jige.checkXToken();
+            // console.log(`调试:当前用户`, user);
+            const typeMap2 = {
+                week: `YEARWEEK( date_format(  created_at,'%Y-%m-%d' ) ) = YEARWEEK( now() ) `,
+                month: `DATE_FORMAT( created_at, '%Y%m' ) = DATE_FORMAT( CURDATE( ) ,'%Y%m' ) `,
+                all: `true `
+            };
+            ex_count = await this.ctx.model.User.findAll({
+                attributes: [[Sequelize.fn('COUNT', 1), 'total']],
+                where: {
+                    father: user.id,
+                    $and: Sequelize.literal(typeMap2[type])
+
+                }
+
+            });
+            delete  user.mpconfig;
+
+        }else{
+            console.log(`调试:后台获取模式`);
+            ex_count = 0;
+            user = {}
+        }
+
+        this.ctx.body = {
+            code:mode === 'user' ?0:20000,
 
             data:{
                 list:data,
@@ -512,3 +704,9 @@ class JigeController extends BaseController {
 
 
 module.exports = JigeController;
+
+
+
+// 同事A: 你知道HIV怎么来的吗 (惊奇语气)
+// 同事B:
+

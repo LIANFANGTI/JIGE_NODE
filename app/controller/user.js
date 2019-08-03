@@ -72,4 +72,6 @@ module.exports = class UserController extends Controller {
     await user.logSignin();
     this.ctx.body = user;
   }
+
+
 };
