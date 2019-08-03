@@ -1,18 +1,20 @@
 module.exports = app => {
-  const { STRING, INTEGER,DATE,FLOAT } = app.Sequelize;
-  const Log = app.model.define("log", {
+  const { STRING, INTEGER,DATE,BOOLEAN } = app.Sequelize;
+  const Notice = app.model.define("notice", {
     id: { type: INTEGER, primaryKey: true, autoIncrement: true },
-    uid: STRING,
-    times: INTEGER,
-    balance: FLOAT,
-    type: STRING, //红包类型
-    amount: FLOAT, //红包金额
-    token:STRING,// 当前调用的TOKEN
-    sum_condition: FLOAT, //红包使用条件 满多少才减
-    sn:STRING,//红包码
+    uid:INTEGER,
+    title:STRING,
+    remark:STRING,
+    content:STRING,
+    coin:INTEGER,
+    type:STRING,
+    read_status:BOOLEAN,
+    get_status:BOOLEAN
+
+
   },{
     freezeTableName:true //表名将与modal名相同
   });
-  // Log.sync({force: true}).then(()=>{})
-  return Log;
+  // Notice.sync({force: true}).then(()=>{});
+  return Notice;
 };
