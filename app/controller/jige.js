@@ -64,9 +64,9 @@ class JigeController extends BaseController {
         try {
             let {token} = await this.ctx.service.mpconfig.checkToken();
             const {appid} = this.ctx.mpconfig;
+            let { env = "prod"} =this.ctx.request.query;
             // const redirect_uri = encodeURI(`https://lft.easy.echosite.cn/`);
-i
-            const redirect_uri = encodeURI(`http://jige.lianfangti.cn/`);
+            const redirect_uri = env==="prod" ? encodeURI(`https://lft.easy.echosite.cn/`) : encodeURI(`http://jige.lianfangti.cn/`);
             const response_type = `code`;
             const scope = `snsapi_userinfo`;
             const state = token;
