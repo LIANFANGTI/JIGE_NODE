@@ -116,8 +116,8 @@ exports.getWeekStartDate = ()=> {
     var nowTime = now.getTime() ;
     var day = now.getDay();
     var oneDayTime = 24*60*60*1000 ;
-    var MondayTime = nowTime - (day-1)*oneDayTime ;
+    var MondayTime = nowTime - ((!day?7:day)-1)*oneDayTime ;  // 周一等于  当前时间戳 - （今天周几-1）* 一天的秒数  因为周日的 day值为0 所以当是周日时  day=7  这样一周是从周一开始算了
     return new Date(MondayTime);
-}
+};
 
 

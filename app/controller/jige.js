@@ -361,7 +361,7 @@ class JigeController extends BaseController {
         let mode = this.ctx.request.query.mode || 'user';  // 查询模式 用户端调用 和  管理后台调用
         let weekStart = utils.getWeekStartDate();  //获取本周周一
         let  curStageMap ={
-            week: weekStart.Format("WyyyyMMdd"),
+            week: weekStart.Format("WyyMMdd"),
             month:new Date().Format("yyyyMM"),
             all:'all'
         };
@@ -408,14 +408,14 @@ class JigeController extends BaseController {
             let currentStage = existStage? existStage : await  this.ctx.model.Stage.create({
                 name:curStage,
                 type,
-                reward:rewardMap[type]
+                reward:JSON.stringify(rewardMap[type])
             });
 
             const sql = `SELECT id,nickname,ex_count ,headimgurl FROM users JOIN (SELECT father,COUNT(1) as ex_count FROM  users WHERE mid =2  ${typeMap[type]}  GROUP BY  father ) AS ex  
                     ON users.id = ex.father 
                     WHERE mid =2
                     ORDER BY  ex.ex_count DESC 
-                    LIMIT 0,100`;
+                    LIMIT 0,20`;
             let data = await mysql.query(sql, {type: mysql.QueryTypes.SELECT});
 
             let  insertSql = `INSERT INTO  rank (uid,sid,value) VALUES`;
@@ -429,12 +429,16 @@ class JigeController extends BaseController {
 
             let insertResult = await  await mysql.query(insertSql, {type: mysql.QueryTypes.INSERT});
 
-            let  querySql= `SELECT sid,uid,nickname,value,headimgurl,fake FROM rank JOIN users ON rank.uid = users.id WHERE rank.sid=${currentStage.id} ORDER BY value + fake DESC`;
+            let  querySql= `SELECT sid,uid,nickname,value,headimgurl,status,fake FROM rank JOIN users ON rank.uid = users.id WHERE rank.sid=${currentStage.id} ORDER BY value + fake DESC`;
 
             let  rankingResult =  await mysql.query(querySql, {type: mysql.QueryTypes.SELECT});
+            let reward;
+            try {
+                 reward = JSON.parse(currentStage.reward);
+             }catch (e) {
+                reward=[];
+             }
 
-
-            let reward = JSON.parse(currentStage.reward);
 
             for(let i in reward ){
                 if(!rankingResult[i]){
@@ -474,6 +478,7 @@ class JigeController extends BaseController {
 
             this.ctx.body = {
                 code:mode==="user" ? 0 :20000,
+                weekStart,
                 data:results
             };
 
@@ -708,6 +713,5 @@ module.exports = JigeController;
 
 
 
-// 同事A: 你知道HIV怎么来的吗 (惊奇语气)
-// 同事B:
+
 

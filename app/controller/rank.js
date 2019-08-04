@@ -12,14 +12,14 @@ class RankController extends BaseController {
       }
     });
     let weekStart = utils.getWeekStartDate();  //获取本周周一
-    let curStage = type==="week"? (weekStart.Format("WyyyyMMdd")):new Date().Format("yyyyMM");
+    let curStage = type==="week"? (weekStart.Format("WyyMMdd")):new Date().Format("yyyyMM");
     let existStage =await this.ctx.model.Stage.findOne({
       where:{name:curStage}
     })
     let currentStage = existStage ? existStage : await  this.ctx.model.Stage.create({
       name:curStage,
       type,
-      reward: JSON.stringify([
+      reward: `${JSON.stringify([ 
         {name:'第一名奖励',coin: 100 },
         {name:'第二名奖励',coin: 90 },
         {name:'第三名奖励',coin: 80 },
@@ -30,7 +30,7 @@ class RankController extends BaseController {
         {name:'第八名奖励',coin: 30 },
         {name:'第九名奖励',coin: 20 },
         {name:'第十名奖励',coin: 10 },
-      ])
+      ])}`
     });
     currentStage.reward = JSON.parse( currentStage.reward);
     this.ctx.body={
@@ -69,6 +69,66 @@ class RankController extends BaseController {
         update:res
       }
     }
+  }
+ //奖励发放
+  async sendReward(){
+     let {uid,reward,stage,index}=this.ctx.request.body;
+     index = index * 1 + 1;
+     let user = await this.ctx.model.User.findOne({ where:{id:uid} });
+     let sendRes = await  this.sendNotice({
+              title:`${stage.name}期打榜奖励`,
+              remark:`恭喜你在${stage.name}期打榜活动中获得第${index}名...`,
+              content:`恭喜你在${stage.name}期打榜活动中获得第${index}名成绩,系统奖励你<view class="text-red">${reward.coin}</view>粮票 点击下方按钮领取`,
+              coin:reward.coin,
+              type:'coin',
+              to:[uid]
+     });
+
+     let updateStatus = await  this.ctx.model.Rank.update({
+       status:1,
+     },{where:{
+       uid,
+       sid:stage.id
+       }});
+
+
+     this.ctx.body={
+        code:20000,
+       data:{
+          sendRes,
+         updateStatus
+       }
+     }
+  }
+
+  /**
+   * 发送通知
+   * @param title      通知标题
+   * @param remark     通知摘要
+   * @param content    通知内容
+   * @param type       通知类型  msg 普通消息   coin 带金币    url 链接消息   copy  带复制内容的
+   * @param coin       赠送金币
+   * @param to         接收方 接收一个存放接收用户id的数组
+   * @param template   是否发送模板消息通知
+   * @returns {Promise<void>}
+   */
+  async sendNotice({title,remark='',content,type ='msg',coin=0,to=[],template=false}){
+      let notice = await  this.ctx.model.Notice.create({
+        title,
+        remark,
+        content,
+        type,
+        coin
+      });
+      let sendLog=[];
+      for(let uid of to){
+       let res =  await this.ctx.model.NoticeUser.create({
+            uid,
+            nid:notice.id,
+         });
+        sendLog.push(res);
+      }
+      return  {notice,sendLog}
 
   }
 }

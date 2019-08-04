@@ -78,9 +78,16 @@ module.exports = app => {
   router.get('/jige/pullnmsl', controller.jige.pullNmsl);
 
 
+  router.get('/notice/list', controller.notice.getNotice);
+  router.post('/notice/read', controller.notice.readNotice);
+  router.post('/notice/getcoin', controller.notice.getNoticeCoin);
+
+
+
   router.get('/rank/stage', controller.rank.getStage);
   router.put('/rank', controller.rank.setFakeUser);
   router.put('/rank/stage/:id/', controller.rank.setStage);
+  router.post('/rank/sendReward/', controller.rank.sendReward);
 
 
 
