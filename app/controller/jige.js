@@ -359,6 +359,7 @@ class JigeController extends BaseController {
         const mysql = new Sequelize(this.config.sequelize);
         let type = this.ctx.request.query.type || 'week';  // 查询类型
         let mode = this.ctx.request.query.mode || 'user';  // 查询模式 用户端调用 和  管理后台调用
+        let stage = this.ctx.request.query.stage || 'new';  // 是否带期查询
         let weekStart = utils.getWeekStartDate();  //获取本周周一
         let  curStageMap ={
             week: weekStart.Format("WyyMMdd"),
@@ -397,7 +398,7 @@ class JigeController extends BaseController {
                 ],
             all:[]
          }
-        let curStage = curStageMap[type];
+        let curStage = stage ==='new'? curStageMap[type]: stage;
         // console.log(`调试:`, curStage)
 
         try {
@@ -417,17 +418,23 @@ class JigeController extends BaseController {
                     ORDER BY  ex.ex_count DESC 
                     LIMIT 0,20`;
             let data = await mysql.query(sql, {type: mysql.QueryTypes.SELECT});
+            console.log(`调试:查询出数据`, data);
 
-            let  insertSql = `INSERT INTO  rank (uid,sid,value) VALUES`;
-            let val = ``;
-            for(let user of data){
-               val +=`(${user.id},${currentStage.id},'${user.ex_count}'),`
+            if(data.length){
+                let  insertSql = `INSERT INTO  rank (uid,sid,value) VALUES`;
+                let val = ``;
+                for(let user of data){
+                    val +=`(${user.id},${currentStage.id},'${user.ex_count}'),`
+                }
+                val=val.substring(0,val.length-1);
+                console.log(`调试:val`, val);
+                insertSql = `${insertSql} ${val} ON DUPLICATE KEY UPDATE value=VALUES(value)`;
+                let insertResult = await  await mysql.query(insertSql, {type: mysql.QueryTypes.INSERT});
+
             }
-            val=val.substring(0,val.length-1);
-            console.log(`调试:val`, val);
-            insertSql = `${insertSql} ${val} ON DUPLICATE KEY UPDATE value=VALUES(value)`;
 
-            let insertResult = await  await mysql.query(insertSql, {type: mysql.QueryTypes.INSERT});
+
+
 
             let  querySql= `SELECT sid,uid,nickname,value,headimgurl,status,fake FROM rank JOIN users ON rank.uid = users.id WHERE rank.sid=${currentStage.id} ORDER BY value + fake DESC`;
 

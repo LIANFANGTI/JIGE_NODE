@@ -5,7 +5,8 @@ class RankController extends BaseController {
   //获取周期列表
   async getStage() {
     let {type = 'week'}= this.ctx.request.query;
-    let stage = await  this.ctx.model.Stage.findAll({
+    let {stage = 'new'}= this.ctx.request.query;
+    let stages = await  this.ctx.model.Stage.findAll({
       attributes:['name','id'],
       where:{
         type
@@ -13,6 +14,7 @@ class RankController extends BaseController {
     });
     let weekStart = utils.getWeekStartDate();  //获取本周周一
     let curStage = type==="week"? (weekStart.Format("WyyMMdd")):new Date().Format("yyyyMM");
+    curStage = stage === 'new' ? curStage : stage;
     let existStage =await this.ctx.model.Stage.findOne({
       where:{name:curStage}
     })
@@ -37,7 +39,7 @@ class RankController extends BaseController {
       code:20000,
       data:{
         cur:currentStage,
-        stages:stage
+        stages:stages
       }
     }
 
@@ -83,22 +85,40 @@ class RankController extends BaseController {
               type:'coin',
               to:[uid]
      });
+     try {
+       let admin = await this.ctx.service.mpconfig.checkAdminToken();
 
-     let updateStatus = await  this.ctx.model.Rank.update({
-       status:1,
-     },{where:{
-       uid,
-       sid:stage.id
-       }});
-
-
-     this.ctx.body={
-        code:20000,
-       data:{
-          sendRes,
-         updateStatus
+       let sendTemplateMessageRes = await  this.ctx.service.weixin.sendTemplateMessage({
+         openid:user.openid,
+         template_id:'NnT-m97VXVt3pQgTVeMiU9enDUr3CW43vSf3k9V_XvE',
+         url:'https://lft.easy.echosite.cn/pages/user/message?token=wx21bd29efec1e0b44',
+         first:'打榜奖励发放',
+         keyword1:`${stage.name}期打榜奖励第${index}名`,
+         keyword2:new Date().Format('yyyy年MM月dd日 hh:ss'),
+         keyword3:`${reward.coin}粮票`,
+         remark:'点击领取',
+       });
+       let updateStatus = await  this.ctx.model.Rank.update({
+         status:1,
+       },{where:{ uid,sid:stage.id }});
+       this.ctx.body={
+         code:20000,
+         data:{
+           sendRes,
+           updateStatus,
+           sendTemplateMessageRes
+         }
        }
+     }catch (e) {
+       console.error(`错误:捕获错误`, e);
+       throw  e
      }
+
+
+
+
+
+
   }
 
   /**

@@ -256,37 +256,26 @@ module.exports = class WeixinService extends Service {
     }
 
     // 发送模板消息
-    async sendTemplateMessage(openid) {
+    async sendTemplateMessage({openid,template_id,url,first,remark,keyword1,keyword2,keyword3}) {
         const {access_token} = await this.getAccessToken();
-        const url = `https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=${access_token}`;
+        const api = `https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=${access_token}`;
         let data = {
-            "touser": `o-GhE5lF3AND63TVdilZMNlNbbNk`,
-            "template_id": "Uo5zXHQk8kPhs-BjOSwaNU3I0R9YyV4lDFgZ6kHMU4w",
-            "url": "http://weixin.qq.com/download",
+            "touser": openid,
+            "template_id": template_id,
+            "url": url,
             // "miniprogram":{ //点击打开小程序
             //     "appid":"xiaochengxuappid12345",
             //     "pagepath":"index?foo=bar"
             // },
             "data": {
-                "first": {
-                    "value": "发送成功",
-                    "color": "#173177"
-                },
-                "keyword1": {
-                    "value": '18757739042',
-                    "color": "#173177"
-                },
-                "keyword2": {
-                    "value": new Date(),
-                    "color": "#173177"
-                },
-                "remark": {
-                    "value": "请在30分钟内回复6位短信验证码 如果这不是您的手机号 您可重新发送手机号绑定",
-                    "color": "#173177"
-                }
+                "first": typeof  first === 'object'? first : {value:first,color:'#173177'} ,
+                "keyword1": typeof  keyword1 === 'object'? first : {value:keyword1,color:'#173177'} ,
+                "keyword2": typeof  keyword2 === 'object'? first : {value:keyword2,color:'#173177'} ,
+                "keyword3": typeof  keyword3 === 'object'? first : {value:keyword3,color:'#173177'} ,
+                "remark": typeof  remark === 'object'? first : {value:remark,color:'#173177'} ,
             }
         };
-        return await this.ctx.service.http.post({url, data})
+        return await this.ctx.service.http.post({url:api, data})
     }
 
     // 新增素材

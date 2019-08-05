@@ -5,22 +5,26 @@ const Sequelize = require('sequelize');
 class NoticeController extends BaseController {
   //获取周期列表
   async getNotice() {
-    let user =  await  this.ctx.service.jige.checkXToken();
-    const mysql = new Sequelize(this.config.sequelize);
-    let {status = 'read_status'} = this.ctx.request.query;
-    status =  status === 'all' ? 'read_status':status;
-    let sql  = ` SELECT  nu.id,nid,title,remark,content,coin,type, nu.created_at ,read_status,get_status  FROM notice_user nu  JOIN notice  n ON nu.nid = n.id WHERE uid = ${user.id} AND read_status = ${status} ORDER BY nu.created_at DESC`;
-    let list = await  mysql.query(sql,{type: mysql.QueryTypes.SELECT});
+    try {
+      let user =  await  this.ctx.service.jige.checkXToken();
+      const mysql = new Sequelize(this.config.sequelize);
+      let {status = 'read_status'} = this.ctx.request.query;
+      status =  status === 'all' ? 'read_status':status;
+      let sql  = ` SELECT  nu.id,nid,title,remark,content,coin,type, nu.created_at ,read_status,get_status  FROM notice_user nu  JOIN notice  n ON nu.nid = n.id WHERE uid = ${user.id} AND read_status = ${status} ORDER BY nu.created_at DESC`;
+      let list = await  mysql.query(sql,{type: mysql.QueryTypes.SELECT});
 
 
-    this.ctx.body={
-      code:0,
-      data:{
-        list:list.map(item=>{
-          item['created_at'] = new Date( item['created_at']).Format('yyyy-MM-dd hh:mm');
-          return item;
-        })
+      this.ctx.body={
+        code:0,
+        data:{
+          list:list.map(item=>{
+            item['created_at'] = new Date( item['created_at']).Format('yyyy-MM-dd hh:mm');
+            return item;
+          })
+        }
       }
+    }catch (e) {
+      this.ctx.body = e
     }
 
   }
