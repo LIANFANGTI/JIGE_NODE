@@ -91,7 +91,7 @@ class RankController extends BaseController {
        let sendTemplateMessageRes = await  this.ctx.service.weixin.sendTemplateMessage({
          openid:user.openid,
          template_id:'NnT-m97VXVt3pQgTVeMiU9enDUr3CW43vSf3k9V_XvE',
-         url:'https://lft.easy.echosite.cn/pages/user/message?token=wx21bd29efec1e0b44',
+         url:'http://jige.lianfangti.cn/?token=wx21bd29efec1e0b44',
          first:'打榜奖励发放',
          keyword1:`${stage.name}期打榜奖励第${index}名`,
          keyword2:new Date().Format('yyyy年MM月dd日 hh:ss'),
