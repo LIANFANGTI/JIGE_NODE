@@ -71,7 +71,7 @@ class HomeController extends Controller {
 
       }
       const countSQL = `SELECT count(1) as total FROM log JOIN users ON log.uid = users.id   WHERE (nickname like '%${word}%' OR phone like '%${word}%') AND type  like '%${type}%' AND  ${dateRange[range]} `;
-      const sql =` SELECT users.nickname,users.phone,log.type,log.sum_condition,log.amount,log.created_at FROM log JOIN users ON log.uid = users.id 
+      const sql =` SELECT users.nickname,users.phone,log.type,log.times,log.sum_condition,log.amount,log.created_at FROM log JOIN users ON log.uid = users.id 
                         WHERE (nickname like '%${word}%' OR phone like '%${word}%') AND type  like '%${type}%' AND  ${dateRange[range]}   
                         ORDER BY log.created_at desc limit ${size * (page - 1)},${size}`;
       let result = await this.mysql.query(sql,{ type: this.mysql.QueryTypes.SELECT});
