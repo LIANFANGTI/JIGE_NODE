@@ -560,7 +560,7 @@ class JigeController extends BaseController {
         try {
             this.ctx.body = await this.ctx.service.jige.checkSignin();
         } catch (e) {
-            console.log(`调试:监听到错误`, e)
+            console.log(`调试:监听到错误`, e);
             this.ctx.body = e
         }
     }

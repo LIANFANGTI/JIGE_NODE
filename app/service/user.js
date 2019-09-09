@@ -100,11 +100,11 @@ module.exports = class UserService extends Service {
         let addCoin= 0 ;
         if(nowInterval < maxInterval){ // 是连续签到
              console.log(`调试:签到成功`);
-            addCoin = config.sign_coin  + (user.conn_sign + 1)
+            addCoin = config.sign_coin  + (user.conn_sign + 1);
             this.ctx.model.User.update({
                   last_sign:now,
                   times:Sequelize.literal(`times + ${addCoin}`),
-                  conn_sign: Sequelize.literal(`conn_sign + 1`)
+                  conn_sign:(user.conn_sign + 1) > 7 ? 0 : Sequelize.literal(`conn_sign + 1`)
               },{where:{openid}});
             await  this.ctx.service.weixin.sendServiceMessage({content:`签到成功\n粮票余额:+${addCoin}\n当前粮票:${user.times + addCoin}\n您已连续签到${(user.conn_sign + 1)}天\n`})
          } else { //不是连续签到
