@@ -134,11 +134,12 @@ module.exports = class WeixinService extends Service {
                 {
                     "name": "一键红包",
                     "sub_button": [
-                         {"type": "click", "name": "一键领取", "key": "YJLQ"},
+                        {"type": "click", "name": "饿了么大礼包", "key": "DLB"},
+
+                        {"type": "click", "name": "一键领取", "key": "YJLQ"},
                          // {"type": "click", "name": "随机礼包", "key": "SJLB"},
 
 
-                        // {"type": "click", "name": "饿了么大礼包", "key": "DLB"},
                         // {"type": "click", "name": "拼手气", "key": "PSQ"},
                         // {"type": "click", "name": "品质联盟", "key": "PZLM"}
                     ]
