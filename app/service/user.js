@@ -115,7 +115,7 @@ module.exports = class UserService extends Service {
                  times:Sequelize.literal(`times + ${addCoin}`),
                  conn_sign: 0
              },{where:{openid}});
-            await  this.ctx.service.weixin.sendServiceMessage({content:`签到成功\n粮票余额:+${addCoin}\n当前粮票:${user.times + addCoin}\n`})
+            await  this.ctx.service.weixin.sendServiceMessage({content:`签到成功\n粮票余额:+${addCoin}\n当前粮票:${addCoin}\n`})
         }
 
         // console.log(`调试:签到的用户信息[${user.id}]` ,nowStr,new Date(user.last_sign).getDate());
