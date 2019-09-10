@@ -139,7 +139,7 @@ module.exports = class JigeService extends Service {
         let nowInterval = (nd - ld) / 1000 //当前间隔时间
 
         console.log(`调试:判断是否连续签到 ]`, nowInterval, maxInterval, nowInterval <= maxInterval);
-        if (nowInterval <= maxInterval) { // 是连续签到
+        if (nowInterval <= maxInterval && false) { // 是连续签到
             console.log(`调试:签到成功`);
             addCoin = config.sign_coin + (user.conn_sign + 1);
             // {coin,message,remark,type = 0,openid,giver}
@@ -160,7 +160,7 @@ module.exports = class JigeService extends Service {
                 code: 0,
                 data: {
                     addCoin,
-                    conn_sign: user.conn_sign + 1
+                    conn_sign: 0
                 },
                 msg: '签到成功'
             }
@@ -187,7 +187,7 @@ module.exports = class JigeService extends Service {
                 code: 0,
                 data: {
                     addCoin,
-                    conn_sign: 1
+                    conn_sign: 0
                 },
                 msg: '签到成功'
 
