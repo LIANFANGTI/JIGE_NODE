@@ -90,7 +90,7 @@ class JigeController extends BaseController {
             await this.ctx.service.mpconfig.checkToken();
             let pidsql = `pid = (SELECT recharge_plan FROM  mpconfig WHERE id = ${this.ctx.mpconfig.id})`;
             let items = await this.ctx.model.RechargePlan.findAll({
-                attributes: ["name", "id", "price", "pay_price", "coin", "pid"],
+                attributes: ["name", "id", "price", "pay_price", "coin", "pid","bg","color"],
                 where: Sequelize.literal(pidsql)
             });
             let {recharge_msg} = await this.service.mpconfig.getAllConfig();
