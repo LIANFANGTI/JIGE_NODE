@@ -56,7 +56,7 @@ module.exports = class ElemeService extends Service {
             };
             console.log(`调试:获取红包链接发送的参数`, formData);
             let res = await  this.ctx.service.http.post({
-                url:`http://eom.mmqbb.cn:8083/elmdhb/getUrl`,
+                url:`http://www.elmdhb.cn/elmdhb/getUrl`,
                 headers:{
                     "Content-Type":"application/x-www-form-urlencoded"
                 },

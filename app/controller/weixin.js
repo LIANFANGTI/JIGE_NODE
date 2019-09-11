@@ -549,86 +549,71 @@ module.exports = class WeixinController extends BaseController {
   async getEleme4({openid}){
         let {ctx} = this;
         this.reply();
-      let user = await this.ctx.service.user.exist({
-          where: {openid},
-          col: ['phone', 'id', "times"],
-          showCol: true
-      });
-
-      if(user.phone == ""){
-          this.reply({content: '领取失败😢\n您未绑定手机号 请回复11位手机号进行绑定😗'});
-          return;
-      }
-
-      if (user.times< 9) {
-          this.reply({content: '领取失败😢\n余额不足快去邀请好友 或充值吧😗'});
-          return;
-      }
         this.ctx.runInBackground(async()=>{
-            try {
 
-                let res = await  this.ctx.service.http.post({
-                    url:`http://www.elmdhb.cn/dkhzy/getGzzYjlq`,
-                    // headers:{
-                    //     "Content-Type":"application/x-www-form-urlencoded"
-                    // },
-                    formData:{
-                        token:"ddB9XDAyzAPU9YWN",
-                        phone:user.phone,
-                        type:3
+        });
+        try {
+
+            let res = await  this.ctx.service.http.post({
+                url:`http://www.elmdhb.cn/dkhzy/getGzzYjlq`,
+                // headers:{
+                //     "Content-Type":"application/x-www-form-urlencoded"
+                // },
+                formData:{
+                    token:"ddB9XDAyzAPU9YWN",
+                    phone:user.phone,
+                    type:3
+                }
+            });
+            console.log('请求返回值',res);
+            //领取成功
+            if(res.Code ==0){
+                //用户扣款
+                let updateUserResult =  await ctx.service.user.update({times: user.times - ctx.mpconfig.unit_coin}, {openid});
+                //商户扣款
+                let updateMpResult =   await ctx.service.mpconfig.update({blance: Sequelize.literal(`blance - unit_price`)},{id:this.ctx.mpconfig.id});//减去账户余额测试
+                res=[res];
+                res =res.map(item=>{
+                    return{
+                        type:item['Name'],
+                        amount:item['Amount'],
+                        sum_condition:item['Sum_Condition'],
                     }
                 });
-                console.log('请求返回值',res);
-                //领取成功
-                if(res.Code ==0){
-                    //用户扣款
-                    let updateUserResult =  await ctx.service.user.update({times: user.times - ctx.mpconfig.unit_coin}, {openid});
-                    //商户扣款
-                    let updateMpResult =   await ctx.service.mpconfig.update({blance: Sequelize.literal(`blance - unit_price`)},{id:this.ctx.mpconfig.id});//减去账户余额测试
-                    res=[res];
-                    res =res.map(item=>{
-                        return{
-                            type:item['Name'],
-                            amount:item['Amount'],
-                            sum_condition:item['Sum_Condition'],
-                        }
-                    });
-                    res= res[0];
+                res= res[0];
 
-                    console.log(`调试:领取返回值`, res);
+                console.log(`调试:领取返回值`, res);
 
-                    let log = {
-                        uid: user.id,
-                        times: user.times - this.ctx.mpconfig.unit_coin,
-                        ...res
-                    };
+                let log = {
+                    uid: user.id,
+                    times: user.times - this.ctx.mpconfig.unit_coin,
+                    ...res
+                };
 
 
-                    let msg = `领取成功！！😄\n请在饿了么中查看\n红包类型:${res.type}\n红包金额:满${res.sum_condition}减${res.amount}\n粮票使用: -${ctx.mpconfig.unit_coin}\n剩余粮票:${user.times - ctx.mpconfig.unit_coin} \n绑定账号: ${user.phone} `;
+                let msg = `领取成功！！😄\n请在饿了么中查看\n红包类型:${res.type}\n红包金额:满${res.sum_condition}减${res.amount}\n粮票使用: -${ctx.mpconfig.unit_coin}\n剩余粮票:${user.times - ctx.mpconfig.unit_coin} \n绑定账号: ${user.phone} `;
 
-                    ctx.service.logs.add(log) ;//领红包日志表中插入数据
-                    ctx.service.weixin.sendServiceMessage({content: msg});
-                }else{
-                    let content = res.Msg;
-                    content =  content.replace(/\\\\n\\\\n/g,'\n');
-                    content =  content.replace(/\\n\\n/g,'\n');
-                    console.log(`调试:转换后的Msg`, content)
+                ctx.service.logs.add(log) ;//领红包日志表中插入数据
+                ctx.service.weixin.sendServiceMessage({content: msg});
+            }else{
+                let content = res.Msg;
+                   content =  content.replace(/\\\\n\\\\n/g,'\n');
+                   content =  content.replace(/\\n\\n/g,'\n');
+                   console.log(`调试:转换后的Msg`, content)
 
-                    ctx.service.weixin.sendServiceMessage({content});
-                }
-
-
-
-
-
-
-
-
-            }catch (e) {
-
+                ctx.service.weixin.sendServiceMessage({content});
             }
-        });
 
+
+
+
+
+
+
+
+        }catch (e) {
+
+        }
 
     }
 
