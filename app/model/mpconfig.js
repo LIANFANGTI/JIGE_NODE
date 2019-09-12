@@ -19,6 +19,7 @@ module.exports = app => {
     limit:BOOLEAN,// 次数限制
     limit_number:INTEGER, // 限制次数
     limit_msg:STRING,
+    add_coin:INTEGER,//添加客服赠送积分
     mp_token:STRING, // 与微信公众号对接的token
     encodingaeskey:STRING,// 公众号秘钥
     appid:STRING,// 公众号APPID
@@ -32,7 +33,7 @@ module.exports = app => {
   }, {
     freezeTableName: true //表名将与modal名相同
   });
-  // Config.sync({ alter: true });
+  Config.sync({ alter: true });
 
   return Config;
 };

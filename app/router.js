@@ -75,7 +75,7 @@ module.exports = app => {
   router.get("/jige/extensioncode",controller.jige.drawExtensionCode);
   router.get('/jige/nmsl', controller.jige.nmsl);
   router.get('/jige/pullnmsl', controller.jige.pullNmsl);
-  router.get('/jige/pullnmsl', controller.jige.pullNmsl);
+  router.get('/jige/system_config', controller.jige.getMpConfig);
 
 
   router.get('/notice/list', controller.notice.getNotice);

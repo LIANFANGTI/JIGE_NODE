@@ -84,6 +84,28 @@ class JigeController extends BaseController {
         }
     }
 
+    async getMpConfig(){
+
+        try {
+            let {token} = await this.ctx.service.mpconfig.checkToken();
+            console.log(`调试:Token校验成功`, token);
+            let config =await this.ctx.service.mpconfig.getAllConfig();
+            console.log(`调试:获取全部配置`, config);
+            config = config.dataValues;
+            config = (({sign_coin,ex_coin,add_coin})=>({sign_coin,ex_coin,add_coin}))(config);
+            this.ctx.body={
+                code:0,
+                data:{
+                    ...config
+                }
+            }
+
+        } catch (e) {
+            console.error(`错误:获取配置信息失败`, e);
+            this.ctx.body = e
+        }
+    }
+
     //获取充值套餐
     async getRechargeList() {
         try {
