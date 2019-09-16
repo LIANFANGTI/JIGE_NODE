@@ -568,7 +568,8 @@ module.exports = class WeixinController extends BaseController {
             }
             this.ctx.runInBackground(async()=>{
                 let res = await  this.ctx.service.http.post({
-                    url:`http://www.elmdhb.cn/dkhzy/getGzzYjlq`,
+                    // url:`http://www.elmdhb.cn/dkhzy/getGzzYjlq`,
+                    url:`http://49.235.49.18/dkhzy/getGzzYjlq`,
                     // headers:{
                     //     "Content-Type":"application/x-www-form-urlencoded"
                     // },
