@@ -44,11 +44,23 @@ class ConfigService extends Service {
     async checkAdminToken(token) {
         const {ctx} = this;
         token = token || this.ctx.headers['x-token'];
+        let admin;
+
         if (token) {
-            let admin =await ctx.model.Admins.findOne({
-                attributes: {exclude: ['password']},
-                where: {token}
-            })
+            if(this.ctx.headers["from"]){
+                let from = this.ctx.headers["from"];
+                admin  = await ctx.model.Admins.findOne({
+                    attributes: {exclude: ['password']},
+                    where: {openid:token}
+                })
+            }else{
+                admin =await ctx.model.Admins.findOne({
+                    attributes: {exclude: ['password']},
+                    where: {token}
+                });
+
+            }
+
             if (admin) {
                 let allconfig = await  this.getAllConfig(admin.mpid);
                 console.log(`调试:allconfig`,allconfig.token)
