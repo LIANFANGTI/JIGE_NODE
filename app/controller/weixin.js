@@ -471,7 +471,7 @@ module.exports = class WeixinController extends BaseController {
 
     async getSNCode({openid,validate_code}){
         let {ctx} = this;
-        // this.reply();
+        this.reply();
         try {
             let user = await this.ctx.service.user.exist({
                 where: {openid},
@@ -497,12 +497,12 @@ module.exports = class WeixinController extends BaseController {
             });
             console.log('请求返回值',res);
             res.sn = res.sn.replace(/\n/g,"");
-            this.ctx.body={
-                code:0,
-                data:{
-                    ...res
-                }
-            }
+            // this.ctx.body={
+            //     code:0,
+            //     data:{
+            //         ...res
+            //     }
+            // }
             if(res.code == 1){
                 let url = `https://h5.ele.me/hongbao/#hardware_id=&sn=`;
                 const articles = {
