@@ -212,12 +212,15 @@ module.exports = class UserService extends Service {
         const sql = `${total_sql} ${ORDERBY} ${LIMIT} `;
         // console.log(`调试:`, this.config.sequelize);
         const mysql =new Sequelize(this.config.sequelize);
+        let startTime =new Date().getTime();
         let results =await  mysql.query(sql,{ type: mysql.QueryTypes.SELECT});
         let total =await  mysql.query(total_sql,{ type: mysql.QueryTypes.SELECT});
+        let endTime = new Date().getTime();
         total = total.length ;
         console.log(`调试:查询结果`, total);
+        let time = (endTime - startTime)/1000;
         // return  result[0];
-        return  {total,size,page,results}
+        return  {total,size,page,results,time}
 
 
     }

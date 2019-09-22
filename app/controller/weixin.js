@@ -183,8 +183,8 @@ module.exports = class WeixinController extends BaseController {
                     await this.getEleme4({openid});
                 break;
                 case "PZLM": // 品质联盟
-                    console.log(`调试:你点击了品质联盟`)
-                    await this.getEleme({type: 21,openid});
+                    console.log(`调试:你点击了品质联盟`);
+                    await this.getSNCode({type: 21,openid});
 
                 break;
                 case "DLB":
@@ -425,7 +425,7 @@ module.exports = class WeixinController extends BaseController {
                let updateUserResult =  await ctx.service.user.update({times: user.times - ctx.mpconfig.unit_coin}, {openid});
                 //商户扣款
                 let updateMpResult =   await ctx.service.mpconfig.update({blance: Sequelize.literal(`blance - unit_price`)},{id:this.ctx.mpconfig.id});//减去账户余额测试
-                res=res.data
+                res=res.data;
                 res =res.map(item=>{
                     return{
                         type:item['title'],
@@ -468,6 +468,85 @@ module.exports = class WeixinController extends BaseController {
         }
 
   }
+
+    async getSNCode({openid,validate_code}){
+        let {ctx} = this;
+        // this.reply();
+        try {
+            let user = await this.ctx.service.user.exist({
+                where: {openid},
+                col: ['phone', 'id', "times"],
+                showCol: true
+            });
+            console.log(`调试:查出用户信息`, user);
+            if (user.times< 9) {
+                this.reply({content: '领取失败😢\n余额不足快去邀请好友 或充值吧😗'});
+                return;
+            }
+            let res = await  this.ctx.service.http.post({
+                url:`https://www.emiaomiao.cn/`,
+                // headers:{
+                //     "Content-Type":"application/x-www-form-urlencoded"
+                // },
+                formData:{
+                    name:"elemeapi",
+                    token:"KnWy9PkJITtB91CVApFxxOw8GV6lhPjw54eD8LadItC9cBIky5FEP2TsS0aiUbDT",
+                    type:"Onekey",
+                    choice:"PZLM"
+                }
+            });
+            console.log('请求返回值',res);
+            res.sn = res.sn.replace(/\n/g,"");
+            this.ctx.body={
+                code:0,
+                data:{
+                    ...res
+                }
+            }
+            if(res.code == 1){
+                let url = `https://h5.ele.me/hongbao/#hardware_id=&sn=`;
+                const articles = {
+                    "title": "鸡哥红包",
+                    "description": "点击拆开红包（临时）",
+                    url:`${url}&sn=${res.sn}`,
+                    "picurl": "https://lft-ad.oss-cn-hangzhou.aliyuncs.com/eleme/png/%E7%BA%A2%E5%8C%85.png"
+                };
+
+                let log = {
+                    uid: user.id,
+                    times: user.times - this.ctx.mpconfig.unit_coin,
+                    type:'鸡哥红包(临时)',
+                    sn:res.sn
+                };
+
+
+                let msg = `领取成功！！😄\n请在饿了么中查看\n红包类型:${res.type}\n红包金额:满${res.sum_condition}减${res.amount}\n粮票使用: -${ctx.mpconfig.unit_coin}\n剩余粮票:${user.times - ctx.mpconfig.unit_coin} \n绑定账号: ${user.phone} `;
+
+                this.ctx.service.logs.add(log) ;//领红包日志表中插入数据
+
+                await  this.ctx.service.weixin.sendServiceMessage({type:'news',articles});
+                let updateUserResult =  await ctx.service.user.update({times: user.times - ctx.mpconfig.unit_coin}, {openid});
+                //商户扣款
+                let updateMpResult =   await ctx.service.mpconfig.update({blance: Sequelize.literal(`blance - unit_price`)},{id:this.ctx.mpconfig.id});//减去账户余额测试
+
+            }
+
+            //领取成功
+
+
+
+
+
+
+
+
+
+        }catch (e) {
+
+        }
+
+    }
+
 
     // 随机礼包 接口失效时间未知
   async getEleme3({openid}){
