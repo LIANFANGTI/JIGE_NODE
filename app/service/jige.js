@@ -232,4 +232,35 @@ module.exports = class JigeService extends Service {
     }
 
 
+    async buildAvatarImage({src =`${this.config.baseDir}/app/public/images/headimg.jpeg` }){
+        let drawer = new Drawer(960, 960);
+        // let loadImageRes =await  this.ctx.service.http.download({url:});
+        // console.log(`调试:loadImageRes`, loadImageRes);
+        // await drawer.setBackgroundImage(`${this.config.baseDir}/app/public/images/headimg.jpeg`);
+        await drawer.drawElements([
+            {
+                type:'image',
+                content:src,
+                x:20,
+                y:20,
+                w:920,
+                h:920
+            },
+            {
+                type:'image',
+                content:`${this.config.baseDir}/app/public/images/bg-avatar_build.png`,
+                x:0,
+                y:0,
+                w:960,
+                h:960
+            }
+
+        ]);
+        return  drawer.getBuffer();
+
+
+
+    }
+
+
 };

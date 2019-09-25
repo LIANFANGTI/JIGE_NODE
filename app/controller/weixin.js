@@ -503,6 +503,7 @@ module.exports = class WeixinController extends BaseController {
             //         ...res
             //     }
             // }
+            // }
             if(res.code == 1){
                 let url = `https://h5.ele.me/hongbao/#hardware_id=&sn=`;
                 const articles = {

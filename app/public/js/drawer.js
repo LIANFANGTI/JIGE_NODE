@@ -37,7 +37,7 @@ module.exports= class Drawer{
            console.log(`调试:no path1`,image);
        }
        this.context.drawImage(image,x,y,w,h);
-       console.log(`调试:图片绘制完成`,image);
+       console.log(`调试:图片绘制完成()`,x,y,w,h,image);
        return  true;
 
 
@@ -72,8 +72,9 @@ module.exports= class Drawer{
                 break;
                 case "image":
                     x = element.x || this.width / 2 - element.w / 2;
-                   await this.drawImage({image:element.content,x ,y:element.y,w:element.w,h:element.h ||element.w});
-                break;
+                    let res =  await this.drawImage({image:element.content,x ,y:element.y,w:element.w,h:element.h ||element.w});
+                    console.log(`调试:图片绘制完成2`,res);
+                    break;
             }
 
         }

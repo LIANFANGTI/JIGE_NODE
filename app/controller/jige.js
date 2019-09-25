@@ -616,6 +616,14 @@ class JigeController extends BaseController {
             }
         }
     }
+
+    async  buildAvatarImage(){
+        let {src} = this.ctx.request.query;
+        console.log(`调试:获取到的头像`, src);
+        let data= await  this.ctx.service.jige.buildAvatarImage({src});
+        this.ctx.set("Content-Type", "image/png");
+        this.ctx.body = data
+    }
    async pullNmsl(){
        let urls={
            // "ktff":"https://nmsl.shadiao.app/api.php",
