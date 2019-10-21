@@ -143,7 +143,7 @@ module.exports = class JigeService extends Service {
            let addLogResult =await  this.ctx.service.logs.add(log) ;//领红包日志表中插入数据
             let logId =addLogResult.get("id");
 
-            let msg = `领取成功！！😄\n请在饿了么中查看\n红包类型:<a href="http://jige.lianfangti.cn?logid=${logId}">饿了么大礼包</a>\n粮票使用: -${unitCoin}\n剩余粮票:${context.times - unitCoin} \n绑定账号: ${context.phone} \n<a href="http://jige.lianfangti.cn?logid=${logId}">点击查看详情</a>`;
+            let msg = `领取成功！！😄\n请在饿了么中查看\n红包类型:饿了么大礼包\n粮票使用: -${unitCoin}\n剩余粮票:${context.times - unitCoin} \n绑定账号: ${context.phone} \n<a href="http://jige.lianfangti.cn/pages/user/user?logid=${logId}">点击查看详情</a>`;
 
             this.ctx.service.weixin.sendServiceMessage({content: msg});
             return  Promise.resolve(getResult);
