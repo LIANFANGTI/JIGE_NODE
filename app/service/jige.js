@@ -77,51 +77,51 @@ module.exports = class JigeService extends Service {
         console.log(`调试:开始调用大礼包接口`, context.phone);
 
 
-        // let getResult = await  this.ctx.service.http.post({
-        //     url:`http://www.elmdhb.cn/dkhzy/getXJJDlb?token=ddB9XDAyzAPU9YWN&phone=${context.phone}`
-        // });
+        let getResult = await  this.ctx.service.http.post({
+            url:`http://www.elmdhb.cn/dkhzy/getXJJDlb?token=ddB9XDAyzAPU9YWN&phone=${context.phone}`
+        });
 
-        let getResult ={
-            "msg": "领取成功",
-            "code": "0000",
-            "data": [
-                {
-                    "amount": 3.0,
-                    "description": "满¥30.0可用",
-                    "logo": "",
-                    "title": "平台通用红包",
-                    "type": 10,
-                    "remarks": "2019-10-20到期"
-                },
-                {
-                    "amount": 4.0,
-                    "description": "满¥30.0可用",
-                    "logo": "",
-                    "title": "下午茶红包",
-                    "type": 11,
-                    "remarks": "2019-10-20到期"
-                },
-                {
-                    "amount": 5.0,
-                    "description": "满¥30.0可用",
-                    "logo": "",
-                    "title": "品质联盟专享红包",
-                    "type": 2,
-                    "remarks": "2019-10-20到期"
-                },
-                {
-                    "amount": 6.0,
-                    "description": "满¥39.0可用",
-                    "logo": "",
-                    "title": "夜宵红包",
-                    "type": 12,
-                    "remarks": "2019-10-20到期"
-                }
-            ],
-            "success": true,
-            "version": "1.0",
-            "timestamp": 1571367765558
-        }
+        // let getResult ={
+        //     "msg": "领取成功",
+        //     "code": "0000",
+        //     "data": [
+        //         {
+        //             "amount": 3.0,
+        //             "description": "满¥30.0可用",
+        //             "logo": "",
+        //             "title": "平台通用红包",
+        //             "type": 10,
+        //             "remarks": "2019-10-20到期"
+        //         },
+        //         {
+        //             "amount": 4.0,
+        //             "description": "满¥30.0可用",
+        //             "logo": "",
+        //             "title": "下午茶红包",
+        //             "type": 11,
+        //             "remarks": "2019-10-20到期"
+        //         },
+        //         {
+        //             "amount": 5.0,
+        //             "description": "满¥30.0可用",
+        //             "logo": "",
+        //             "title": "品质联盟专享红包",
+        //             "type": 2,
+        //             "remarks": "2019-10-20到期"
+        //         },
+        //         {
+        //             "amount": 6.0,
+        //             "description": "满¥39.0可用",
+        //             "logo": "",
+        //             "title": "夜宵红包",
+        //             "type": 12,
+        //             "remarks": "2019-10-20到期"
+        //         }
+        //     ],
+        //     "success": true,
+        //     "version": "1.0",
+        //     "timestamp": 1571367765558
+        // }
 
         console.log(`调试:红包领取返回值`, getResult);
         let code  = getResult.code * 1;
