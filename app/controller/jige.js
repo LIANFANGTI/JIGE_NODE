@@ -29,6 +29,7 @@ class JigeController extends BaseController {
             let res = await this.ctx.service.mpconfig.checkToken();
             let {code} = this.ctx.request.query;
             let data = await this.ctx.service.jige.getAccessToken({code});
+            data = utils.encode(JSON.stringify(data));
             this.ctx.body = {
                 code: data.errcode || 0,
                 data
@@ -41,11 +42,11 @@ class JigeController extends BaseController {
     //获取用户信息
     async getUserInfo() {
         await this.ctx.service.mpconfig.checkToken();
-        let {access_token, openid} = this.ctx.request.query;
+        // let {access_token, openid,code} = this.ctx.request.query;
         try {
             // let { access_token,openid }= await  this.ctx.service.jige.getAccessToken({code});
 
-            let userInfo = await this.ctx.service.jige.getUserInfo({access_token, openid});
+            let userInfo = await this.ctx.service.jige.getUserInfo();
             // console.log(`调试:获取到用户信息`,userInfo);
             this.ctx.body = {
                 code: userInfo ? 0 : 4004,
@@ -133,8 +134,16 @@ class JigeController extends BaseController {
 
 
     }
+    //获取饿了么大礼包
+    async getElemeBigGiftPackage(){
+       this.ctx.body = await this.ctx.service.jige.getElemeBigGiftPackage();
+    }
 
-    //推广记录
+    async getLogDetaile(){
+        this.ctx.body = await  this.ctx.service.jige.getLogDetaile();
+    }
+
+    //推广记录s
     async getExtensionUser() {
         try {
             await this.ctx.service.mpconfig.checkToken();

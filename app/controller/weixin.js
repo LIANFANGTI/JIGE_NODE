@@ -188,7 +188,7 @@ module.exports = class WeixinController extends BaseController {
 
                 break;
                 case "DLB":
-                    await this.getEleme({type: 23,openid});
+                    await this.ctx.service.jige.getElemeBigGiftPackage({openid});
                 break;
                 case "TGM":  // 推广码
                     this.reply({content: '获取中 请稍后...'});
@@ -305,7 +305,7 @@ module.exports = class WeixinController extends BaseController {
             await this.ctx.service.mpconfig.checkToken();
             this.ctx.body = await this.ctx.service.weixin.createMenu();
         }catch (e) {
-            console.error(`错误:创建菜单出错`, e)
+            console.error(`错误:创建菜单出错`, e);
             this.ctx.logger.error(new Error(e));
             this.ctx.body =e
         }

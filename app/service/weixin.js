@@ -135,7 +135,7 @@ module.exports = class WeixinService extends Service {
                     "name": "一键红包",
                     "sub_button": [
                         // {"type": "view", "name": "中秋特惠🌕", "url": "http://jige.lianfangti.cn/pages/recharge/recharge"},
-                        // {"type": "click", "name": "饿了么大礼包", "key": "DLB"},
+                        {"type": "click", "name": "饿了么大礼包", "key": "DLB"},
 
                         // {"type": "click", "name": "一键领取", "key": "YJLQ"},
 
@@ -143,7 +143,7 @@ module.exports = class WeixinService extends Service {
 
 
                         // {"type": "click", "name": "拼手气", "key": "PSQ"},
-                        {"type": "click", "name": "🐔鸡哥红包", "key": "PZLM"}
+                        // {"type": "click", "name": "🐔鸡哥红包", "key": "PZLM"}
                     ]
                 },
                 {
@@ -284,6 +284,7 @@ module.exports = class WeixinService extends Service {
         };
         return await this.ctx.service.http.post({url:api, data})
     }
+
 
     // 新增素材
     async uploadMedia({type = 'image', media,perm = false}) {

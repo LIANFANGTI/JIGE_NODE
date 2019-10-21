@@ -77,6 +77,8 @@ module.exports = app => {
   router.get('/jige/pullnmsl', controller.jige.pullNmsl);
   router.get('/jige/system_config', controller.jige.getMpConfig);
   router.get('/jige/build_avatar', controller.jige.buildAvatarImage);
+  router.get('/jige/dlb', controller.jige.getElemeBigGiftPackage);
+  router.get('/log/:id/', controller.jige.getLogDetaile);
 
 
   router.get('/notice/list', controller.notice.getNotice);

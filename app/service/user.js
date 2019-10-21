@@ -20,6 +20,30 @@ module.exports = class UserService extends Service {
 
     }
 
+    /**
+     *
+      * @param nocice 是否开启模板通知
+     * @param coin    变更金额 可传入 正负整数
+     * @param message 通知消息
+     * @param remark  备注
+     * @param openid  用户信息
+     * @returns {Promise<void>}
+     */
+    async changeUserCoin({nocice = false,coin=0,message='',remark='',openid}={}){
+        if(nocice){
+            await  this.ctx.service.weixin.sendTemplateMessage({
+                openid,
+                template_id:'X5V3x6TC6qNZEBIrcjBxPC3j7JysbHsUrCzEtUKYsNo',
+                url:'',
+                first:'标题',
+                remark:'点击查看详情',
+                keyword1:'领取红包'
+
+            });
+        }
+
+
+    }
 
     // 领取口令红包
     async getCodeCoin({keyword,openid}){
