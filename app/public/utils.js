@@ -75,7 +75,7 @@ exports.RandomNum = function (Min,Max,range="[]") {
         case "[)":
             var Range = Max - Min;
             var Rand = Math.random();
-            var num = Min + Math.floor(Rand * Range); //舍去
+            var num = Min + Math.floor(Rand * Range); //舍去fixtest
         break;
         case "(]":
             var Range = Max - Min;
