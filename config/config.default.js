@@ -1,6 +1,6 @@
 /* eslint valid-jsdoc: "off" */
 const path = require('path');
-const errors = require("./errorcode")
+const errors = require("./errorcode");
 "use strict";
 
 /**

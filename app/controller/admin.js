@@ -6,23 +6,19 @@ const toArray = require('stream-to-array');
 const sendToWormhole = require('stream-wormhole');
 module.exports = class AdminController extends BaseController {
     async login() {
-        const rules = {
-            user: [
-                {required: true}
-            ],
-            password: [
-                {required: true}
-            ]
+        const rules = {     //定义认证规则
+            user: [  {required: true} ],
+            password: [{required: true}]
         }
-        let body = await this.validate(rules);
+        let body = await this.validate(rules);  //验证表单
         try {
-            let token = await this.ctx.service.mpconfig.Login(body);
+            let token = await this.ctx.service.mpconfig.Login(body); //调用登录
 
-            this.ctx.set("Admin-Token",token);
-            this.ctx.body={
+            this.ctx.set("Admin-Token",token); //往响应头中加入token
+            this.ctx.body={   //响应数据
                 code:20000,
                 msg:'登录成功',
-                token
+                token:token
             }
         }catch (e) {
             console.log(`调试:`, e);
