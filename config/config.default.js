@@ -57,11 +57,11 @@ module.exports = appInfo => {
     },
     sequelize: {
       dialect: "mysql",
-      database: "eleme",
-      host: "ele.lianfangti.cn",
+      database: "databases;",
+      host: "www.host.com",
       port: 3306,
-      username: "eleme",
-      password: "lianfangti*",
+      username: "user",
+      password: "pwd",
       dialectOptions: {
         useUTC: false //for reading from database
       },
