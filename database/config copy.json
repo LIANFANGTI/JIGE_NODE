@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "eleme",
-    "password": "lianfangti*",
-    "database": "eleme",
-    "host": "ele.lianfangti.cn",
+    "username": "",
+    "password": "",
+    "database": "",
+    "host": "",
     "dialect": "mysql",
     "operatorsAliases": false
   },
